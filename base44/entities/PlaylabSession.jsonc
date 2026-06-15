@@ -1,0 +1,38 @@
+{
+  "name": "PlaylabSession",
+  "type": "object",
+  "properties": {
+    "world_id": {
+      "type": "string"
+    },
+    "player_email": {
+      "type": "string"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "default": 0
+    },
+    "score": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "world_id",
+    "player_email"
+  ],
+  "rls": {
+    "create": {
+      "data.player_email": "{{user.email}}"
+    },
+    "read": {
+      "data.player_email": "{{user.email}}"
+    },
+    "update": {
+      "data.player_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.player_email": "{{user.email}}"
+    }
+  }
+}

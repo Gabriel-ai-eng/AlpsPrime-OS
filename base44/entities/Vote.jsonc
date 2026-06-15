@@ -1,0 +1,35 @@
+{
+  "name": "Vote",
+  "type": "object",
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "ID of the post being voted on"
+    },
+    "voter_email": {
+      "type": "string",
+      "description": "Email of the user voting"
+    },
+    "round_id": {
+      "type": "string",
+      "description": "ID of the voting round (one round per week, key = YYYY-WW)"
+    }
+  },
+  "required": [
+    "post_id",
+    "voter_email",
+    "round_id"
+  ],
+  "rls": {
+    "create": {
+      "data.voter_email": "{{user.email}}"
+    },
+    "read": {},
+    "update": {
+      "data.voter_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.voter_email": "{{user.email}}"
+    }
+  }
+}

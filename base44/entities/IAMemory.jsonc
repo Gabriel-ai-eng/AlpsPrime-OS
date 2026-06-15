@@ -1,0 +1,50 @@
+{
+  "name": "IAMemory",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user this memory belongs to"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "trabalho",
+        "relacionamento",
+        "saude",
+        "humor",
+        "interesses",
+        "rotina",
+        "outro"
+      ],
+      "default": "outro"
+    },
+    "content": {
+      "type": "string",
+      "description": "What was learned about the user (free text)"
+    },
+    "relevance": {
+      "type": "number",
+      "default": 3,
+      "description": "1 (low) to 5 (high)"
+    }
+  },
+  "required": [
+    "user_email",
+    "content"
+  ],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {
+      "data.user_email": "{{user.email}}"
+    },
+    "update": {
+      "data.user_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.user_email": "{{user.email}}"
+    }
+  }
+}

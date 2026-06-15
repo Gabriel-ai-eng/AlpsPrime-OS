@@ -98,6 +98,11 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
       setAuthChecked(true);
+
+      // Fire-and-forget welcome notification (idempotent — backend skips if already exists)
+      if (currentUser?.email) {
+        base44.functions.invoke('welcomeNewUser', { data: { email: currentUser.email } }).catch(() => {});
+      }
     } catch (error) {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
@@ -144,7 +149,8 @@ export const AuthProvider = ({ children }) => {
       logout,
       navigateToLogin,
       checkUserAuth,
-      checkAppState
+      checkAppState,
+      refetchUser: checkUserAuth
     }}>
       {children}
     </AuthContext.Provider>

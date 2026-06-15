@@ -1,0 +1,88 @@
+{
+  "name": "QuestionCard",
+  "type": "object",
+  "properties": {
+    "author_email": {
+      "type": "string",
+      "description": "Email of the user who asked the question"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "Display name at the time of asking"
+    },
+    "author_avatar": {
+      "type": "string",
+      "description": "Avatar URL at the time of asking"
+    },
+    "is_anonymous": {
+      "type": "boolean",
+      "default": false,
+      "description": "If the question itself was posted anonymously"
+    },
+    "question": {
+      "type": "string",
+      "description": "The question / doubt content"
+    },
+    "context": {
+      "type": "string",
+      "description": "Optional short context / help text shown on the back of the card"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "vida",
+        "amor",
+        "trabalho",
+        "saude",
+        "criatividade",
+        "tecnologia",
+        "filosofia",
+        "outro"
+      ],
+      "default": "outro",
+      "description": "Category of the question"
+    },
+    "answers_count": {
+      "type": "number",
+      "default": 0
+    },
+    "best_answer_id": {
+      "type": "string",
+      "description": "ID of the answer marked as best by the question author"
+    }
+  },
+  "required": [
+    "author_email",
+    "question"
+  ],
+  "rls": {
+    "create": {
+      "data.author_email": "{{user.email}}"
+    },
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "data.author_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.author_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

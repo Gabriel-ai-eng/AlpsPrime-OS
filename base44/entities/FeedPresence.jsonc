@@ -1,0 +1,35 @@
+{
+  "name": "FeedPresence",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user currently viewing the feed"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Display name at the time of presence"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO datetime of the last heartbeat"
+    }
+  },
+  "required": [
+    "user_email",
+    "last_seen"
+  ],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {},
+    "update": {
+      "data.user_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.user_email": "{{user.email}}"
+    }
+  }
+}
