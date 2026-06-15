@@ -1,0 +1,16 @@
+{
+  "name": "Sexta",
+  "short_name": "Sexta",
+  "start_url": "/feed",
+  "display": "standalone",
+  "background_color": "#FBFAF6",
+  "theme_color": "#C9A24F",
+  "icons": [
+    {
+      "src": "/image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "TimeCapsules",
+  "fields": {
+    // Vincula a cápsula ao e-mail do criador
+    "user_email": {
+      "type": "string",
+      "required": true
+    },
+    // Guarda o texto da mensagem (o segredo) para o futuro
+    "message": {
+      "type": "string",
+      "required": true
+    },
+    // Armazena a data e a hora exatas em que a cápsula poderá ser aberta
+    "unlock_date": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

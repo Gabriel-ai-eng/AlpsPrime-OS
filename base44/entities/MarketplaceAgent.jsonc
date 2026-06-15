@@ -1,0 +1,130 @@
+{
+  "name": "MarketplaceAgent",
+  "type": "object",
+  "properties": {
+    "seller_email": {
+      "type": "string"
+    },
+    "seller_name": {
+      "type": "string"
+    },
+    "seller_avatar": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "produtividade",
+        "criatividade",
+        "negocios",
+        "educacao",
+        "entretenimento",
+        "saude",
+        "tecnologia",
+        "outro"
+      ],
+      "default": "outro"
+    },
+    "price_brl": {
+      "type": "number",
+      "default": 0
+    },
+    "is_free": {
+      "type": "boolean",
+      "default": false
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cover_color": {
+      "type": "string",
+      "default": "#1877F2"
+    },
+    "icon_emoji": {
+      "type": "string",
+      "default": "\ud83e\udd16"
+    },
+    "sales_count": {
+      "type": "number",
+      "default": 0
+    },
+    "rating": {
+      "type": "number",
+      "default": 0
+    },
+    "ratings_count": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "draft"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "seller_email",
+    "name",
+    "description"
+  ],
+  "rls": {
+    "create": {
+      "data.seller_email": "{{user.email}}",
+      "$or": [
+        {
+          "user_condition": {
+            "plan": "pro"
+          }
+        },
+        {
+          "user_condition": {
+            "plan": "unlimited"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "data.seller_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.seller_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

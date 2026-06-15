@@ -1,0 +1,62 @@
+{
+  "name": "PlaylabCharacter",
+  "type": "object",
+  "properties": {
+    "owner_email": {
+      "type": "string",
+      "description": "Email of the character owner"
+    },
+    "sprite_url": {
+      "type": "string",
+      "description": "URL of the AI-generated pixel art sprite (face)"
+    },
+    "skin_color": {
+      "type": "string",
+      "default": "#F5C7A1",
+      "description": "Skin tone hex"
+    },
+    "hair_color": {
+      "type": "string",
+      "default": "#3B2A1E",
+      "description": "Hair color hex"
+    },
+    "shirt_color": {
+      "type": "string",
+      "default": "#C9A24F",
+      "description": "Shirt / clothing color hex"
+    },
+    "pants_color": {
+      "type": "string",
+      "default": "#2A2A3A",
+      "description": "Pants color hex"
+    },
+    "accessory": {
+      "type": "string",
+      "enum": [
+        "none",
+        "hat",
+        "glasses",
+        "cape",
+        "backpack"
+      ],
+      "default": "none"
+    }
+  },
+  "required": [
+    "owner_email"
+  ],
+  "rls": {
+    "create": {
+      "data.owner_email": "{{user.email}}"
+    },
+    "read": {
+      "data.owner_email": "{{user.email}}"
+    },
+    "update": {
+      "data.owner_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.owner_email": "{{user.email}}"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "PostInteraction",
+  "type": "object",
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "ID of the post"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user who interacted"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "like",
+        "share"
+      ],
+      "description": "Type of interaction"
+    }
+  },
+  "required": [
+    "post_id",
+    "user_email",
+    "type"
+  ],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {
+      "data.user_email": "{{user.email}}"
+    },
+    "update": {
+      "data.user_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.user_email": "{{user.email}}"
+    }
+  }
+}

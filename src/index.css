@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,89 +6,303 @@
 
 @layer base {
   :root {
-    --background: 140 20% 98%;
-    --foreground: 160 30% 8%;
-    --card: 0 0% 100%;
-    --card-foreground: 160 30% 8%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 160 30% 8%;
-    --primary: 152 60% 42%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 145 20% 94%;
-    --secondary-foreground: 160 30% 15%;
-    --muted: 140 15% 95%;
-    --muted-foreground: 160 10% 45%;
-    --accent: 152 45% 90%;
-    --accent-foreground: 152 60% 25%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 145 15% 90%;
-    --input: 145 15% 90%;
-    --ring: 152 60% 42%;
-    --chart-1: 152 60% 42%;
-    --chart-2: 200 65% 50%;
-    --chart-3: 35 85% 55%;
-    --chart-4: 280 55% 55%;
-    --chart-5: 10 75% 55%;
-    --radius: 0.75rem;
-    --font-heading: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 152 60% 42%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 145 20% 94%;
-    --sidebar-accent-foreground: 160 30% 15%;
-    --sidebar-border: 145 15% 90%;
-    --sidebar-ring: 152 60% 42%;
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-display: 'Playfair Display', serif;
+
+    /* ── LIGHT / WHITE PALETTE ── */
+    --background:        40 30% 98%;
+    --foreground:        240 10% 12%;
+    --card:              0 0% 100%;
+    --card-foreground:   240 10% 12%;
+    --popover:           0 0% 100%;
+    --popover-foreground:240 10% 12%;
+    --primary:           38 65% 55%;
+    --primary-foreground:0 0% 100%;
+    --secondary:         40 25% 95%;
+    --secondary-foreground:240 10% 18%;
+    --muted:             40 20% 94%;
+    --muted-foreground:  240 5% 46%;
+    --accent:            260 45% 93%;
+    --accent-foreground: 260 30% 30%;
+    --destructive:       0 72% 55%;
+    --destructive-foreground:0 0% 100%;
+    --border:            40 18% 88%;
+    --input:             40 18% 92%;
+    --ring:              38 65% 55%;
+
+    --chart-1: 38 65% 55%;
+    --chart-2: 260 45% 70%;
+    --chart-3: 340 60% 75%;
+    --chart-4: 200 50% 65%;
+    --chart-5: 40 25% 65%;
+
+    --radius: 1rem;
+
+    --sidebar-background:         0 0% 100%;
+    --sidebar-foreground:         240 10% 20%;
+    --sidebar-primary:            38 65% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent:             40 25% 96%;
+    --sidebar-accent-foreground:  240 10% 14%;
+    --sidebar-border:             40 18% 90%;
+    --sidebar-ring:               38 65% 55%;
   }
 
+  /* ── DARK PALETTE (Premium Graphite & Gold) ── */
   .dark {
-    --background: 160 25% 5%;
-    --foreground: 140 15% 95%;
-    --card: 160 20% 8%;
-    --card-foreground: 140 15% 95%;
-    --popover: 160 20% 8%;
-    --popover-foreground: 140 15% 95%;
-    --primary: 152 55% 48%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 160 15% 14%;
-    --secondary-foreground: 140 15% 95%;
-    --muted: 160 15% 14%;
-    --muted-foreground: 140 10% 55%;
-    --accent: 152 30% 18%;
-    --accent-foreground: 152 55% 70%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 160 15% 16%;
-    --input: 160 15% 16%;
-    --ring: 152 55% 48%;
-    --chart-1: 152 55% 48%;
-    --chart-2: 200 60% 55%;
-    --chart-3: 35 80% 60%;
-    --chart-4: 280 55% 60%;
-    --chart-5: 10 70% 58%;
-    --sidebar-background: 160 20% 8%;
-    --sidebar-foreground: 140 15% 95%;
-    --sidebar-primary: 152 55% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 160 15% 14%;
-    --sidebar-accent-foreground: 140 15% 95%;
-    --sidebar-border: 160 15% 16%;
-    --sidebar-ring: 152 55% 48%;
+    --background:          225 6% 10%; /* #18191A (Facebook Dark Bg) */
+    --foreground:          220 5% 90%; /* #E4E6EB */
+    --card:                225 6% 15%; /* #242526 (Facebook Card Bg) */
+    --card-foreground:     220 5% 90%;
+    --popover:             225 6% 15%;
+    --popover-foreground:  220 5% 90%;
+    --primary:             42 70% 64%; /* #E4BC62 (Bright Gold) */
+    --primary-foreground:  0 0% 10%;
+    --secondary:           225 6% 23%; /* #3A3B3C (Facebook Hover/Input Bg) */
+    --secondary-foreground:220 5% 85%;
+    --muted:               225 6% 15%;
+    --muted-foreground:    215 8% 70%; /* #B0B3B8 (Facebook Secondary Text) */
+    --accent:              42 70% 64%;
+    --accent-foreground:   0 0% 10%;
+    --destructive:         0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border:              225 6% 23%; /* #3A3B3C */
+    --input:               225 6% 23%;
+    --ring:                42 70% 64%;
+    
+    --sidebar-background:         225 6% 10%;
+    --sidebar-foreground:         220 5% 90%;
+    --sidebar-primary:            42 70% 64%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent:             225 6% 15%;
+    --sidebar-accent-foreground:  220 5% 90%;
+    --sidebar-border:             225 6% 23%;
+    --sidebar-ring:               42 70% 64%;
   }
 }
 
-
-
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  * { @apply border-border outline-ring/50; }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-background text-foreground font-body;
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    background-color: hsl(40, 30%, 98%);
+    background-image:
+      radial-gradient(ellipse 70% 45% at 10% 0%,   rgba(201,162,79,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 55% 40% at 90% 100%,  rgba(160,120,220,0.04) 0%, transparent 60%);
+    background-attachment: fixed;
+    transition: background-color 0.4s ease, color 0.4s ease;
   }
+}
+
+/* ═══════════════════════════════════════════
+   LIQUID GLASS — Light variants
+   ═══════════════════════════════════════════ */
+@layer utilities {
+
+  .glass {
+    background: rgba(255, 255, 255, 0.60);
+    backdrop-filter: blur(24px) saturate(160%) brightness(1.04);
+    -webkit-backdrop-filter: blur(24px) saturate(160%) brightness(1.04);
+    border: 1px solid rgba(255, 255, 255, 0.80);
+    box-shadow:
+      0 8px 32px rgba(120, 90, 40, 0.09),
+      0 2px 8px  rgba(0, 0, 0, 0.05),
+      0 1px 0    rgba(255,255,255,0.95) inset;
+    position: relative;
+    isolation: isolate;
+  }
+
+  .glass-heavy {
+    background: rgba(255, 255, 255, 0.80);
+    backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
+    border: 1px solid rgba(255, 255, 255, 0.88);
+    box-shadow:
+      0 16px 56px rgba(120, 90, 40, 0.10),
+      0 1px  0   rgba(255,255,255,1.00) inset;
+    position: relative;
+    isolation: isolate;
+  }
+
+  .glass-gold {
+    background: rgba(201,162,79,0.09);
+    backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(201,162,79,0.26);
+    box-shadow:
+      0 4px 20px rgba(201,162,79,0.10),
+      0 1px 0   rgba(255,235,150,0.55) inset;
+  }
+
+  .glow-gold { box-shadow: 0 0 22px rgba(201,162,79,0.20), 0 4px 16px rgba(201,162,79,0.08); }
+
+  .gold-gradient {
+    background: linear-gradient(135deg, #E8C77A 0%, #C9A24F 50%, #A8852E 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding-bottom: 0.18em;
+    padding-right: 0.08em;
+    line-height: 1.25;
+    display: inline-block;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    line-height: 1.25;
+    padding-bottom: 0.08em;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(120,90,40,0.14);
+    border-radius: 3px;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════ */
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-7px); }
+}
+.page-enter { animation: pageIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-float { animation: float 4s ease-in-out infinite; }
+
+/* =========================================================
+   BLINDAGEM DO MODO ESCURO (FACEBOOK DARK MODE STANDARD)
+   Este bloco força TODAS as caixas brancas a ficarem escuras
+========================================================= */
+
+[data-theme="dark"] {
+  --sf-bg:              #18191A; 
+  --sf-surface:         #242526; 
+  --sf-border:          rgba(255,255,255,0.10);
+  --sf-text:            #E4E6EB; 
+  --sf-text2:           #B0B3B8; 
+  --sf-text3:           #65676B;
+  --sf-gold:            #E4BC62; 
+  --sf-input-bg:        #3A3B3C;
+}
+
+/* 1. FORÇAR O FUNDO GLOBAL DO APLICATIVO */
+html.dark body,
+[data-theme="dark"] body {
+  background-color: #18191A !important;
+  background-image:
+    radial-gradient(circle at 10% 0%, rgba(228,188,98,0.05), transparent 30%),
+    radial-gradient(circle at 95% 90%, rgba(80,120,255,0.03), transparent 25%),
+    linear-gradient(180deg, #18191A 0%, #18191A 100%) !important;
+  color: #E4E6EB !important;
+}
+
+/* 2. FORÇAR TODAS AS CAIXAS (CARDS, MENUS, POSTS) A FICAREM ESCURAS */
+html.dark .bg-white,
+html.dark .bg-card,
+html.dark .glass,
+html.dark .glass-heavy,
+html.dark .glass-card-pro,
+html.dark .liquid-glass-pro-feed,
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .bg-card,
+[data-theme="dark"] .glass,
+[data-theme="dark"] .glass-heavy,
+[data-theme="dark"] .glass-card-pro,
+[data-theme="dark"] .liquid-glass-pro-feed,
+[data-theme="dark"] article,
+[data-theme="dark"] section {
+  background: #242526 !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04) !important;
+  backdrop-filter: none !important; /* Remove o vidro embaçado que clareia a tela */
+}
+
+/* 3. FORÇAR OS TEXTOS E TÍTULOS DENTRO DOS CARDS A FICAREM BRANCOS/GELO */
+html.dark p, html.dark span, html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6, html.dark label,
+html.dark .text-gray-900, html.dark .text-gray-800, html.dark .text-black, html.dark .text-foreground,
+[data-theme="dark"] p, [data-theme="dark"] span, [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6, [data-theme="dark"] label,
+[data-theme="dark"] .text-gray-900, [data-theme="dark"] .text-gray-800, [data-theme="dark"] .text-black, [data-theme="dark"] .text-foreground {
+  color: #E4E6EB !important;
+  text-shadow: none !important;
+}
+
+/* Textos secundários (como datas e @arrobas) */
+html.dark .text-gray-500, html.dark .text-gray-600, html.dark .text-muted-foreground,
+[data-theme="dark"] .text-gray-500, [data-theme="dark"] .text-gray-600, [data-theme="dark"] .text-muted-foreground {
+  color: #B0B3B8 !important;
+}
+
+/* 4. FORÇAR TODOS OS ÍCONES SVG A FICAREM BRANCOS */
+html.dark svg,
+html.dark i,
+[data-theme="dark"] svg,
+[data-theme="dark"] i {
+  color: #E4E6EB !important;
+  opacity: 0.9;
+}
+
+/* 5. CORRIGIR AS CAIXAS DE INPUT E DIGITAÇÃO (Fundo um pouco mais claro que o card) */
+html.dark input,
+html.dark textarea,
+html.dark .feed-input,
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] .feed-input {
+  background: #3A3B3C !important;
+  color: #E4E6EB !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder,
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #8E9297 !important;
+}
+
+/* 6. MANTER O DESTAQUE DOURADO PERFEITO NO MODO ESCURO */
+html.dark .gold-gradient,
+[data-theme="dark"] .gold-gradient {
+  background: linear-gradient(135deg, #F3D99F 0%, #E4BC62 50%, #C9A24F 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+html.dark .border-gold\/30,
+html.dark .bg-gold\/5,
+html.dark .bg-gold\/10,
+[data-theme="dark"] .border-gold\/30,
+[data-theme="dark"] .bg-gold\/5,
+[data-theme="dark"] .bg-gold\/10 {
+  background: rgba(228, 188, 98, 0.05) !important;
+  border-color: rgba(228, 188, 98, 0.2) !important;
+  box-shadow: 0 0 0 1px rgba(228,188,98,0.15), 0 8px 24px rgba(0,0,0,0.4) !important;
+}
+
+/* 7. BOTÕES E HEADER/BARRA DE NAVEGAÇÃO INFERIOR */
+html.dark .bottom-bar,
+html.dark header,
+html.dark .bottom-nav-pro,
+[data-theme="dark"] .bottom-bar,
+[data-theme="dark"] header,
+[data-theme="dark"] .bottom-nav-pro {
+  background: rgba(24, 25, 26, 0.98) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+html.dark .scrollbar-thin::-webkit-scrollbar-thumb,
+[data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15) !important;
 }

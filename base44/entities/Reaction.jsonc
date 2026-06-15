@@ -1,0 +1,45 @@
+{
+  "name": "Reaction",
+  "type": "object",
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "ID of the post being reacted to"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user who reacted"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "like",
+        "love",
+        "haha",
+        "wow",
+        "sad",
+        "fire",
+        "clap"
+      ],
+      "default": "like",
+      "description": "Type of emoji reaction"
+    }
+  },
+  "required": [
+    "post_id",
+    "user_email",
+    "type"
+  ],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {},
+    "update": {
+      "data.user_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.user_email": "{{user.email}}"
+    }
+  }
+}

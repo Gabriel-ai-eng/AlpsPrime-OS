@@ -1,5 +1,5 @@
 {
-  "name": "untitled",
+  "name": "ALPS AI",
   "site": {
     "installCommand": "npm install",
     "buildCommand": "npm run build",

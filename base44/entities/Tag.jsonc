@@ -1,0 +1,44 @@
+{
+  "name": "Tag",
+  "type": "object",
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "ID of the post the tag is attached to"
+    },
+    "author_email": {
+      "type": "string",
+      "description": "Email of the post author"
+    },
+    "tag": {
+      "type": "string",
+      "description": "Lowercase tag name (without #)"
+    },
+    "is_trend": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this tag is the official weekly trend"
+    }
+  },
+  "required": [
+    "post_id",
+    "author_email",
+    "tag"
+  ],
+  "rls": {
+    "create": {
+      "data.author_email": "{{user.email}}"
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

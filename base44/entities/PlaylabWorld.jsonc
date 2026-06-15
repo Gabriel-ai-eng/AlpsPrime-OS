@@ -1,0 +1,136 @@
+{
+  "name": "PlaylabWorld",
+  "type": "object",
+  "properties": {
+    "owner_email": {
+      "type": "string",
+      "description": "Email of the world creator"
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Display name of the creator at creation time"
+    },
+    "name": {
+      "type": "string",
+      "description": "World display name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description shown on the world card"
+    },
+    "template": {
+      "type": "string",
+      "enum": [
+        "bedroom",
+        "street",
+        "forest",
+        "cyberpunk"
+      ],
+      "default": "bedroom",
+      "description": "Pre-built scenario template the world is based on"
+    },
+    "style": {
+      "type": "string",
+      "enum": [
+        "8bit",
+        "16bit",
+        "neon",
+        "fantasy"
+      ],
+      "default": "16bit",
+      "description": "Visual style of the world"
+    },
+    "cover_url": {
+      "type": "string",
+      "description": "Static cover image shown as preview on cards"
+    },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "public",
+        "friends",
+        "paid"
+      ],
+      "default": "public"
+    },
+    "price_brl": {
+      "type": "number",
+      "default": 0,
+      "description": "Price in BRL to play (only when visibility=paid)"
+    },
+    "plays_count": {
+      "type": "number",
+      "default": 0
+    },
+    "objects": {
+      "type": "array",
+      "description": "Interactive objects placed in the world",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "owner_email",
+    "name",
+    "template"
+  ],
+  "rls": {
+    "create": {
+      "data.owner_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.visibility": "public"
+        },
+        {
+          "data.owner_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.owner_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.owner_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

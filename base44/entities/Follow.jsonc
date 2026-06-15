@@ -1,0 +1,41 @@
+{
+  "name": "Follow",
+  "type": "object",
+  "properties": {
+    "follower_email": {
+      "type": "string",
+      "description": "Email of the user who follows"
+    },
+    "followed_email": {
+      "type": "string",
+      "description": "Email of the user being followed"
+    }
+  },
+  "required": [
+    "follower_email",
+    "followed_email"
+  ],
+  "rls": {
+    "create": {
+      "data.follower_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.follower_email": "{{user.email}}"
+        },
+        {
+          "data.followed_email": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "data.follower_email": "{{user.email}}"
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "name": "WeeklyTrend",
+  "type": "object",
+  "properties": {
+    "tag": {
+      "type": "string",
+      "description": "The official trend tag for this week (lowercase, no #)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Display title of the trend"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description / theme of the trend"
+    },
+    "starts_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the trend opens (typically Sunday 00:00 BRT)"
+    },
+    "ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the trend closes (typically Saturday 23:59 BRT)"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this trend is currently active"
+    }
+  },
+  "required": [
+    "tag",
+    "starts_at",
+    "ends_at"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

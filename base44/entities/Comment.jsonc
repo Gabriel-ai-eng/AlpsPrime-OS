@@ -1,0 +1,68 @@
+{
+  "name": "Comment",
+  "type": "object",
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "ID of the post being commented"
+    },
+    "author_email": {
+      "type": "string"
+    },
+    "author_name": {
+      "type": "string"
+    },
+    "author_avatar": {
+      "type": "string"
+    },
+    "author_plan": {
+      "type": "string",
+      "enum": [
+        "free",
+        "pro",
+        "unlimited"
+      ],
+      "default": "free",
+      "description": "Plan of the comment author (for verified badge / aura)"
+    },
+    "content": {
+      "type": "string",
+      "maxLength": 500
+    }
+  },
+  "required": [
+    "post_id",
+    "author_email",
+    "content"
+  ],
+  "rls": {
+    "create": {
+      "data.author_email": "{{user.email}}"
+    },
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "data.author_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.author_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

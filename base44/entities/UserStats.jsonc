@@ -1,0 +1,48 @@
+{
+  "name": "UserStats",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Display name"
+    },
+    "total_messages": {
+      "type": "number",
+      "default": 0,
+      "description": "Total messages sent to Sexta-feira"
+    },
+    "total_images": {
+      "type": "number",
+      "default": 0,
+      "description": "Total images generated"
+    },
+    "total_conversations": {
+      "type": "number",
+      "default": 0
+    },
+    "score": {
+      "type": "number",
+      "default": 0,
+      "description": "Ranking score"
+    }
+  },
+  "required": [
+    "user_email"
+  ],
+  "rls": {
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "read": {},
+    "update": {
+      "data.user_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.user_email": "{{user.email}}"
+    }
+  }
+}
