@@ -1,29 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import Lottie from 'lottie-react';
 import { AnimatePresence, motion } from 'framer-motion';
-
-const LOTTIE_URL = 'https://media.base44.com/files/public/69e44004c1822ff0840cc105/b6a72ca11_paperplane.json';
+import { Send } from 'lucide-react';
 
 export default function PaperPlaneAnimation({ origin, onDone }) {
   const [show, setShow] = useState(true);
-  const [animData, setAnimData] = useState(null);
-
-  useEffect(() => {
-    fetch(LOTTIE_URL)
-      .then((r) => r.json())
-      .then(setAnimData)
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => {
       setShow(false);
       onDone?.();
-    }, 2200);
+    }, 1800);
     return () => clearTimeout(t);
   }, [onDone]);
 
-  if (!animData) return null;
+  const toRight = origin?.x > window.innerWidth / 2;
 
   return (
     <AnimatePresence>
@@ -31,22 +21,23 @@ export default function PaperPlaneAnimation({ origin, onDone }) {
         <motion.div
           className="fixed z-[400] pointer-events-none"
           style={{
-            left: origin.x - 70,
-            top: origin.y - 70,
-            width: 140,
-            height: 140,
+            left: (origin?.x ?? window.innerWidth / 2) - 24,
+            top: (origin?.y ?? window.innerHeight / 2) - 24,
           }}
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1, y: -100, x: origin.x > window.innerWidth / 2 ? -80 : 80 }}
-          exit={{ opacity: 0, scale: 0.4 }}
-          transition={{ duration: 1.8, ease: [0.22, 0.61, 0.36, 1] }}
+          initial={{ opacity: 1, scale: 0.8, x: 0, y: 0, rotate: 0 }}
+          animate={{
+            opacity: [1, 1, 0],
+            scale: [0.8, 1.2, 0.6],
+            x: toRight ? -120 : 120,
+            y: -160,
+            rotate: toRight ? -30 : 30,
+          }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.6, ease: [0.22, 0.61, 0.36, 1] }}
         >
-          <Lottie
-            animationData={animData}
-            loop={false}
-            autoplay
-            style={{ width: 140, height: 140 }}
-          />
+          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg">
+            <Send className="w-5 h-5 text-white" />
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
