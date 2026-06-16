@@ -5,12 +5,11 @@ import {
 } from 'lucide-react';
 
 // OTIMIZAÇÃO: Carregamento Preguiçoso (Lazy Loading)
-// Esses componentes pesados só serão baixados da internet quando o usuário clicar neles!
 const Vivart = lazy(() => import('./Vivart'));
 const Sexta = lazy(() => import('./Sexta'));
 const Titan = lazy(() => import('./Titan'));
 
-// Tela de carregamento minimalista enquanto o app é baixado
+// Tela de carregamento minimalista
 const LoadingScreen = () => (
   <div className="absolute inset-0 z-[200000] flex flex-col items-center justify-center bg-black/80 backdrop-blur-xl animate-in fade-in duration-300">
     <Loader2 className="w-8 h-8 text-white/40 animate-spin mb-4" />
@@ -20,19 +19,16 @@ const LoadingScreen = () => (
 
 export default function Feed() {
   const [telaAtual, setTelaAtual] = useState('hub');
-  
-  // Estado para controlar a abertura do novo Menu Apple Glass
   const [menuAberto, setMenuAberto] = useState(false);
 
   return (
-    // CORREÇÃO: Container principal fixo usando 100dvh (Dynamic Viewport Height) para mobile
     <div className="w-full h-[100dvh] bg-black text-white font-sans relative overflow-hidden flex flex-col selection:bg-white/30">
 
       {/* =========================================
-          MODAL DO MENU (LIQUID GLASS APPLE STYLE)
+          MODAL DO MENU (CORRIGIDO PARA FIXED E Z-INDEX MAXIMO)
           ========================================= */}
       {menuAberto && (
-        <div className="absolute inset-0 z-[100000] flex items-center justify-center p-6 bg-black/50 backdrop-blur-xl animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-6 bg-black/50 backdrop-blur-xl animate-in fade-in duration-300">
           
           {/* Overlay invisível para fechar ao clicar fora */}
           <div className="absolute inset-0" onClick={() => setMenuAberto(false)} />
@@ -44,7 +40,7 @@ export default function Feed() {
             <div className="flex justify-end p-2 pb-0">
               <button 
                 onClick={() => setMenuAberto(false)}
-                className="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+                className="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors outline-none"
               >
                 <X className="w-4 h-4 text-white/70" />
               </button>
@@ -117,7 +113,7 @@ export default function Feed() {
 
       {telaAtual === 'hub' && (
         <>
-          {/* HEADER */}
+          {/* HEADER DO FEED */}
           <div className="absolute top-0 left-0 w-full h-14 flex items-center justify-between px-4 z-50">
             <div className="w-10 flex-shrink-0 flex items-center justify-start">
               <button 
@@ -133,7 +129,7 @@ export default function Feed() {
             <div className="flex-1" />
           </div>
 
-          {/* CONTEÚDO PRINCIPAL (Área com Scroll) */}
+          {/* CONTEÚDO PRINCIPAL */}
           <div className="flex-1 w-full overflow-y-auto overflow-x-hidden scrollbar-none flex flex-col items-center pt-32 px-6 pb-32 z-10 relative animate-fade-in">
 
             {/* Efeito Aurora */}
@@ -159,7 +155,6 @@ export default function Feed() {
             {/* CARDS */}
             <div className="w-full max-w-sm flex flex-col gap-8 z-10">
 
-              {/* BLOCO AZUL (TITAN) */}
               <div
                 onClick={() => setTelaAtual('titan')}
                 className="w-full rounded-[32px] overflow-hidden relative shadow-[0_0_50px_rgba(37,99,235,0.12)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
@@ -169,12 +164,9 @@ export default function Feed() {
                   alt="Novo App Azul"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
                 />
-
-                {/* Glow Overlay */}
                 <div className="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors duration-500" />
               </div>
 
-              {/* CARD SEXTA (CARINHA FELIZ) */}
               <div
                 onClick={() => setTelaAtual('sexta')}
                 className="w-full rounded-[32px] overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.03)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
@@ -186,7 +178,6 @@ export default function Feed() {
                 />
               </div>
 
-              {/* CARD VIVART */}
               <div
                 onClick={() => setTelaAtual('vivart')}
                 className="w-full rounded-[32px] overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.08)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
