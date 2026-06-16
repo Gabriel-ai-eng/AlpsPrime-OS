@@ -22,12 +22,13 @@ import Settings from '@/pages/Settings';
 import Notifications from '@/pages/Notifications';
 import AIRouteGuard from '@/components/AIRouteGuard';
 import HotmartGate from '@/components/access/HotmartGate';
+import PaywallScreen from '@/components/access/PaywallScreen';
 import { LOGO_URL } from '@/lib/branding';
 import Todos from '@/pages/Todos';
 import Categorias from '@/pages/Categorias';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, isAuthenticated, user } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, isAuthenticated, user, checkUserAuth } = useAuth();
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -47,6 +48,11 @@ const AuthenticatedApp = () => {
 
   if (!isAuthenticated && !isLoadingAuth) {
     return <Welcome />;
+  }
+
+  // Bloqueia acesso se acesso_liberado for false
+  if (user && user.acesso_liberado === false) {
+    return <PaywallScreen user={user} onRefresh={checkUserAuth} />;
   }
 
   return (

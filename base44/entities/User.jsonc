@@ -2,6 +2,11 @@
   "name": "User",
   "type": "object",
   "properties": {
+    "acesso_liberado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se verdadeiro, o utilizador tem acesso pago liberado"
+    },
     "credits": {
       "type": "number",
       "default": 100,
