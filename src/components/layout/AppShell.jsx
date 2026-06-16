@@ -221,26 +221,28 @@ export default function AppShell() {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
 
-        {/* Mobile header */}
-        <header className="lg:hidden flex items-center justify-between px-4 h-14 bg-transparent absolute w-full top-0 z-50 pointer-events-none">
-          <div className="pointer-events-auto">
-            <button onClick={() => setMobileOpen(true)} className="p-2 -ml-2 hover:bg-white/10 rounded-xl transition-colors">
+        {/* Mobile header com efeito Apple Glass */}
+        <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-black/40 backdrop-blur-2xl backdrop-saturate-150 border-b border-white/10">
+          <div>
+            <button onClick={() => setMobileOpen(true)} className="p-2 -ml-2 hover:bg-white/10 rounded-xl transition-colors outline-none">
               <Menu className="w-5 h-5 text-white" />
             </button>
           </div>
 
-          {/* Título centralizado (apenas no feed) — fica no meio entre o menu (☰) e os ícones */}
-          {location.pathname === '/feed' && (
-            <span className="flex-1 text-center text-[#8E8E93] font-light tracking-[0.32em] text-[18px] select-none pointer-events-none px-2 truncate">
+          {/* Título centralizado (apenas no feed) */}
+          {location.pathname === '/feed' ? (
+            <span className="flex-1 text-center text-[#8E8E93] font-light tracking-[0.32em] text-[18px] select-none px-2 truncate">
               Sexta-feira
             </span>
+          ) : (
+            <div className="flex-1" />
           )}
 
-          <div className="flex items-center gap-1 pointer-events-auto">
-            <Link to="/search" className="p-2 rounded-full hover:bg-white/10 transition-colors" aria-label="Buscar">
+          <div className="flex items-center gap-1">
+            <Link to="/search" className="p-2 rounded-full hover:bg-white/10 transition-colors outline-none" aria-label="Buscar">
               <SearchIcon className="w-5 h-5 text-white/80 hover:text-white" />
             </Link>
-            <div className="pointer-events-auto">
+            <div>
               <NotificationsBell userEmail={user?.email} />
             </div>
           </div>
@@ -252,7 +254,7 @@ export default function AppShell() {
         </header>
 
         {/* Page outlet */}
-        <main className="flex-1 w-full overflow-x-hidden overflow-y-auto scrollbar-thin pb-24 lg:pb-0">
+        <main className="flex-1 w-full overflow-x-hidden overflow-y-auto scrollbar-thin pb-24 lg:pb-0 pt-14 lg:pt-0">
           <motion.div
             key={location.pathname}
             initial={{ opacity: 0, y: 5 }}
