@@ -184,13 +184,18 @@ export default function Welcome() {
               )}
             </div>
 
-            <button
-              onClick={handleEmail}
-              className="w-full h-10 text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2"
-            >
-              <Mail className="w-4 h-4" />
-              Já comprei — fazer login
-            </button>
+            <div className="text-center space-y-1">
+              <button
+                onClick={handleEmail}
+                className="w-full h-10 text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2"
+              >
+                <Mail className="w-4 h-4" />
+                Já comprei — entrar com meu e-mail
+              </button>
+              <p className="text-[10px] text-muted-foreground/60 leading-snug px-3">
+                Use o mesmo e-mail informado na compra da Hotmart
+              </p>
+            </div>
             <p className="text-[11px] text-muted-foreground/80 text-center leading-relaxed px-2 mt-4">
               Ao continuar, você concorda com nossos{' '}
               <a
