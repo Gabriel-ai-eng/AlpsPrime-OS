@@ -229,9 +229,9 @@ export default function AppShell() {
             </button>
           </div>
 
-          {/* Título centralizado (apenas no feed) — perfeitamente no meio entre o menu e os ícones */}
+          {/* Título centralizado (apenas no feed) — fica no meio entre o menu (☰) e os ícones */}
           {location.pathname === '/feed' && (
-            <span className="absolute left-1/2 -translate-x-1/2 text-[#8E8E93] font-light tracking-[0.32em] text-[18px] select-none pointer-events-none">
+            <span className="flex-1 text-center text-[#8E8E93] font-light tracking-[0.32em] text-[18px] select-none pointer-events-none px-2 truncate">
               Sexta-feira
             </span>
           )}
