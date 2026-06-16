@@ -5,15 +5,24 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
  * Retorna: { hasAccess: boolean, reason: string, checkoutUrl: string }
  */
 Deno.serve(async (req) => {
+  // A URL de checkout é pública: a tela Welcome (pré-login) precisa dela para o botão "Comprar".
+  const checkoutUrl = Deno.env.get('HOTMART_CHECKOUT_URL') || '';
+
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
 
-    if (!user) {
-      return Response.json({ hasAccess: false, reason: 'unauthenticated' }, { status: 401 });
+    // me() pode lançar quando não há sessão; tratamos como visitante anônimo.
+    let user = null;
+    try {
+      user = await base44.auth.me();
+    } catch {
+      user = null;
     }
 
-    const checkoutUrl = Deno.env.get('HOTMART_CHECKOUT_URL') || '';
+    if (!user) {
+      // Visitante não logado: ainda devolvemos a checkoutUrl para liberar o botão de compra.
+      return Response.json({ hasAccess: false, reason: 'unauthenticated', checkoutUrl });
+    }
 
     // Admins sempre têm acesso
     if (user.role === 'admin') {
@@ -35,6 +44,6 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error('[checkMyAccess] error', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ error: error.message, hasAccess: false, checkoutUrl }, { status: 500 });
   }
 });
