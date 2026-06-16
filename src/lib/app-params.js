@@ -44,7 +44,10 @@ const getAppParams = () => {
 		token: getAppParamValue("access_token", { removeFromUrl: true }),
 		fromUrl: getAppParamValue("from_url", { defaultValue: window.location.href }),
 		functionsVersion: getAppParamValue("functions_version", { defaultValue: import.meta.env.VITE_BASE44_FUNCTIONS_VERSION }),
-		appBaseUrl: getAppParamValue("app_base_url", { defaultValue: import.meta.env.VITE_BASE44_APP_BASE_URL }),
+		// Fallback para o subdomínio publicado do Base44: sem isso, em domínios próprios
+		// (ex.: sextaai.com) o appBaseUrl fica vazio e o redirectToLogin do SDK gera uma
+		// URL relativa "/login" inexistente, quebrando o login. Ver CLAUDE.md.
+		appBaseUrl: getAppParamValue("app_base_url", { defaultValue: import.meta.env.VITE_BASE44_APP_BASE_URL }) || 'https://lush-nutriflow-daily-track.base44.app',
 	}
 }
 

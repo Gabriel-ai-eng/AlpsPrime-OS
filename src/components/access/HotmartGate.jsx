@@ -125,7 +125,7 @@ export default function HotmartGate({ userEmail, children }) {
           </button>
 
           <p className="mt-5 text-[11px] text-muted-foreground leading-relaxed">
-            Sua compra é processada pela Hotmart. Use o mesmo e-mail da sua conta <strong className="text-foreground">{userEmail}</strong> na hora de comprar para que o acesso seja liberado automaticamente.
+            Você entrou com <strong className="text-foreground">{userEmail}</strong>, mas esse e-mail ainda não tem acesso. Faça o cadastro/login com o <strong className="text-foreground">mesmo e-mail usado na compra da Hotmart</strong> — só ele libera a plataforma. Se ainda não comprou, use este mesmo e-mail no checkout para o acesso ser liberado automaticamente.
           </p>
 
           <button

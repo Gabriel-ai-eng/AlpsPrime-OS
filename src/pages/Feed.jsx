@@ -107,7 +107,7 @@ export default function Feed() {
                   <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Suporte</span>
                 </button>
 
-                <button onClick={() => base44.auth.logout()} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-500/10 transition-colors group outline-none">
+                <button onClick={() => base44.auth.logout(window.location.origin)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-500/10 transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-red-400 group-hover:border-red-400/20 transition-colors">
                     <LogOut className="w-4 h-4" />
                   </div>
