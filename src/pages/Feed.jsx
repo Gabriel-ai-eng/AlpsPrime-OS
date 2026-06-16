@@ -1,6 +1,6 @@
 import React, { useState, Suspense, lazy } from 'react';
 import {
-  Menu, Grid, LayoutList, Star, Sparkles,
+  Menu, X, Grid, LayoutList, Star, Sparkles,
   User, Settings, HelpCircle, LogOut, Loader2,
   ChevronLeft, ChevronRight // Ícones das setas adicionados aqui
 } from 'lucide-react';
@@ -49,11 +49,13 @@ export default function Feed() {
           MODAL DO MENU
           ========================================= */}
       {menuAberto && (
-        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-5 bg-black/40 backdrop-blur-xl animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-5 bg-black/40 backdrop-blur-xl animate-menu-overlay-in">
+
+          {/* Overlay invisível para fechar ao clicar fora */}
           <div className="absolute inset-0" onClick={() => setMenuAberto(false)} />
 
           <div
-            className="relative z-10 w-full max-w-md rounded-[44px] flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-300"
+            className="relative z-10 w-full max-w-md rounded-[44px] flex flex-col overflow-hidden animate-menu-panel-in"
             style={{
               background: 'linear-gradient(160deg, rgba(44,44,48,0.72) 0%, rgba(18,18,22,0.66) 100%)',
               backdropFilter: 'blur(44px) saturate(180%) brightness(1.08)',
@@ -64,7 +66,25 @@ export default function Feed() {
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/10 to-transparent" />
 
-            <div className="relative px-5 pb-8 pt-8 space-y-7">
+            {/* Botão fechar (X) em vidro, flutuando no canto */}
+            <button
+              onClick={() => setMenuAberto(false)}
+              aria-label="Fechar"
+              className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-90 outline-none"
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                backdropFilter: 'blur(16px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(16px) saturate(160%)',
+                border: '1px solid rgba(255,255,255,0.14)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18)',
+              }}
+            >
+              <X className="w-4 h-4 text-white/70" />
+            </button>
+
+            <div className="relative px-5 pb-8 pt-6 space-y-7">
+
+              {/* Seção 1: Web-apps do Ecossistema */}
               <div className="space-y-1">
                 <button onClick={() => setMenuAberto(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
