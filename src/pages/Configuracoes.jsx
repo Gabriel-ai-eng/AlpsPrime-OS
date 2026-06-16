@@ -38,7 +38,7 @@ export default function Configuracoes({ onVoltar }) {
         
         <h3 className="text-[13px] font-semibold text-[#8E8E93] uppercase tracking-wider ml-4 mb-2">Conta & Privacidade</h3>
         <div className="flex flex-col mb-8">
-          <ItemConfig icon={User} titulo="Perfil do Alps OS" subtitulo="Gerencie seus dados" cor="bg-blue-500" />
+          <ItemConfig icon={User} titulo="Perfil do AlpsPrime-OS" subtitulo="Gerencie seus dados" cor="bg-blue-500" />
           <ItemConfig icon={Shield} titulo="Privacidade" subtitulo="As fotos são processadas localmente" cor="bg-green-500" />
         </div>
 

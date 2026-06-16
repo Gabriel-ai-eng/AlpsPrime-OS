@@ -22,8 +22,8 @@ VITE_BASE44_APP_ID=your_app_id
 VITE_BASE44_APP_BASE_URL=your_backend_url
 
 e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
+VITE_BASE44_APP_ID=69e44004c1822ff0840cc105
+VITE_BASE44_APP_BASE_URL=https://lush-nutriflow-daily-track.base44.app
 ```
 
 Run the app: `npm run dev`
