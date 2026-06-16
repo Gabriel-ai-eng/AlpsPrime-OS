@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, ShoppingBag, Loader2 } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const FLOATING_WORDS = ['IA', 'Neural', 'Genius', 'Quantum', 'Core', 'Alpha', 'Logic', 'Sync'];
@@ -29,8 +28,6 @@ export default function Welcome() {
       },
     }))
   );
-
-  const hotmartRef = useRef(null);
 
   // Estados para a contagem de usuários
   const [totalUsers, setTotalUsers] = useState(0);
@@ -67,11 +64,6 @@ export default function Welcome() {
 
     fetchTotalUsers();
   }, []);
-
-  const handleBuy = () => {
-    // Aciona o gatilho oculto do widget Hotmart, que abre o checkout em overlay
-    hotmartRef.current?.click();
-  };
 
   const handleEmail = () => {
     base44.auth.redirectToLogin('/feed');
@@ -151,23 +143,17 @@ export default function Welcome() {
             transition={{ delay: 0.55 }}
             className="space-y-3 mb-6"
           >
-            <Button
-              onClick={handleBuy}
-              className="w-full h-12 bg-gradient-to-r from-gold-light via-gold to-gold-dark text-background font-semibold hover:opacity-90 flex items-center gap-3"
+            {/* Link real do checkout da Hotmart: o widget (quando carregado) abre em
+                overlay; se o widget não interceptar, o link abre o checkout direto. */}
+            <a
+              href="https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hotmart-fb hotmart__button-checkout w-full h-12 rounded-md text-background font-semibold hover:opacity-90 flex items-center justify-center gap-3"
+              style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
             >
               <ShoppingBag className="w-4 h-4" />
               Comprar acesso por R$ 19,90
-            </Button>
-            {/* Gatilho oculto do widget de checkout da Hotmart (acionado pelo botão acima) */}
-            <a
-              ref={hotmartRef}
-              href="https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh"
-              onClick={(e) => e.preventDefault()}
-              className="hotmart-fb hotmart__button-checkout sr-only"
-              aria-hidden="true"
-              tabIndex={-1}
-            >
-              Comprar Agora
             </a>
 
             {/* Contador de usuários atualizado e corrigido */}
