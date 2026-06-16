@@ -144,7 +144,7 @@ export default function Feed() {
                     '0 0 4px rgba(255,255,255,0.9), 0 0 12px rgba(255,255,255,0.6), 0 0 24px rgba(255,255,255,0.4), 0 0 45px rgba(255,255,255,0.2)',
                 }}
               >
-                AlpsPrime-OS
+                Alps OS
               </h1>
 
               <p className="text-[#8E8E93] text-[14px] font-light tracking-wide">
