@@ -160,7 +160,26 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    // Sem AuthProvider acima (ex.: render isolado no editor visual do Base44).
+    // Em vez de lançar erro e quebrar a tela, devolve um estado seguro. No app
+    // real o AuthProvider sempre existe (ver App.jsx), então isto nunca é usado lá.
+    if (typeof console !== 'undefined') {
+      console.warn('useAuth foi chamado fora de um AuthProvider — usando estado padrão.');
+    }
+    return {
+      user: null,
+      isAuthenticated: false,
+      isLoadingAuth: false,
+      isLoadingPublicSettings: false,
+      authError: null,
+      appPublicSettings: null,
+      authChecked: true,
+      logout: () => {},
+      navigateToLogin: () => {},
+      checkUserAuth: () => {},
+      checkAppState: () => {},
+      refetchUser: () => {},
+    };
   }
   return context;
 };

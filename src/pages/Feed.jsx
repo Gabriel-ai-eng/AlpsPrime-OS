@@ -1,10 +1,5 @@
 import React, { useState, Suspense, lazy } from 'react';
-import {
-  Menu, X, Grid, LayoutList, Star, Sparkles,
-  User, Settings, HelpCircle, LogOut, Loader2,
-  ChevronLeft, ChevronRight // Ícones das setas adicionados aqui
-} from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // OTIMIZAÇÃO: Carregamento Preguiçoso (Lazy Loading)
 const Vivart = lazy(() => import('./Vivart'));
@@ -21,8 +16,7 @@ const LoadingScreen = () => (
 
 export default function Feed() {
   const [telaAtual, setTelaAtual] = useState('hub');
-  const [menuAberto, setMenuAberto] = useState(false);
-  
+
   // ESTADO DO CARROSSEL
   const [slideAtual, setSlideAtual] = useState(0);
 
@@ -45,122 +39,8 @@ export default function Feed() {
   return (
     <div className="w-full h-[100dvh] bg-black text-white font-sans relative overflow-hidden flex flex-col selection:bg-white/30">
 
-      {/* =========================================
-          MODAL DO MENU
-          ========================================= */}
-      {menuAberto && (
-        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-5 bg-black/40 backdrop-blur-xl animate-menu-overlay-in">
-
-          {/* Overlay invisível para fechar ao clicar fora */}
-          <div className="absolute inset-0" onClick={() => setMenuAberto(false)} />
-
-          <div
-            className="relative z-10 w-full max-w-md rounded-[44px] flex flex-col overflow-hidden animate-menu-panel-in"
-            style={{
-              background: 'linear-gradient(160deg, rgba(44,44,48,0.72) 0%, rgba(18,18,22,0.66) 100%)',
-              backdropFilter: 'blur(44px) saturate(180%) brightness(1.08)',
-              WebkitBackdropFilter: 'blur(44px) saturate(180%) brightness(1.08)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              boxShadow: '0 30px 90px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.18), inset 0 0 40px rgba(255,255,255,0.03)',
-            }}
-          >
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/10 to-transparent" />
-
-            {/* Botão fechar (X) em vidro, flutuando no canto */}
-            <button
-              onClick={() => setMenuAberto(false)}
-              aria-label="Fechar"
-              className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-90 outline-none"
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                backdropFilter: 'blur(16px) saturate(160%)',
-                WebkitBackdropFilter: 'blur(16px) saturate(160%)',
-                border: '1px solid rgba(255,255,255,0.14)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18)',
-              }}
-            >
-              <X className="w-4 h-4 text-white/70" />
-            </button>
-
-            <div className="relative px-5 pb-8 pt-6 space-y-7">
-
-              {/* Seção 1: Web-apps do Ecossistema */}
-              <div className="space-y-1">
-                <button onClick={() => setMenuAberto(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
-                  <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
-                    <Grid className="w-4 h-4" />
-                  </div>
-                  <span className="text-[15px] font-medium text-white/90">Todos</span>
-                </button>
-                <button onClick={() => setMenuAberto(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
-                  <div className="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
-                    <LayoutList className="w-4 h-4" />
-                  </div>
-                  <span className="text-[15px] font-medium text-white/90">Categorias</span>
-                </button>
-                <button onClick={() => setMenuAberto(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
-                  <div className="w-8 h-8 rounded-xl bg-yellow-500/20 flex items-center justify-center text-yellow-400 group-hover:scale-110 transition-transform">
-                    <Star className="w-4 h-4" />
-                  </div>
-                  <span className="text-[15px] font-medium text-white/90">Favoritos</span>
-                </button>
-                <button onClick={() => setMenuAberto(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
-                  <div className="w-8 h-8 rounded-xl bg-[#C9A24F]/20 flex items-center justify-center text-[#C9A24F] group-hover:scale-110 transition-transform">
-                    <Sparkles className="w-4 h-4" />
-                  </div>
-                  <span className="text-[15px] font-medium text-white/90">Em breve</span>
-                </button>
-              </div>
-
-              <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-              <div className="space-y-1">
-                <button onClick={() => setMenuAberto(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
-                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-white transition-colors">
-                    <User className="w-4 h-4" />
-                  </div>
-                  <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Perfil</span>
-                </button>
-                <button onClick={() => setMenuAberto(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
-                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-white transition-colors">
-                    <Settings className="w-4 h-4" />
-                  </div>
-                  <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Configurações</span>
-                </button>
-                <button onClick={() => setMenuAberto(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
-                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-white transition-colors">
-                    <HelpCircle className="w-4 h-4" />
-                  </div>
-                  <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Suporte</span>
-                </button>
-                <button onClick={() => base44.auth.logout(window.location.origin)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-500/10 transition-colors group outline-none">
-                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-red-400 group-hover:border-red-400/20 transition-colors">
-                    <LogOut className="w-4 h-4" />
-                  </div>
-                  <span className="text-[15px] font-medium text-white/80 group-hover:text-red-400 transition-colors">Sair</span>
-                </button>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      )}
-
       {telaAtual === 'hub' && (
         <>
-          {/* HEADER DO FEED */}
-          <div className="absolute top-0 left-0 w-full h-14 flex items-center justify-between px-4 z-50 pointer-events-none">
-            <div className="w-10 flex-shrink-0 flex items-center justify-start pointer-events-auto">
-              <button
-                onClick={() => setMenuAberto(true)}
-                className="p-2 -ml-2 hover:bg-white/10 rounded-xl transition-colors outline-none"
-              >
-                <Menu className="w-5 h-5 text-white" />
-              </button>
-            </div>
-            <div className="flex-1" />
-          </div>
-
           {/* CONTEÚDO PRINCIPAL */}
           <div className="flex-1 w-full overflow-y-auto overflow-x-hidden scrollbar-none flex flex-col items-center pt-28 px-6 pb-32 z-10 relative animate-fade-in">
 
