@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import {
   User, LogOut, Menu, Search as SearchIcon, 
-  Settings, HelpCircle
+  Settings, HelpCircle, Grid, LayoutList, Star, Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAIUnlock } from '@/lib/useAIUnlock';
@@ -20,7 +20,6 @@ import PrioritySupportButton from '@/components/support/PrioritySupportButton';
 import BottomNav from '@/components/layout/BottomNav';
 import { useLiquidGlass } from '@/lib/useLiquidGlass';
 
-// Lista de itens do menu principal totalmente limpa!
 const NAV_ITEMS = [];
 
 /* ── Atmospheric orbs ── */
@@ -67,25 +66,15 @@ function AtmosphericOrbs() {
   );
 }
 
-/* ── Sidebar ── */
+/* ── Sidebar (Desktop) ── */
 function Sidebar({ user, location, aiUnlocked, plan, postsDisplay, postsLimitDisplay, onNavigate, onAILocked }) {
   return (
     <div className="flex flex-col h-full bg-background border-r border-border relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
-      {/* Logo Placeholder */}
       <div className="px-5 pt-5 pb-0 border-b border-border" />
-
-      {/* Espaçador flexível que empurra o rodapé para baixo, substituindo o menu antigo */}
       <div className="flex-1" />
-
-      {/* User footer (Mantido intacto apenas com as opções solicitadas) */}
       <div className="p-3 border-t border-border space-y-1">
-        <Link
-          to="/profile"
-          onClick={onNavigate}
-          className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-muted transition-colors group"
-        >
+        <Link to="/profile" onClick={onNavigate} className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-muted transition-colors group">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 ring-gold/20 group-hover:ring-gold/50 transition-all">
             {user?.profile_picture_url ? (
               <img src={user.profile_picture_url} alt={user.full_name} className="w-full h-full object-cover" />
@@ -98,28 +87,15 @@ function Sidebar({ user, location, aiUnlocked, plan, postsDisplay, postsLimitDis
             <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider mt-0.5">Ver Perfil</p>
           </div>
         </Link>
-        <Link
-          to="/settings"
-          onClick={onNavigate}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-        >
+        <Link to="/settings" onClick={onNavigate} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <Settings className="w-4 h-4" />
           <span>Configurações</span>
         </Link>
-        <a
-          href="https://www.alpsprime.com.br/suporte"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={onNavigate}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-        >
+        <a href="https://www.alpsprime.com.br/suporte" target="_blank" rel="noopener noreferrer" onClick={onNavigate} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <HelpCircle className="w-4 h-4" />
           <span>Suporte</span>
         </a>
-        <button
-          onClick={() => base44.auth.logout()}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-        >
+        <button onClick={() => base44.auth.logout()} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <LogOut className="w-4 h-4" />
           <span>Sair</span>
         </button>
@@ -198,25 +174,85 @@ export default function AppShell() {
         <Sidebar {...sidebarProps} />
       </aside>
 
-      {/* Mobile drawer */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <div className="lg:hidden fixed inset-0 z-[60] flex">
-            <motion.div
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setMobileOpen(false)}
-            />
-            <motion.aside
-              className="relative w-72 flex-shrink-0 bg-background shadow-2xl"
-              initial={{ x: -288 }} animate={{ x: 0 }} exit={{ x: -288 }}
-              transition={{ type: 'spring', stiffness: 340, damping: 32 }}
-            >
-              <Sidebar {...sidebarProps} onNavigate={() => setMobileOpen(false)} />
-            </motion.aside>
+      {/* =========================================
+          MOBILE MENU (LIQUID GLASS PREMIUM)
+          ========================================= */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-[999999] flex items-center justify-center p-5 bg-black/40 backdrop-blur-xl animate-in fade-in duration-300">
+          <div className="absolute inset-0" onClick={() => setMobileOpen(false)} />
+
+          <div
+            className="relative z-10 w-full max-w-md rounded-[44px] flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-300"
+            style={{
+              background: 'linear-gradient(160deg, rgba(44,44,48,0.72) 0%, rgba(18,18,22,0.66) 100%)',
+              backdropFilter: 'blur(44px) saturate(180%) brightness(1.08)',
+              WebkitBackdropFilter: 'blur(44px) saturate(180%) brightness(1.08)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              boxShadow: '0 30px 90px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.18), inset 0 0 40px rgba(255,255,255,0.03)',
+            }}
+          >
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/10 to-transparent" />
+
+            <div className="relative px-5 pb-8 pt-8 space-y-7">
+              <div className="space-y-1">
+                <button onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                  <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                    <Grid className="w-4 h-4" />
+                  </div>
+                  <span className="text-[15px] font-medium text-white/90">Todos</span>
+                </button>
+                <button onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                  <div className="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                    <LayoutList className="w-4 h-4" />
+                  </div>
+                  <span className="text-[15px] font-medium text-white/90">Categorias</span>
+                </button>
+                <button onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                  <div className="w-8 h-8 rounded-xl bg-yellow-500/20 flex items-center justify-center text-yellow-400 group-hover:scale-110 transition-transform">
+                    <Star className="w-4 h-4" />
+                  </div>
+                  <span className="text-[15px] font-medium text-white/90">Favoritos</span>
+                </button>
+                <button onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                  <div className="w-8 h-8 rounded-xl bg-[#C9A24F]/20 flex items-center justify-center text-[#C9A24F] group-hover:scale-110 transition-transform">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <span className="text-[15px] font-medium text-white/90">Em breve</span>
+                </button>
+              </div>
+
+              <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+              <div className="space-y-1">
+                <Link to="/profile" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-white transition-colors">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Perfil</span>
+                </Link>
+                <Link to="/settings" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-white transition-colors">
+                    <Settings className="w-4 h-4" />
+                  </div>
+                  <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Configurações</span>
+                </Link>
+                <a href="https://www.alpsprime.com.br/suporte" target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-white transition-colors">
+                    <HelpCircle className="w-4 h-4" />
+                  </div>
+                  <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Suporte</span>
+                </a>
+                <button onClick={() => { setMobileOpen(false); base44.auth.logout(window.location.origin); }} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-500/10 transition-colors group outline-none">
+                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-red-400 group-hover:border-red-400/20 transition-colors">
+                    <LogOut className="w-4 h-4" />
+                  </div>
+                  <span className="text-[15px] font-medium text-white/80 group-hover:text-red-400 transition-colors">Sair</span>
+                </button>
+              </div>
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
