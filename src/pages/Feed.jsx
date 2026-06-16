@@ -114,9 +114,9 @@ export default function Feed() {
       {telaAtual === 'hub' && (
         <>
           {/* HEADER DO FEED */}
-          <div className="absolute top-0 left-0 w-full h-14 flex items-center justify-between px-4 z-50">
-            <div className="w-10 flex-shrink-0 flex items-center justify-start">
-              <button 
+          <div className="absolute top-0 left-0 w-full h-14 flex items-center justify-between px-4 z-50 pointer-events-none">
+            <div className="w-10 flex-shrink-0 flex items-center justify-start pointer-events-auto">
+              <button
                 onClick={() => setMenuAberto(true)}
                 className="p-2 -ml-2 hover:bg-white/10 rounded-xl transition-colors outline-none"
               >
