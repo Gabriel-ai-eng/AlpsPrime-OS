@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Loader2, ShoppingBag, RefreshCcw, LogOut, Lock } from 'lucide-react';
@@ -14,15 +14,14 @@ import { motion } from 'framer-motion';
 export default function HotmartGate({ userEmail, children }) {
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
-  const [checkoutUrl, setCheckoutUrl] = useState('');
   const [rechecking, setRechecking] = useState(false);
+  const hotmartRef = useRef(null);
 
   const check = async () => {
     try {
       const res = await base44.functions.invoke('checkMyAccess', {});
       const data = res?.data || {};
       setHasAccess(!!data.hasAccess);
-      setCheckoutUrl(data.checkoutUrl || '');
     } catch {
       setHasAccess(false);
     } finally {
@@ -36,6 +35,20 @@ export default function HotmartGate({ userEmail, children }) {
     check();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userEmail]);
+
+  // Carrega o widget de checkout da Hotmart (abre o checkout em overlay — checkoutMode=2)
+  useEffect(() => {
+    if (document.getElementById('hotmart-checkout-widget')) return;
+    const script = document.createElement('script');
+    script.id = 'hotmart-checkout-widget';
+    script.src = 'https://static.hotmart.com/checkout/widget.min.js';
+    document.head.appendChild(script);
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = 'https://static.hotmart.com/css/hotmart-fb.min.css';
+    document.head.appendChild(link);
+  }, []);
 
   if (loading) {
     return (
@@ -51,8 +64,8 @@ export default function HotmartGate({ userEmail, children }) {
   if (hasAccess) return children;
 
   const handleBuy = () => {
-    if (!checkoutUrl) return;
-    window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+    // Aciona o gatilho oculto do widget Hotmart, que abre o checkout em overlay
+    hotmartRef.current?.click();
   };
 
   const handleRecheck = () => {
@@ -98,12 +111,22 @@ export default function HotmartGate({ userEmail, children }) {
 
           <Button
             onClick={handleBuy}
-            disabled={!checkoutUrl}
             className="w-full mt-7 h-12 bg-gradient-to-r from-gold-light via-gold to-gold-dark hover:opacity-90 text-background font-semibold text-base"
           >
             <ShoppingBag className="w-4 h-4 mr-2" />
             Comprar acesso por R$ 19,90
           </Button>
+          {/* Gatilho oculto do widget de checkout da Hotmart (acionado pelo botão acima) */}
+          <a
+            ref={hotmartRef}
+            href="https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh"
+            onClick={(e) => e.preventDefault()}
+            className="hotmart-fb hotmart__button-checkout sr-only"
+            aria-hidden="true"
+            tabIndex={-1}
+          >
+            Comprar Agora
+          </a>
 
           <button
             onClick={handleRecheck}
