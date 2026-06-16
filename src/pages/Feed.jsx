@@ -1,8 +1,9 @@
 import React, { useState, Suspense, lazy } from 'react';
-import { 
-  Menu, X, Grid, LayoutList, Star, Sparkles, 
-  User, Settings, HelpCircle, Loader2 
+import {
+  Menu, Grid, LayoutList, Star, Sparkles,
+  User, Settings, HelpCircle, LogOut, Loader2
 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 // OTIMIZAÇÃO: Carregamento Preguiçoso (Lazy Loading)
 const Vivart = lazy(() => import('./Vivart'));
@@ -28,25 +29,26 @@ export default function Feed() {
           MODAL DO MENU (CORRIGIDO PARA FIXED E Z-INDEX MAXIMO)
           ========================================= */}
       {menuAberto && (
-        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-6 bg-black/50 backdrop-blur-xl animate-in fade-in duration-300">
-          
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-5 bg-black/40 backdrop-blur-xl animate-in fade-in duration-300">
+
           {/* Overlay invisível para fechar ao clicar fora */}
           <div className="absolute inset-0" onClick={() => setMenuAberto(false)} />
 
-          {/* Retângulo do Menu */}
-          <div className="bg-[#1C1C1E]/80 backdrop-blur-3xl border border-white/10 p-2 rounded-[36px] w-full max-w-sm shadow-[0_20px_60px_rgba(0,0,0,0.6)] relative z-10 flex flex-col animate-in zoom-in-95 duration-300">
-            
-            {/* Botão Fechar */}
-            <div className="flex justify-end p-2 pb-0">
-              <button 
-                onClick={() => setMenuAberto(false)}
-                className="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors outline-none"
-              >
-                <X className="w-4 h-4 text-white/70" />
-              </button>
-            </div>
+          {/* Retângulo do Menu — Liquid Glass (estilo Apple) */}
+          <div
+            className="relative z-10 w-full max-w-md rounded-[44px] flex flex-col overflow-hidden animate-in zoom-in-95 fade-in duration-300"
+            style={{
+              background: 'linear-gradient(160deg, rgba(44,44,48,0.72) 0%, rgba(18,18,22,0.66) 100%)',
+              backdropFilter: 'blur(44px) saturate(180%) brightness(1.08)',
+              WebkitBackdropFilter: 'blur(44px) saturate(180%) brightness(1.08)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              boxShadow: '0 30px 90px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.18), inset 0 0 40px rgba(255,255,255,0.03)',
+            }}
+          >
+            {/* Reflexo especular no topo */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/10 to-transparent" />
 
-            <div className="px-4 pb-6 pt-2 space-y-6">
+            <div className="relative px-5 pb-8 pt-8 space-y-7">
               
               {/* Seção 1: Web-apps do Ecossistema */}
               <div className="space-y-1">
@@ -103,6 +105,13 @@ export default function Feed() {
                     <HelpCircle className="w-4 h-4" />
                   </div>
                   <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Suporte</span>
+                </button>
+
+                <button onClick={() => base44.auth.logout()} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-500/10 transition-colors group outline-none">
+                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-red-400 group-hover:border-red-400/20 transition-colors">
+                    <LogOut className="w-4 h-4" />
+                  </div>
+                  <span className="text-[15px] font-medium text-white/80 group-hover:text-red-400 transition-colors">Sair</span>
                 </button>
               </div>
 
