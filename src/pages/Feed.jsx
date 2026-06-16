@@ -128,11 +128,9 @@ export default function Feed() {
               </button>
             </div>
 
-            <span className="flex-1 text-center text-[#8E8E93] font-light tracking-[0.32em] text-[18px] select-none pointer-events-none">
-              Sexta-feira
-            </span>
-
-            <div className="w-10 flex-shrink-0" />
+            {/* Título "Sexta-feira" e ícones (busca/notificações) são renderizados pelo
+                header do AppShell, que fica por cima — evita duplicação e centraliza o título. */}
+            <div className="flex-1" />
           </div>
 
           {/* CONTEÚDO PRINCIPAL (Área com Scroll) */}

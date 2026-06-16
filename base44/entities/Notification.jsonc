@@ -25,7 +25,9 @@
         "comment",
         "follow",
         "message",
-        "welcome"
+        "welcome",
+        "update",
+        "app"
       ],
       "description": "Type of notification"
     },

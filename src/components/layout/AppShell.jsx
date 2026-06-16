@@ -229,8 +229,15 @@ export default function AppShell() {
             </button>
           </div>
 
+          {/* Título centralizado (apenas no feed) — perfeitamente no meio entre o menu e os ícones */}
+          {location.pathname === '/feed' && (
+            <span className="absolute left-1/2 -translate-x-1/2 text-[#8E8E93] font-light tracking-[0.32em] text-[18px] select-none pointer-events-none">
+              Sexta-feira
+            </span>
+          )}
+
           <div className="flex items-center gap-1 pointer-events-auto">
-            <Link to="/search" className="p-2 rounded-full hover:bg-white/10 transition-colors">
+            <Link to="/search" className="p-2 rounded-full hover:bg-white/10 transition-colors" aria-label="Buscar">
               <SearchIcon className="w-5 h-5 text-white/80 hover:text-white" />
             </Link>
             <div className="pointer-events-auto">

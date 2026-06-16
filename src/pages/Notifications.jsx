@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Bell, Heart, MessageCircle, UserPlus, Mail, User, Check, Sparkles, ArrowLeft } from 'lucide-react';
+import { Bell, Heart, MessageCircle, UserPlus, Mail, User, Check, Sparkles, ArrowLeft, Megaphone, AppWindow } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { base44 } from '@/api/base44Client';
@@ -16,6 +16,8 @@ const ICON_BY_TYPE = {
   follow: UserPlus,
   message: Mail,
   welcome: Sparkles,
+  update: Megaphone,
+  app: AppWindow,
 };
 
 const COLOR_BY_TYPE = {
@@ -24,6 +26,8 @@ const COLOR_BY_TYPE = {
   follow: 'text-gold bg-gold/10',
   message: 'text-emerald-400 bg-emerald-400/10',
   welcome: 'text-gold bg-gold/10',
+  update: 'text-gold bg-gold/10',
+  app: 'text-blue-400 bg-blue-400/10',
 };
 
 function buildMessage(n) {
@@ -33,6 +37,8 @@ function buildMessage(n) {
     case 'follow': return 'começou a seguir você';
     case 'message': return 'enviou uma mensagem';
     case 'welcome': return 'quer instalar a Sexta-feira no seu celular?';
+    case 'update': return 'publicou uma nova atualização';
+    case 'app': return 'lançou um novo web app';
     default: return '';
   }
 }
@@ -152,7 +158,8 @@ export default function Notifications() {
                 n.type === 'comment' ? n.comment_preview :
                 n.type === 'message' ? n.message_preview :
                 n.type === 'like' ? n.post_preview :
-                n.type === 'welcome' ? n.post_preview : null;
+                n.type === 'welcome' ? n.post_preview :
+                (n.type === 'update' || n.type === 'app') ? n.post_preview : null;
 
               return (
                 <motion.button
