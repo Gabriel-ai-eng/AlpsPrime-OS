@@ -20,6 +20,7 @@ import SettingsSection from '@/components/settings/SettingsSection';
 import ToggleRow from '@/components/settings/ToggleRow';
 import InstallShortcutCard from '@/components/settings/InstallShortcutCard';
 import PlanNotificationsSection from '@/components/settings/PlanNotificationsSection';
+import AdminBroadcastSection from '@/components/settings/AdminBroadcastSection';
 
 export default function Settings() {
   const { user } = useAuth();
@@ -158,6 +159,9 @@ export default function Settings() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 lg:px-6 py-6 space-y-5 pb-12">
+        {/* ADMIN — comunicados para todos os usuários (somente admin) */}
+        {user?.role === 'admin' && <AdminBroadcastSection />}
+
         {/* APPEARANCE */}
         <SettingsSection
           icon={Sun}
