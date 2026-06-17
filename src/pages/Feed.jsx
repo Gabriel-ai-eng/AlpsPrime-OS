@@ -111,7 +111,7 @@ export default function Feed() {
                 className="w-full rounded-[32px] overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.08)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
               >
                 <img
-                  src="https://i.ibb.co/TDnDM6j4/11-20260616-225816-0000.png"
+                  src="/apps/titan-bg.png"
                   alt="Titan App"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
                 />
@@ -123,7 +123,7 @@ export default function Feed() {
                 className="w-full rounded-[32px] overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.03)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
               >
                 <img
-                  src="https://i.ibb.co/VcM6ZpBQ/11-20260609-144421-0000.png"
+                  src="/apps/sexta-bg.png"
                   alt="Sexta App"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
                 />
@@ -135,7 +135,7 @@ export default function Feed() {
                 className="w-full rounded-[32px] overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.08)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
               >
                 <img
-                  src="https://i.ibb.co/ywTbh5q/Vivart-20260609-024021-0000.png"
+                  src="/apps/vivart-bg.png"
                   alt="Vivart App"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
                 />
