@@ -112,14 +112,14 @@ export default function AppShell() {
   const [aiLockedOpen, setAiLockedOpen] = useState(false);
   const { aiUnlocked, showCelebration, dismissCelebration } = useAIUnlock();
   const { celebrationPlan, dismiss: dismissPlanCelebration } = usePlanUpgradeDetector(user);
-  
+
   const { setMode } = useLiquidGlass();
 
   usePushNotifications(user?.email);
 
   useEffect(() => {
     const localTheme = localStorage.getItem('sf_theme_preference');
-    
+
     if (localTheme) {
       if (localTheme === 'dark') {
         document.documentElement.classList.add('dark');
@@ -169,14 +169,10 @@ export default function AppShell() {
 
       <AtmosphericOrbs />
 
-      {/* Desktop sidebar */}
       <aside className="hidden lg:flex w-60 flex-shrink-0 relative z-10 border-r border-border">
         <Sidebar {...sidebarProps} />
       </aside>
 
-      {/* =========================================
-          MOBILE MENU (LIQUID GLASS PREMIUM)
-          ========================================= */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-[999999] flex items-center justify-center p-5 bg-black/40 backdrop-blur-xl animate-menu-overlay-in">
           <div className="absolute inset-0" onClick={() => setMobileOpen(false)} />
@@ -193,7 +189,6 @@ export default function AppShell() {
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/10 to-transparent" />
 
-            {/* Botão fechar (X) em vidro, flutuando no canto */}
             <button
               onClick={() => setMobileOpen(false)}
               aria-label="Fechar"
@@ -270,26 +265,18 @@ export default function AppShell() {
         </div>
       )}
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
-
-        {/* Mobile header com efeito Apple Glass */}
         <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-black/40 backdrop-blur-2xl backdrop-saturate-150 border-b border-white/10">
           <div>
             <button
               onClick={() => setMobileOpen(true)}
-              className="w-9 h-9 -ml-1 rounded-full overflow-hidden flex items-center justify-center bg-white/5 ring-1 ring-white/15 hover:ring-white/30 transition-all outline-none active:scale-95"
+              className="p-2 -ml-2 hover:bg-white/10 rounded-xl transition-colors outline-none"
               aria-label="Menu"
             >
-              {user?.profile_picture_url ? (
-                <img src={user.profile_picture_url} alt={user.full_name || 'Perfil'} className="w-full h-full object-cover" />
-              ) : (
-                <User className="w-5 h-5 text-white/80" />
-              )}
+              <Menu className="w-5 h-5 text-white" />
             </button>
           </div>
 
-          {/* Título centralizado (apenas no feed) */}
           {location.pathname === '/feed' ? (
             <span className="flex-1 text-center text-[#8E8E93] font-light tracking-[0.32em] text-[18px] select-none px-2 truncate">
               Sexta-feira
@@ -308,12 +295,10 @@ export default function AppShell() {
           </div>
         </header>
 
-        {/* Desktop top bar */}
         <header className="hidden lg:flex items-center justify-end px-6 h-12 border-b border-border bg-background/60 backdrop-blur-xl sticky top-0 z-20">
           <NotificationsBell userEmail={user?.email} />
         </header>
 
-        {/* Page outlet */}
         <main className="flex-1 w-full overflow-x-hidden overflow-y-auto scrollbar-thin pb-24 lg:pb-0 pt-14 lg:pt-0">
           <motion.div
             key={location.pathname}
