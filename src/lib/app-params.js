@@ -40,16 +40,12 @@ const getAppParams = () => {
 		storage.removeItem('token');
 	}
 
-	// O login é SEMPRE hospedado pelo Base44 (subdomínio *.base44.app). Em domínio
-	// próprio (ex.: sextaai.com) o app_base_url costuma vir como o próprio domínio, e aí
-	// o redirectToLogin do SDK monta "sextaai.com/login" — uma rota inexistente, que cai
-	// de volta no Welcome (parece que o botão "Já comprei" não faz nada). Por isso só
-	// aceitamos app_base_url quando for um endereço do Base44; caso contrário, forçamos
-	// o subdomínio publicado. Ver CLAUDE.md.
+	// appBaseUrl: usado pelo SDK só para os métodos de login internos (que NÃO usamos
+	// mais — o login agora é central via src/lib/loginRedirect.js). Só aceitamos um
+	// endereço do Base44; qualquer outra coisa (domínio próprio, token inválido ou vazio)
+	// vira string vazia, evitando hardcode de subdomínio errado. Ver CLAUDE.md.
 	const rawBase = getAppParamValue("app_base_url", { defaultValue: import.meta.env.VITE_BASE44_APP_BASE_URL });
-	const appBaseUrl = (rawBase && rawBase.includes('.base44.app'))
-		? rawBase
-		: 'https://lush-nutriflow-daily-track.base44.app';
+	const appBaseUrl = (rawBase && rawBase.includes('.base44.app')) ? rawBase : '';
 
 	return {
 		appId: getAppParamValue("app_id", { defaultValue: import.meta.env.VITE_BASE44_APP_ID }),
