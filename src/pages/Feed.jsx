@@ -107,10 +107,12 @@ export default function Feed() {
 
               <div
                 onClick={() => setTelaAtual('titan')}
-                className="w-full rounded-[32px] overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.05)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
+                /* CORREÇÃO: Removi arredondamento de bordas externo para deixar somente o retângulo da imagem */
+                className="w-full overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.05)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
               >
                 <img
-                  src="https://i.ibb.co/TDnDM6j4/11-20260616-225816-0000.png"
+                  /* NOVA IMAGEM RECORTADA SEM BORDA CINZA */
+                  src="image_0.png"
                   alt="Titan App"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
                 />
