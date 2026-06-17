@@ -41,6 +41,21 @@ export default function Categorias() {
 
       {/* LISTA DE CATEGORIAS */}
       <div className="flex-1 px-6 pt-6 pb-32 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+        {/* Opção: ver todos os web apps */}
+        <div
+          onClick={() => navigate('/todos')}
+          className="flex items-center gap-4 p-3 rounded-[24px] bg-[#1C1C1E]/50 border border-white/5 active:scale-[0.98] transition-all cursor-pointer"
+        >
+          <div className="w-12 h-12 rounded-[18px] flex items-center justify-center flex-shrink-0 bg-white/10">
+            <LayoutGrid className="w-6 h-6 text-white" />
+          </div>
+          <div className="flex-1">
+            <span className="block text-[16px] font-medium text-white">Todos</span>
+            <span className="text-[#8E8E93] text-[13px]">Ver todos os web apps</span>
+          </div>
+        </div>
+
         {CATEGORIAS.map((categoria, idx) => (
           <div key={idx}>
             <h2 className="text-[#8E8E93] text-[13px] font-semibold uppercase tracking-widest mb-4 ml-2">

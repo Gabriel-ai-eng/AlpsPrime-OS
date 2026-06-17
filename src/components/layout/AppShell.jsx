@@ -276,8 +276,16 @@ export default function AppShell() {
         {/* Mobile header com efeito Apple Glass */}
         <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-black/40 backdrop-blur-2xl backdrop-saturate-150 border-b border-white/10">
           <div>
-            <button onClick={() => setMobileOpen(true)} className="p-2 -ml-2 hover:bg-white/10 rounded-xl transition-colors outline-none">
-              <Menu className="w-5 h-5 text-white" />
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="w-9 h-9 -ml-1 rounded-full overflow-hidden flex items-center justify-center bg-white/5 ring-1 ring-white/15 hover:ring-white/30 transition-all outline-none active:scale-95"
+              aria-label="Menu"
+            >
+              {user?.profile_picture_url ? (
+                <img src={user.profile_picture_url} alt={user.full_name || 'Perfil'} className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-5 h-5 text-white/80" />
+              )}
             </button>
           </div>
 
