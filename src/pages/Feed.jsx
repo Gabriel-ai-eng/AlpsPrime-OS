@@ -105,20 +105,20 @@ export default function Feed() {
             {/* CARDS DOS APLICATIVOS */}
             <div className="w-full max-w-sm flex flex-col gap-8 z-10">
 
+              {/* CARD TITAN (CORRIGIDO) */}
               <div
                 onClick={() => setTelaAtual('titan')}
-                /* CORREÇÃO: Removi arredondamento de bordas externo para deixar somente o retângulo da imagem */
-                className="w-full overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.05)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
+                className="w-full rounded-[32px] overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.05)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
               >
                 <img
-                  /* NOVA IMAGEM RECORTADA SEM BORDA CINZA */
-                  src="image_0.png"
+                  src="https://i.ibb.co/TDnDM6j4/11-20260616-225816-0000.png"
                   alt="Titan App"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
                 />
                 <div className="absolute inset-0 bg-white/5 group-hover:bg-white/10 transition-colors duration-500" />
               </div>
 
+              {/* CARD SEXTA */}
               <div
                 onClick={() => setTelaAtual('sexta')}
                 className="w-full rounded-[32px] overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.03)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
@@ -130,6 +130,7 @@ export default function Feed() {
                 />
               </div>
 
+              {/* CARD VIVART */}
               <div
                 onClick={() => setTelaAtual('vivart')}
                 className="w-full rounded-[32px] overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.08)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
