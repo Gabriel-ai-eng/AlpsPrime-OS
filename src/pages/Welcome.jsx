@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { redirectToBase44Login } from '@/lib/loginRedirect';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, ShoppingBag, Loader2 } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
@@ -66,7 +67,7 @@ export default function Welcome() {
   }, []);
 
   const handleEmail = () => {
-    base44.auth.redirectToLogin('/feed');
+    redirectToBase44Login('/feed');
   };
 
   return (
