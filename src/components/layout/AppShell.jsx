@@ -26,40 +26,21 @@ const NAV_ITEMS = [];
 function AtmosphericOrbs() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
+      {/* Estáticas (sem animação infinita) — mantém o clima sem custo de repintura no scroll */}
       <div
-        className="absolute animate-atmo-drift"
+        className="absolute"
         style={{
           width: 560, height: 560, borderRadius: '50%',
           top: '-160px', left: '-140px',
           background: 'radial-gradient(circle, rgba(201,162,79,0.22) 0%, rgba(201,162,79,0.08) 35%, transparent 70%)',
-          animationDelay: '0s',
         }}
       />
       <div
-        className="absolute animate-atmo-drift"
+        className="absolute"
         style={{
           width: 440, height: 440, borderRadius: '50%',
           bottom: '-100px', right: '-80px',
           background: 'radial-gradient(circle, rgba(160,120,220,0.16) 0%, rgba(160,120,220,0.06) 40%, transparent 70%)',
-          animationDelay: '-5s', animationDuration: '18s',
-        }}
-      />
-      <div
-        className="absolute animate-atmo-drift"
-        style={{
-          width: 320, height: 320, borderRadius: '50%',
-          top: '40%', right: '-60px',
-          background: 'radial-gradient(circle, rgba(232,199,122,0.14) 0%, transparent 70%)',
-          animationDelay: '-8s', animationDuration: '22s',
-        }}
-      />
-      <div
-        className="absolute animate-atmo-drift"
-        style={{
-          width: 280, height: 280, borderRadius: '50%',
-          bottom: '20%', left: '-40px',
-          background: 'radial-gradient(circle, rgba(180,150,210,0.12) 0%, transparent 70%)',
-          animationDelay: '-11s', animationDuration: '20s',
         }}
       />
     </div>
@@ -266,7 +247,7 @@ export default function AppShell() {
       )}
 
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
-        <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-black/40 backdrop-blur-2xl backdrop-saturate-150 border-b border-white/10">
+        <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-[#0A0A0B]/95 border-b border-white/10">
           <div>
             <button
               onClick={() => setMobileOpen(true)}
