@@ -17,10 +17,7 @@ function msgErro(e) {
 }
 
 /**
- * Seção de Cadastro/Login dentro do app (e-mail + senha), usando a API de auth do
- * Base44 (funciona pelo /api proxied, sem depender de subdomínio). Só permite
- * cadastro/login para e-mails que compraram o acesso (checkEmailAccess) e o
- * HotmartGate ainda revalida depois.
+ * Seção de Cadastro/Login dentro do app (e-mail + senha).
  */
 export default function AuthSection({ onClose }) {
   const [mode, setMode] = useState('login');   // 'login' | 'register' | 'forgot'
@@ -36,15 +33,12 @@ export default function AuthSection({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
-  const [noAccess, setNoAccess] = useState(false); // e-mail sem acesso (não comprou)
+  const [noAccess, setNoAccess] = useState(false);
 
   const goFeed = () => window.location.assign('/feed');
   const cleanEmail = () => email.trim().toLowerCase();
   const reset = (m) => { setMode(m); setStep('form'); setError(''); setInfo(''); setNoAccess(false); };
 
-  // Garante que só quem comprou o acesso (ou admin) consiga cadastrar/logar.
-  // Bloqueia apenas com um "não" definitivo; se a função estiver indisponível,
-  // deixa seguir — o HotmartGate ainda barra quem não comprou após o login.
   const ensureAccess = async () => {
     try {
       const res = await base44.functions.invoke('checkEmailAccess', { email: cleanEmail() });
@@ -140,26 +134,28 @@ export default function AuthSection({ onClose }) {
     : mode === 'forgot' ? (step === 'reset' ? 'Redefinir senha' : 'Enviar instruções')
     : mode === 'login' ? 'Entrar' : 'Criar conta';
 
+  // BUG 2 RESOLVIDO: O comando autofill agora não substitui as cores originais
   const inputBase =
-    'w-full h-12 pl-11 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 outline-none focus:border-gold/50 focus:bg-white/[0.07] transition-colors';
+    'w-full h-12 pl-11 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 outline-none focus:border-gold/50 focus:bg-white/[0.07] transition-all [&:-webkit-autofill]:[transition-delay:9999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white] relative z-10';
   const inputCls = `${inputBase} pr-3`;
   const inputPw = `${inputBase} pr-11`;
 
-  // Olho minimalista para revelar/ocultar a senha
+  // BUG 1 RESOLVIDO: Ícone do olho maior (w-5 h-5), cor mais nítida (text-white/70)
   const EyeToggle = ({ shown, onToggle }) => (
     <button
       type="button"
       onClick={onToggle}
       tabIndex={-1}
       aria-label={shown ? 'Ocultar senha' : 'Mostrar senha'}
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/80 transition-colors"
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors z-20"
     >
-      {shown ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      {shown ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
     </button>
   );
 
   return (
-    <div className="fixed inset-0 z-[100000] bg-background flex items-center justify-center px-4 py-8 overflow-y-auto">
+    // BUG 3 RESOLVIDO: Adicionado 'overflow-x-hidden' para matar a rolagem lateral 
+    <div className="fixed inset-0 z-[100000] bg-background flex items-center justify-center px-4 py-8 overflow-y-auto overflow-x-hidden">
       <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gold/8 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-md">
@@ -170,7 +166,7 @@ export default function AuthSection({ onClose }) {
           <ArrowLeft className="w-4 h-4" /> Voltar
         </button>
 
-        <div className="bg-card/95 backdrop-blur-xl border border-gold/20 rounded-3xl p-7 shadow-2xl shadow-gold/10">
+        <div className="bg-card/95 backdrop-blur-xl border border-gold/20 rounded-3xl p-7 shadow-2xl shadow-gold/10 relative z-20">
           <div className="flex flex-col items-center mb-6">
             <img src={LOGO_URL} alt="Sexta-feira" className="w-14 h-14 rounded-2xl object-cover shadow-lg shadow-gold/20" />
             <h1 className="mt-4 text-xl font-semibold text-white">{titulo}</h1>
@@ -179,9 +175,8 @@ export default function AuthSection({ onClose }) {
             </p>
           </div>
 
-          {/* Abas login/cadastro (só no formulário inicial) */}
           {step === 'form' && mode !== 'forgot' && (
-            <div className="flex p-1 mb-5 rounded-xl bg-white/5 border border-white/10">
+            <div className="flex p-1 mb-5 rounded-xl bg-white/5 border border-white/10 relative z-10">
               {['login', 'register'].map((m) => (
                 <button
                   key={m}
@@ -197,29 +192,27 @@ export default function AuthSection({ onClose }) {
             </div>
           )}
 
-          <form onSubmit={submit} className="space-y-3">
+          <form onSubmit={submit} className="space-y-3 relative z-10">
             {step === 'form' && mode === 'register' && (
               <div className="relative">
-                <User className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+                <User className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2 z-20" />
                 <input className={inputCls} placeholder="Seu nome" value={fullName}
                   onChange={(e) => setFullName(e.target.value)} autoComplete="name" />
               </div>
             )}
 
-            {/* E-mail: login, cadastro e pedido de recuperação */}
             {step === 'form' && (
               <div className="relative">
-                <Mail className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2 z-20" />
                 <input className={inputCls} type="email" placeholder="E-mail" value={email}
                   onChange={(e) => { setEmail(e.target.value); if (noAccess) { setNoAccess(false); setError(''); } }}
                   autoComplete="email" required />
               </div>
             )}
 
-            {/* Senha (com olho): login e cadastro */}
             {step === 'form' && mode !== 'forgot' && (
               <div className="relative">
-                <Lock className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2 z-20" />
                 <input className={inputPw} type={showPw ? 'text' : 'password'} placeholder="Senha" value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required />
@@ -227,26 +220,24 @@ export default function AuthSection({ onClose }) {
               </div>
             )}
 
-            {/* Etapa de código (cadastro) */}
             {step === 'otp' && (
               <div className="relative">
-                <KeyRound className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+                <KeyRound className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2 z-20" />
                 <input className={`${inputCls} tracking-[0.3em] text-center`} inputMode="numeric"
                   placeholder="Código do e-mail" value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)} />
               </div>
             )}
 
-            {/* Etapa de redefinição (esqueci a senha) */}
             {mode === 'forgot' && step === 'reset' && (
               <>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+                  <KeyRound className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2 z-20" />
                   <input className={inputCls} placeholder="Código recebido por e-mail" value={resetToken}
                     onChange={(e) => setResetToken(e.target.value)} />
                 </div>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2 z-20" />
                   <input className={inputPw} type={showNewPw ? 'text' : 'password'} placeholder="Nova senha" value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" required />
                   <EyeToggle shown={showNewPw} onToggle={() => setShowNewPw((v) => !v)} />
@@ -258,41 +249,39 @@ export default function AuthSection({ onClose }) {
             {info && !error && <p className="text-xs text-emerald-400 px-1">{info}</p>}
 
             <button type="submit" disabled={loading}
-              className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60"
+              className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60 relative z-20"
               style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}>
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {botao}
             </button>
 
-            {/* Sem acesso: oferece a compra na hora */}
             {noAccess && (
               <a
                 href={CHECKOUT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity relative z-20"
                 style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
               >
                 <ShoppingBag className="w-4 h-4" /> Comprar acesso
               </a>
             )}
 
-            {/* Links auxiliares */}
             {step === 'form' && mode === 'login' && (
               <button type="button" onClick={() => reset('forgot')}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-1">
+                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-1 relative z-20">
                 Esqueci minha senha
               </button>
             )}
             {mode === 'forgot' && (
               <button type="button" onClick={() => reset('login')}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-1">
+                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-1 relative z-20">
                 Voltar para o login
               </button>
             )}
             {step === 'otp' && (
               <button type="button" onClick={handleResend}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-1">
+                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-1 relative z-20">
                 Reenviar código
               </button>
             )}
