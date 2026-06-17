@@ -131,13 +131,12 @@ export default function AuthSection({ onClose }) {
     : mode === 'forgot' ? (step === 'reset' ? 'Redefinir senha' : 'Enviar instruções')
     : mode === 'login' ? 'Entrar' : 'Criar conta';
 
-  // CORREÇÃO MESTRA: Força um fundo grafite escuro (#18181b) caso o navegador tente aplicar fundo branco (autofill)
+  // CORREÇÃO: Fundo cinza suave (#3f3f46) no preenchimento e cursor forçado na cor branca (caret-white)
   const inputBase =
-    'w-full h-12 pl-11 rounded-xl bg-white/5 border border-white/10 text-zinc-200 placeholder-zinc-400 outline-none focus:border-gold/50 focus:bg-white/[0.07] transition-all relative z-10 [&:-webkit-autofill]:[box-shadow:0_0_0_40px_#18181b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#e4e4e7]';
+    'w-full h-12 pl-11 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 outline-none focus:border-gold/50 focus:bg-white/[0.07] transition-all relative z-10 caret-white [&:-webkit-autofill]:[box-shadow:0_0_0_40px_#3f3f46_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#ffffff]';
   const inputCls = `${inputBase} pr-3`;
   const inputPw = `${inputBase} pr-11`;
 
-  // CORREÇÃO: Ícones do olho maiores e mais visíveis
   const EyeToggle = ({ shown, onToggle }) => (
     <button
       type="button"
@@ -192,26 +191,43 @@ export default function AuthSection({ onClose }) {
             {step === 'form' && mode === 'register' && (
               <div className="relative">
                 <User className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
-                <input className={inputCls} placeholder="Seu nome" value={fullName}
-                  onChange={(e) => setFullName(e.target.value)} autoComplete="name" />
+                <input
+                  className={inputCls}
+                  placeholder="Seu nome"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  autoComplete="name"
+                />
               </div>
             )}
 
             {step === 'form' && (
               <div className="relative">
                 <Mail className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
-                <input className={inputCls} type="email" placeholder="E-mail" value={email}
+                <input
+                  className={inputCls}
+                  type="email"
+                  placeholder="E-mail"
+                  value={email}
                   onChange={(e) => { setEmail(e.target.value); if (noAccess) { setNoAccess(false); setError(''); } }}
-                  autoComplete="email" required />
+                  autoComplete="email"
+                  required
+                />
               </div>
             )}
 
             {step === 'form' && mode !== 'forgot' && (
               <div className="relative">
                 <Lock className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
-                <input className={inputPw} type={showPw ? 'text' : 'password'} placeholder="Senha" value={password}
+                <input
+                  className={inputPw}
+                  type={showPw ? 'text' : 'password'}
+                  placeholder="Senha"
+                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required />
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                  required
+                />
                 <EyeToggle shown={showPw} onToggle={() => setShowPw((v) => !v)} />
               </div>
             )}
@@ -219,9 +235,13 @@ export default function AuthSection({ onClose }) {
             {step === 'otp' && (
               <div className="relative">
                 <KeyRound className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
-                <input className={`${inputCls} tracking-[0.3em] text-center`} inputMode="numeric"
-                  placeholder="Código do e-mail" value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value)} />
+                <input
+                  className={`${inputCls} tracking-[0.3em] text-center`}
+                  inputMode="numeric"
+                  placeholder="Código do e-mail"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                />
               </div>
             )}
 
@@ -229,13 +249,24 @@ export default function AuthSection({ onClose }) {
               <>
                 <div className="relative">
                   <KeyRound className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
-                  <input className={inputCls} placeholder="Código recebido por e-mail" value={resetToken}
-                    onChange={(e) => setResetToken(e.target.value)} />
+                  <input
+                    className={inputCls}
+                    placeholder="Código recebido por e-mail"
+                    value={resetToken}
+                    onChange={(e) => setResetToken(e.target.value)}
+                  />
                 </div>
                 <div className="relative">
                   <Lock className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
-                  <input className={inputPw} type={showNewPw ? 'text' : 'password'} placeholder="Nova senha" value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" required />
+                  <input
+                    className={inputPw}
+                    type={showNewPw ? 'text' : 'password'}
+                    placeholder="Nova senha"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    autoComplete="new-password"
+                    required
+                  />
                   <EyeToggle shown={showNewPw} onToggle={() => setShowNewPw((v) => !v)} />
                 </div>
               </>
@@ -244,9 +275,12 @@ export default function AuthSection({ onClose }) {
             {error && <p className="text-xs text-red-400 px-1 pt-1">{error}</p>}
             {info && !error && <p className="text-xs text-emerald-400 px-1 pt-1">{info}</p>}
 
-            <button type="submit" disabled={loading}
+            <button
+              type="submit"
+              disabled={loading}
               className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60 relative z-20 mt-2 outline-none"
-              style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}>
+              style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
+            >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {botao}
             </button>
@@ -264,20 +298,31 @@ export default function AuthSection({ onClose }) {
             )}
 
             {step === 'form' && mode === 'login' && (
-              <button type="button" onClick={() => reset('forgot')}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none">
+              <button
+                type="button"
+                onClick={() => reset('forgot')}
+                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none"
+              >
                 Esqueci minha senha
               </button>
             )}
+
             {mode === 'forgot' && (
-              <button type="button" onClick={() => reset('login')}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none">
+              <button
+                type="button"
+                onClick={() => reset('login')}
+                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none"
+              >
                 Voltar para o login
               </button>
             )}
+
             {step === 'otp' && (
-              <button type="button" onClick={handleResend}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none">
+              <button
+                type="button"
+                onClick={handleResend}
+                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none"
+              >
                 Reenviar código
               </button>
             )}
