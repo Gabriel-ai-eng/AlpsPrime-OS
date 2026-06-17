@@ -37,12 +37,13 @@ export default function Feed() {
   };
 
   return (
+    {/* FUNDO PRINCIPAL (VERDE NA SUA IMAGEM): Continua bg-black */}
     <div className="w-full h-[100dvh] bg-black text-white font-sans relative overflow-hidden flex flex-col selection:bg-white/30">
 
       {telaAtual === 'hub' && (
         <>
-          {/* CONTEÚDO PRINCIPAL */}
-          <div className="flex-1 w-full overflow-y-auto overflow-x-hidden scrollbar-none flex flex-col items-center pt-28 px-6 pb-32 z-10 relative animate-fade-in">
+          {/* CONTEÚDO PRINCIPAL (VERMELHO NA SUA IMAGEM): Adicionado bg-[#121212] */}
+          <div className="flex-1 w-full bg-[#121212] overflow-y-auto overflow-x-hidden scrollbar-none flex flex-col items-center pt-28 px-6 pb-32 z-10 relative animate-fade-in">
 
             {/* Efeito Aurora */}
             <div className="absolute top-[-10%] left-[20%] w-[300px] h-[300px] bg-white/5 blur-[100px] rounded-full pointer-events-none" />
