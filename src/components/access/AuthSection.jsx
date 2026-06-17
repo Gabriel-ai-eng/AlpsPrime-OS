@@ -133,7 +133,7 @@ export default function AuthSection({ onClose }) {
 
   // CORREÇÃO MESTRA: Força um fundo grafite escuro (#18181b) caso o navegador tente aplicar fundo branco (autofill)
   const inputBase =
-    'w-full h-12 pl-11 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 outline-none focus:border-gold/50 focus:bg-white/[0.07] transition-all relative z-10 [&:-webkit-autofill]:[box-shadow:0_0_0_40px_#18181b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]';
+    'w-full h-12 pl-11 rounded-xl bg-white/5 border border-white/10 text-zinc-200 placeholder-zinc-400 outline-none focus:border-gold/50 focus:bg-white/[0.07] transition-all relative z-10 [&:-webkit-autofill]:[box-shadow:0_0_0_40px_#18181b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#e4e4e7]';
   const inputCls = `${inputBase} pr-3`;
   const inputPw = `${inputBase} pr-11`;
 
@@ -151,7 +151,7 @@ export default function AuthSection({ onClose }) {
   );
 
   return (
-    <div className="fixed inset-0 z-[100000] bg-background flex items-center justify-center px-4 py-8 overflow-y-auto overflow-x-hidden">
+    <div className="fixed inset-0 z-[100000] bg-[#0B0B0C] flex items-center justify-center px-4 py-8 overflow-y-auto overflow-x-hidden">
       <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gold/8 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-md">
@@ -162,7 +162,7 @@ export default function AuthSection({ onClose }) {
           <ArrowLeft className="w-4 h-4" /> Voltar
         </button>
 
-        <div className="bg-card/95 backdrop-blur-xl border border-gold/20 rounded-3xl p-7 shadow-2xl shadow-gold/10 relative z-20">
+        <div className="bg-[#161618]/95 backdrop-blur-xl border border-gold/20 rounded-3xl p-7 shadow-2xl shadow-gold/10 relative z-20">
           <div className="flex flex-col items-center mb-6">
             <img src={LOGO_URL} alt="Sexta-feira" className="w-14 h-14 rounded-2xl object-cover shadow-lg shadow-gold/20" />
             <h1 className="mt-4 text-xl font-semibold text-white">{titulo}</h1>
