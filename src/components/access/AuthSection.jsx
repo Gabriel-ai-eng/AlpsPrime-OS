@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Mail, Lock, User, ArrowLeft, Loader2, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, ArrowLeft, Loader2, KeyRound, Eye, EyeOff, ShoppingBag } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
+
+// Checkout da Hotmart (mesmo usado no Welcome/HotmartGate).
+const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
 
 // Extrai uma mensagem amigável do erro da API do Base44.
 function msgErro(e) {
@@ -33,10 +36,11 @@ export default function AuthSection({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
+  const [noAccess, setNoAccess] = useState(false); // e-mail sem acesso (não comprou)
 
   const goFeed = () => window.location.assign('/feed');
   const cleanEmail = () => email.trim().toLowerCase();
-  const reset = (m) => { setMode(m); setStep('form'); setError(''); setInfo(''); };
+  const reset = (m) => { setMode(m); setStep('form'); setError(''); setInfo(''); setNoAccess(false); };
 
   // Garante que só quem comprou o acesso (ou admin) consiga cadastrar/logar.
   // Bloqueia apenas com um "não" definitivo; se a função estiver indisponível,
@@ -46,8 +50,10 @@ export default function AuthSection({ onClose }) {
       const res = await base44.functions.invoke('checkEmailAccess', { email: cleanEmail() });
       if (res?.data && res.data.hasAccess === false) {
         setError('Este e-mail ainda não tem acesso. Use o mesmo e-mail da sua compra na Hotmart — só ele libera o cadastro/login.');
+        setNoAccess(true);
         return false;
       }
+      setNoAccess(false);
       return true;
     } catch {
       return true;
@@ -205,7 +211,8 @@ export default function AuthSection({ onClose }) {
               <div className="relative">
                 <Mail className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
                 <input className={inputCls} type="email" placeholder="E-mail" value={email}
-                  onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
+                  onChange={(e) => { setEmail(e.target.value); if (noAccess) { setNoAccess(false); setError(''); } }}
+                  autoComplete="email" required />
               </div>
             )}
 
@@ -256,6 +263,19 @@ export default function AuthSection({ onClose }) {
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {botao}
             </button>
+
+            {/* Sem acesso: oferece a compra na hora */}
+            {noAccess && (
+              <a
+                href={CHECKOUT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
+              >
+                <ShoppingBag className="w-4 h-4" /> Comprar acesso
+              </a>
+            )}
 
             {/* Links auxiliares */}
             {step === 'form' && mode === 'login' && (
