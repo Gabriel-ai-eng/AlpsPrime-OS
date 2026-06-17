@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Mail, Lock, User, ArrowLeft, Loader2, KeyRound } from 'lucide-react';
+import { Mail, Lock, User, ArrowLeft, Loader2, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
 
 // Extrai uma mensagem amigável do erro da API do Base44.
@@ -15,8 +15,9 @@ function msgErro(e) {
 
 /**
  * Seção de Cadastro/Login dentro do app (e-mail + senha), usando a API de auth do
- * Base44 (funciona pelo /api proxied, sem depender de subdomínio). Após autenticar,
- * o HotmartGate ainda valida se o e-mail comprou o acesso.
+ * Base44 (funciona pelo /api proxied, sem depender de subdomínio). Só permite
+ * cadastro/login para e-mails que compraram o acesso (checkEmailAccess) e o
+ * HotmartGate ainda revalida depois.
  */
 export default function AuthSection({ onClose }) {
   const [mode, setMode] = useState('login');   // 'login' | 'register' | 'forgot'
@@ -27,6 +28,8 @@ export default function AuthSection({ onClose }) {
   const [otpCode, setOtpCode] = useState('');
   const [resetToken, setResetToken] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
@@ -35,9 +38,26 @@ export default function AuthSection({ onClose }) {
   const cleanEmail = () => email.trim().toLowerCase();
   const reset = (m) => { setMode(m); setStep('form'); setError(''); setInfo(''); };
 
+  // Garante que só quem comprou o acesso (ou admin) consiga cadastrar/logar.
+  // Bloqueia apenas com um "não" definitivo; se a função estiver indisponível,
+  // deixa seguir — o HotmartGate ainda barra quem não comprou após o login.
+  const ensureAccess = async () => {
+    try {
+      const res = await base44.functions.invoke('checkEmailAccess', { email: cleanEmail() });
+      if (res?.data && res.data.hasAccess === false) {
+        setError('Este e-mail ainda não tem acesso. Use o mesmo e-mail da sua compra na Hotmart — só ele libera o cadastro/login.');
+        return false;
+      }
+      return true;
+    } catch {
+      return true;
+    }
+  };
+
   const handleLogin = async () => {
     setLoading(true); setError('');
     try {
+      if (!(await ensureAccess())) { setLoading(false); return; }
       await base44.auth.loginViaEmailPassword(cleanEmail(), password);
       goFeed();
     } catch (e) { setError(msgErro(e)); setLoading(false); }
@@ -46,6 +66,7 @@ export default function AuthSection({ onClose }) {
   const handleRegister = async () => {
     setLoading(true); setError('');
     try {
+      if (!(await ensureAccess())) { setLoading(false); return; }
       const res = await base44.auth.register({
         email: cleanEmail(),
         password,
@@ -113,8 +134,23 @@ export default function AuthSection({ onClose }) {
     : mode === 'forgot' ? (step === 'reset' ? 'Redefinir senha' : 'Enviar instruções')
     : mode === 'login' ? 'Entrar' : 'Criar conta';
 
-  const inputCls =
-    'w-full h-12 pl-11 pr-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 outline-none focus:border-gold/50 focus:bg-white/[0.07] transition-colors';
+  const inputBase =
+    'w-full h-12 pl-11 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 outline-none focus:border-gold/50 focus:bg-white/[0.07] transition-colors';
+  const inputCls = `${inputBase} pr-3`;
+  const inputPw = `${inputBase} pr-11`;
+
+  // Olho minimalista para revelar/ocultar a senha
+  const EyeToggle = ({ shown, onToggle }) => (
+    <button
+      type="button"
+      onClick={onToggle}
+      tabIndex={-1}
+      aria-label={shown ? 'Ocultar senha' : 'Mostrar senha'}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/80 transition-colors"
+    >
+      {shown ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+    </button>
+  );
 
   return (
     <div className="fixed inset-0 z-[100000] bg-background flex items-center justify-center px-4 py-8 overflow-y-auto">
@@ -164,7 +200,7 @@ export default function AuthSection({ onClose }) {
               </div>
             )}
 
-            {/* E-mail: aparece no login, cadastro e no pedido de recuperação */}
+            {/* E-mail: login, cadastro e pedido de recuperação */}
             {step === 'form' && (
               <div className="relative">
                 <Mail className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -173,13 +209,14 @@ export default function AuthSection({ onClose }) {
               </div>
             )}
 
-            {/* Senha: login e cadastro */}
+            {/* Senha (com olho): login e cadastro */}
             {step === 'form' && mode !== 'forgot' && (
               <div className="relative">
                 <Lock className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
-                <input className={inputCls} type="password" placeholder="Senha" value={password}
+                <input className={inputPw} type={showPw ? 'text' : 'password'} placeholder="Senha" value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required />
+                <EyeToggle shown={showPw} onToggle={() => setShowPw((v) => !v)} />
               </div>
             )}
 
@@ -203,8 +240,9 @@ export default function AuthSection({ onClose }) {
                 </div>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
-                  <input className={inputCls} type="password" placeholder="Nova senha" value={newPassword}
+                  <input className={inputPw} type={showNewPw ? 'text' : 'password'} placeholder="Nova senha" value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" required />
+                  <EyeToggle shown={showNewPw} onToggle={() => setShowNewPw((v) => !v)} />
                 </div>
               </>
             )}
