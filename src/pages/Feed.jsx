@@ -37,8 +37,8 @@ export default function Feed() {
   };
 
   return (
-    {/* FUNDO PRINCIPAL (VERDE NA SUA IMAGEM): Continua bg-black */}
     <div className="w-full h-[100dvh] bg-black text-white font-sans relative overflow-hidden flex flex-col selection:bg-white/30">
+      {/* FUNDO PRINCIPAL (VERDE NA SUA IMAGEM): Continua bg-black */}
 
       {telaAtual === 'hub' && (
         <>
