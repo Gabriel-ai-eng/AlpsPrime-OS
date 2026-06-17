@@ -9,7 +9,7 @@ function msgErro(e) {
   const raw = d.detail || d.message || e?.message || '';
   if (/incorrect|invalid cred|unauthorized|401/i.test(raw)) return 'E-mail ou senha incorretos.';
   if (/already|exists|registered/i.test(raw)) return 'Este e-mail já tem uma conta. Tente entrar.';
-  if (/otp|code/i.test(raw)) return 'Código inválido ou expirado.';
+  if (/otp|code|token/i.test(raw)) return 'Código inválido ou expirado.';
   return raw || 'Não foi possível concluir. Tente novamente.';
 }
 
@@ -19,18 +19,21 @@ function msgErro(e) {
  * o HotmartGate ainda valida se o e-mail comprou o acesso.
  */
 export default function AuthSection({ onClose }) {
-  const [mode, setMode] = useState('login');   // 'login' | 'register'
-  const [step, setStep] = useState('form');     // 'form' | 'otp'
+  const [mode, setMode] = useState('login');   // 'login' | 'register' | 'forgot'
+  const [step, setStep] = useState('form');     // 'form' | 'otp' | 'reset'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [otpCode, setOtpCode] = useState('');
+  const [resetToken, setResetToken] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
 
   const goFeed = () => window.location.assign('/feed');
   const cleanEmail = () => email.trim().toLowerCase();
+  const reset = (m) => { setMode(m); setStep('form'); setError(''); setInfo(''); };
 
   const handleLogin = async () => {
     setLoading(true); setError('');
@@ -72,12 +75,43 @@ export default function AuthSection({ onClose }) {
     } catch (e) { setError(msgErro(e)); }
   };
 
+  const handleForgotRequest = async () => {
+    setLoading(true); setError('');
+    try {
+      await base44.auth.resetPasswordRequest(cleanEmail());
+      setStep('reset');
+      setInfo('Enviamos as instruções para o seu e-mail. Cole o código recebido e defina a nova senha.');
+      setLoading(false);
+    } catch (e) { setError(msgErro(e)); setLoading(false); }
+  };
+
+  const handleResetPassword = async () => {
+    setLoading(true); setError('');
+    try {
+      await base44.auth.resetPassword({ resetToken: resetToken.trim(), newPassword });
+      setPassword(''); setNewPassword(''); setResetToken('');
+      reset('login');
+      setInfo('Senha redefinida! Agora é só entrar com a nova senha.');
+    } catch (e) { setError(msgErro(e)); setLoading(false); }
+  };
+
   const submit = (e) => {
     e.preventDefault();
     if (loading) return;
     if (step === 'otp') return handleVerify();
+    if (mode === 'forgot') return step === 'reset' ? handleResetPassword() : handleForgotRequest();
     return mode === 'login' ? handleLogin() : handleRegister();
   };
+
+  const titulo =
+    step === 'otp' ? 'Confirme seu e-mail'
+    : mode === 'forgot' ? 'Recuperar senha'
+    : mode === 'login' ? 'Entrar' : 'Criar conta';
+
+  const botao =
+    step === 'otp' ? 'Confirmar código'
+    : mode === 'forgot' ? (step === 'reset' ? 'Redefinir senha' : 'Enviar instruções')
+    : mode === 'login' ? 'Entrar' : 'Criar conta';
 
   const inputCls =
     'w-full h-12 pl-11 pr-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 outline-none focus:border-gold/50 focus:bg-white/[0.07] transition-colors';
@@ -97,22 +131,20 @@ export default function AuthSection({ onClose }) {
         <div className="bg-card/95 backdrop-blur-xl border border-gold/20 rounded-3xl p-7 shadow-2xl shadow-gold/10">
           <div className="flex flex-col items-center mb-6">
             <img src={LOGO_URL} alt="Sexta-feira" className="w-14 h-14 rounded-2xl object-cover shadow-lg shadow-gold/20" />
-            <h1 className="mt-4 text-xl font-semibold text-white">
-              {step === 'otp' ? 'Confirme seu e-mail' : mode === 'login' ? 'Entrar' : 'Criar conta'}
-            </h1>
+            <h1 className="mt-4 text-xl font-semibold text-white">{titulo}</h1>
             <p className="text-xs text-muted-foreground mt-1 text-center">
               Use o mesmo e-mail da sua compra na Hotmart.
             </p>
           </div>
 
-          {/* Abas login/cadastro (ocultas na etapa de código) */}
-          {step === 'form' && (
+          {/* Abas login/cadastro (só no formulário inicial) */}
+          {step === 'form' && mode !== 'forgot' && (
             <div className="flex p-1 mb-5 rounded-xl bg-white/5 border border-white/10">
               {['login', 'register'].map((m) => (
                 <button
                   key={m}
                   type="button"
-                  onClick={() => { setMode(m); setError(''); }}
+                  onClick={() => reset(m)}
                   className={`flex-1 h-9 rounded-lg text-sm font-medium transition-colors ${
                     mode === m ? 'bg-gold/20 text-gold' : 'text-muted-foreground hover:text-foreground'
                   }`}
@@ -132,22 +164,26 @@ export default function AuthSection({ onClose }) {
               </div>
             )}
 
+            {/* E-mail: aparece no login, cadastro e no pedido de recuperação */}
             {step === 'form' && (
-              <>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
-                  <input className={inputCls} type="email" placeholder="E-mail" value={email}
-                    onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
-                </div>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
-                  <input className={inputCls} type="password" placeholder="Senha" value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required />
-                </div>
-              </>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+                <input className={inputCls} type="email" placeholder="E-mail" value={email}
+                  onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
+              </div>
             )}
 
+            {/* Senha: login e cadastro */}
+            {step === 'form' && mode !== 'forgot' && (
+              <div className="relative">
+                <Lock className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+                <input className={inputCls} type="password" placeholder="Senha" value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required />
+              </div>
+            )}
+
+            {/* Etapa de código (cadastro) */}
             {step === 'otp' && (
               <div className="relative">
                 <KeyRound className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -157,6 +193,22 @@ export default function AuthSection({ onClose }) {
               </div>
             )}
 
+            {/* Etapa de redefinição (esqueci a senha) */}
+            {mode === 'forgot' && step === 'reset' && (
+              <>
+                <div className="relative">
+                  <KeyRound className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+                  <input className={inputCls} placeholder="Código recebido por e-mail" value={resetToken}
+                    onChange={(e) => setResetToken(e.target.value)} />
+                </div>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+                  <input className={inputCls} type="password" placeholder="Nova senha" value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" required />
+                </div>
+              </>
+            )}
+
             {error && <p className="text-xs text-red-400 px-1">{error}</p>}
             {info && !error && <p className="text-xs text-emerald-400 px-1">{info}</p>}
 
@@ -164,9 +216,22 @@ export default function AuthSection({ onClose }) {
               className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60"
               style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}>
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {step === 'otp' ? 'Confirmar código' : mode === 'login' ? 'Entrar' : 'Criar conta'}
+              {botao}
             </button>
 
+            {/* Links auxiliares */}
+            {step === 'form' && mode === 'login' && (
+              <button type="button" onClick={() => reset('forgot')}
+                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-1">
+                Esqueci minha senha
+              </button>
+            )}
+            {mode === 'forgot' && (
+              <button type="button" onClick={() => reset('login')}
+                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-1">
+                Voltar para o login
+              </button>
+            )}
             {step === 'otp' && (
               <button type="button" onClick={handleResend}
                 className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-1">
