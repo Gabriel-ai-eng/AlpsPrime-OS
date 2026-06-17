@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { redirectToBase44Login } from '@/lib/loginRedirect';
+import AuthSection from '@/components/access/AuthSection';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, ShoppingBag, Loader2 } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
@@ -33,6 +33,9 @@ export default function Welcome() {
   // Estados para a contagem de usuários
   const [totalUsers, setTotalUsers] = useState(0);
   const [loadingUsers, setLoadingUsers] = useState(true);
+
+  // Mostra a seção de Cadastro/Login dentro do app
+  const [showAuth, setShowAuth] = useState(false);
 
   // Carrega o widget de checkout da Hotmart (abre o checkout em overlay — checkoutMode=2)
   useEffect(() => {
@@ -67,8 +70,12 @@ export default function Welcome() {
   }, []);
 
   const handleEmail = () => {
-    redirectToBase44Login('/feed');
+    setShowAuth(true);
   };
+
+  if (showAuth) {
+    return <AuthSection onClose={() => setShowAuth(false)} />;
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">

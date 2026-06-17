@@ -40,10 +40,10 @@ const getAppParams = () => {
 		storage.removeItem('token');
 	}
 
-	// appBaseUrl: usado pelo SDK só para os métodos de login internos (que NÃO usamos
-	// mais — o login agora é central via src/lib/loginRedirect.js). Só aceitamos um
-	// endereço do Base44; qualquer outra coisa (domínio próprio, token inválido ou vazio)
-	// vira string vazia, evitando hardcode de subdomínio errado. Ver CLAUDE.md.
+	// appBaseUrl: usado pelo SDK só para os métodos de login por REDIRECT (que NÃO usamos
+	// mais — o login agora é in-app via API, em components/access/AuthSection.jsx). Só
+	// aceitamos um endereço do Base44; qualquer outra coisa (domínio próprio, token
+	// inválido ou vazio) vira string vazia, evitando subdomínio errado. Ver CLAUDE.md.
 	const rawBase = getAppParamValue("app_base_url", { defaultValue: import.meta.env.VITE_BASE44_APP_BASE_URL });
 	const appBaseUrl = (rawBase && rawBase.includes('.base44.app')) ? rawBase : '';
 

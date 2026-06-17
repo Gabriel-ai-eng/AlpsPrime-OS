@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
-import { redirectToBase44Login } from '@/lib/loginRedirect';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
@@ -134,8 +133,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const navigateToLogin = () => {
-    // Login central do Base44 (independente de subdomínio/domínio próprio).
-    redirectToBase44Login(window.location.pathname + window.location.search);
+    // Sem token: leva para a home, onde o Welcome mostra a seção de Cadastro/Login interna.
+    if (typeof window !== 'undefined') window.location.assign('/');
   };
 
   return (
