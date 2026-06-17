@@ -16,12 +16,9 @@ function msgErro(e) {
   return raw || 'Não foi possível concluir. Tente novamente.';
 }
 
-/**
- * Seção de Cadastro/Login dentro do app (e-mail + senha).
- */
 export default function AuthSection({ onClose }) {
-  const [mode, setMode] = useState('login');   // 'login' | 'register' | 'forgot'
-  const [step, setStep] = useState('form');     // 'form' | 'otp' | 'reset'
+  const [mode, setMode] = useState('login');
+  const [step, setStep] = useState('form');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -134,13 +131,13 @@ export default function AuthSection({ onClose }) {
     : mode === 'forgot' ? (step === 'reset' ? 'Redefinir senha' : 'Enviar instruções')
     : mode === 'login' ? 'Entrar' : 'Criar conta';
 
-  // BUG 2 RESOLVIDO: O comando autofill agora não substitui as cores originais
+  // CORREÇÃO MESTRA: Força um fundo grafite escuro (#18181b) caso o navegador tente aplicar fundo branco (autofill)
   const inputBase =
-    'w-full h-12 pl-11 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 outline-none focus:border-gold/50 focus:bg-white/[0.07] transition-all [&:-webkit-autofill]:[transition-delay:9999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white] relative z-10';
+    'w-full h-12 pl-11 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 outline-none focus:border-gold/50 focus:bg-white/[0.07] transition-all relative z-10 [&:-webkit-autofill]:[box-shadow:0_0_0_40px_#18181b_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:white]';
   const inputCls = `${inputBase} pr-3`;
   const inputPw = `${inputBase} pr-11`;
 
-  // BUG 1 RESOLVIDO: Ícone do olho maior (w-5 h-5), cor mais nítida (text-white/70)
+  // CORREÇÃO: Ícones do olho maiores e mais visíveis
   const EyeToggle = ({ shown, onToggle }) => (
     <button
       type="button"
@@ -154,14 +151,13 @@ export default function AuthSection({ onClose }) {
   );
 
   return (
-    // BUG 3 RESOLVIDO: Adicionado 'overflow-x-hidden' para matar a rolagem lateral 
     <div className="fixed inset-0 z-[100000] bg-background flex items-center justify-center px-4 py-8 overflow-y-auto overflow-x-hidden">
       <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gold/8 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-md">
         <button
           onClick={onClose}
-          className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors outline-none"
         >
           <ArrowLeft className="w-4 h-4" /> Voltar
         </button>
@@ -182,7 +178,7 @@ export default function AuthSection({ onClose }) {
                   key={m}
                   type="button"
                   onClick={() => reset(m)}
-                  className={`flex-1 h-9 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex-1 h-9 rounded-lg text-sm font-medium transition-colors outline-none ${
                     mode === m ? 'bg-gold/20 text-gold' : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -195,7 +191,7 @@ export default function AuthSection({ onClose }) {
           <form onSubmit={submit} className="space-y-3 relative z-10">
             {step === 'form' && mode === 'register' && (
               <div className="relative">
-                <User className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2 z-20" />
+                <User className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                 <input className={inputCls} placeholder="Seu nome" value={fullName}
                   onChange={(e) => setFullName(e.target.value)} autoComplete="name" />
               </div>
@@ -203,7 +199,7 @@ export default function AuthSection({ onClose }) {
 
             {step === 'form' && (
               <div className="relative">
-                <Mail className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2 z-20" />
+                <Mail className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                 <input className={inputCls} type="email" placeholder="E-mail" value={email}
                   onChange={(e) => { setEmail(e.target.value); if (noAccess) { setNoAccess(false); setError(''); } }}
                   autoComplete="email" required />
@@ -212,7 +208,7 @@ export default function AuthSection({ onClose }) {
 
             {step === 'form' && mode !== 'forgot' && (
               <div className="relative">
-                <Lock className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2 z-20" />
+                <Lock className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                 <input className={inputPw} type={showPw ? 'text' : 'password'} placeholder="Senha" value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required />
@@ -222,7 +218,7 @@ export default function AuthSection({ onClose }) {
 
             {step === 'otp' && (
               <div className="relative">
-                <KeyRound className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2 z-20" />
+                <KeyRound className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                 <input className={`${inputCls} tracking-[0.3em] text-center`} inputMode="numeric"
                   placeholder="Código do e-mail" value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)} />
@@ -232,12 +228,12 @@ export default function AuthSection({ onClose }) {
             {mode === 'forgot' && step === 'reset' && (
               <>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2 z-20" />
+                  <KeyRound className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                   <input className={inputCls} placeholder="Código recebido por e-mail" value={resetToken}
                     onChange={(e) => setResetToken(e.target.value)} />
                 </div>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2 z-20" />
+                  <Lock className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                   <input className={inputPw} type={showNewPw ? 'text' : 'password'} placeholder="Nova senha" value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" required />
                   <EyeToggle shown={showNewPw} onToggle={() => setShowNewPw((v) => !v)} />
@@ -245,11 +241,11 @@ export default function AuthSection({ onClose }) {
               </>
             )}
 
-            {error && <p className="text-xs text-red-400 px-1">{error}</p>}
-            {info && !error && <p className="text-xs text-emerald-400 px-1">{info}</p>}
+            {error && <p className="text-xs text-red-400 px-1 pt-1">{error}</p>}
+            {info && !error && <p className="text-xs text-emerald-400 px-1 pt-1">{info}</p>}
 
             <button type="submit" disabled={loading}
-              className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60 relative z-20"
+              className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60 relative z-20 mt-2 outline-none"
               style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}>
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {botao}
@@ -260,7 +256,7 @@ export default function AuthSection({ onClose }) {
                 href={CHECKOUT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity relative z-20"
+                className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity relative z-20 outline-none"
                 style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
               >
                 <ShoppingBag className="w-4 h-4" /> Comprar acesso
@@ -269,19 +265,19 @@ export default function AuthSection({ onClose }) {
 
             {step === 'form' && mode === 'login' && (
               <button type="button" onClick={() => reset('forgot')}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-1 relative z-20">
+                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none">
                 Esqueci minha senha
               </button>
             )}
             {mode === 'forgot' && (
               <button type="button" onClick={() => reset('login')}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-1 relative z-20">
+                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none">
                 Voltar para o login
               </button>
             )}
             {step === 'otp' && (
               <button type="button" onClick={handleResend}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-1 relative z-20">
+                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none">
                 Reenviar código
               </button>
             )}
