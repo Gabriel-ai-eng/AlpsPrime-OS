@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, LayoutGrid, Grip, MessageCircle, Bot, User } from 'lucide-react';
+import { Home, LayoutGrid, Grip, Star, Bot, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useLiquidRipple } from '@/lib/useLiquidRipple';
@@ -10,7 +10,7 @@ const ITEMS = [
   { label: 'Início', path: '/feed', icon: Home },
   { label: 'Categorias', path: '/categorias', icon: LayoutGrid },
   { label: 'Perfil', path: '/profile', icon: User, isCenter: true },
-  { label: 'Chat', path: '/chat-dm', icon: MessageCircle },
+  { label: 'Favoritos', path: '/favoritos', icon: Star },
   { label: 'IA', path: null, icon: Bot, isDead: true },
 ];
 
