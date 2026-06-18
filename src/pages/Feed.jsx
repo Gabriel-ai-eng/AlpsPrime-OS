@@ -109,7 +109,7 @@ export default function Feed() {
               {/* CARD TITAN */}
               <div
                 onClick={() => setTelaAtual('titan')}
-                className="w-full rounded-[32px] overflow-hidden relative bg-[#101012] shadow-[0_0_50px_rgba(255,255,255,0.08)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
+                className="w-full rounded-[32px] overflow-hidden relative aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
               >
                 <img
                   src="/apps/titan-bg.webp"
@@ -123,7 +123,7 @@ export default function Feed() {
               {/* CARD SEXTA */}
               <div
                 onClick={() => setTelaAtual('sexta')}
-                className="w-full rounded-[32px] overflow-hidden relative bg-[#101012] shadow-[0_0_50px_rgba(255,255,255,0.03)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
+                className="w-full rounded-[32px] overflow-hidden relative aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
               >
                 <img
                   src="/apps/sexta-bg.webp"
@@ -137,7 +137,7 @@ export default function Feed() {
               {/* CARD VIVART */}
               <div
                 onClick={() => setTelaAtual('vivart')}
-                className="w-full rounded-[32px] overflow-hidden relative bg-[#101012] shadow-[0_0_50px_rgba(255,255,255,0.08)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
+                className="w-full rounded-[32px] overflow-hidden relative aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
               >
                 <img
                   src="/apps/vivart-bg.webp"
