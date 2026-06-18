@@ -18,25 +18,22 @@ export default function DirectMessages() {
   const handleBack = () => setSearchParams({});
 
   return (
-    <div className="flex h-[100dvh] w-full bg-black text-white relative overflow-hidden select-none">
+    <div className="flex h-full w-full bg-transparent text-white relative overflow-hidden select-none">
       
-      {/* Luz ambiente sutil no fundo (Aurora centralizada) */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/[0.02] blur-[150px] rounded-full pointer-events-none" />
-
       {/* =========================================
           COLUNA DA ESQUERDA: LISTA DE CONVERSAS
           ========================================= */}
       {/* No celular (sem chat ativo): Ocupa 100%. No PC: Fica presa em 380px */}
       <div 
         className={cn(
-          "flex-shrink-0 h-full border-r border-white/5 transition-all duration-300 z-10",
+          "flex-shrink-0 h-full border-r border-white/10 transition-all duration-300 z-10",
           activeKey 
             ? "hidden lg:flex lg:w-[380px]" 
             : "flex-1 flex w-full lg:flex-none lg:w-[380px]"
         )}
       >
-        {/* Fundo de Vidro Fosco Escuro */}
-        <div className="w-full h-full bg-[#0A0A0B]/80 backdrop-blur-3xl">
+        {/* Fundo de Vidro Translúcido integrado ao fundo do AppShell */}
+        <div className="w-full h-full bg-black/20 backdrop-blur-xl">
           <ConversationList
             currentEmail={user.email}
             activeKey={activeKey}
@@ -71,13 +68,22 @@ export default function DirectMessages() {
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               className="relative"
             >
-               {/* Brilho volumétrico dourado no fundo do ícone */}
-              <div className="absolute inset-0 bg-[#FFD700]/10 blur-[50px] rounded-full pointer-events-none" />
+               {/* Brilho volumétrico dourado integrado com o tom Premium do AppShell */}
+              <div className="absolute inset-0 bg-[#C9A24F]/15 blur-[50px] rounded-full pointer-events-none" />
               
-              {/* Ícone de Pílula Liquid Glass */}
-              <div className="w-24 h-24 rounded-full bg-white/[0.03] border border-white/10 backdrop-blur-xl flex items-center justify-center mb-6 relative shadow-2xl">
-                <MessageCircle className="w-10 h-10 text-[#FFD700] drop-shadow-[0_0_15px_rgba(255,215,0,0.4)]" strokeWidth={1.2} />
-                <Sparkles className="w-5 h-5 text-white/40 absolute top-5 right-5" strokeWidth={1.5} />
+              {/* Ícone de Pílula Liquid Glass (Estilo idêntico ao menu lateral) */}
+              <div 
+                className="w-24 h-24 rounded-full flex items-center justify-center mb-6 relative shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                style={{
+                  background: 'linear-gradient(160deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+                  backdropFilter: 'blur(20px) saturate(160%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18)',
+                }}
+              >
+                <MessageCircle className="w-10 h-10 text-[#C9A24F] drop-shadow-[0_0_15px_rgba(201,162,79,0.4)]" strokeWidth={1.2} />
+                <Sparkles className="w-5 h-5 text-[#C9A24F]/60 absolute top-5 right-5" strokeWidth={1.5} />
               </div>
             </motion.div>
             
@@ -86,7 +92,7 @@ export default function DirectMessages() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="text-[26px] font-semibold tracking-tight text-white mb-3"
-              style={{ textShadow: '0 0 15px rgba(255,255,255,0.2)' }}
+              style={{ textShadow: '0 0 15px rgba(255,255,255,0.1)' }}
             >
               Alps Messenger
             </motion.h2>
@@ -95,7 +101,7 @@ export default function DirectMessages() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-[14px] text-[#8E8E93] max-w-[280px] leading-relaxed"
+              className="text-[14px] text-white/60 max-w-[280px] leading-relaxed"
             >
               Selecione uma conversa ao lado ou inicie um novo chat de forma instantânea.
             </motion.p>
