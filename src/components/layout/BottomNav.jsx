@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, LayoutGrid, Grip, MessageCircle, CreditCard, User } from 'lucide-react';
+import { Home, LayoutGrid, Grip, MessageCircle, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useLiquidRipple } from '@/lib/useLiquidRipple';
@@ -11,7 +11,6 @@ const ITEMS = [
   { label: 'Categorias', path: '/categorias', icon: LayoutGrid },
   { label: 'Todos', path: '/todos', icon: Grip, isCenter: true },
   { label: 'Chat', path: '/chat-dm', icon: MessageCircle },
-  { label: 'Planos', path: null, icon: CreditCard, isDead: true },
 ];
 
 function NavItem({ item, active }) {
