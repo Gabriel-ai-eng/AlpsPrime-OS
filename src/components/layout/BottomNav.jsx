@@ -114,6 +114,12 @@ function AppCenterpiece({ active, path }) {
 export default function BottomNav() {
   const location = useLocation();
 
+  const hideOnRoutes = ['/settings'];
+
+  if (hideOnRoutes.includes(location.pathname)) {
+    return null;
+  }
+
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
 
