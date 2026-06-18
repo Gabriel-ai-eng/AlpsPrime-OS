@@ -240,7 +240,7 @@ export default function AppShell() {
         <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-[#0A0A0B]/95 border-b border-white/10">
           <div>
             <button
-              onPointerDown={() => setMobileOpen(true)}
+              onClick={() => setMobileOpen(true)}
               className="p-2 -ml-2 hover:bg-white/10 rounded-xl transition-colors outline-none"
               aria-label="Menu"
               style={{ touchAction: 'manipulation' }}
