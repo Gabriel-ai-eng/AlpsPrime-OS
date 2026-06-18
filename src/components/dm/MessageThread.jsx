@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { formatDistanceToNow, format, isSameDay } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { User, Send, Loader2, ArrowLeft, Image as ImageIcon, X, Phone, Video, MoreVertical, Trash2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -17,7 +17,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MessageThread({ conversationKey, currentUser, onBack }) {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const otherEmail = getOtherEmail(conversationKey, currentUser.email);
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -26,9 +25,9 @@ export default function MessageThread({ conversationKey, currentUser, onBack }) 
   const [media, setMedia] = useState(null); // { url, uploading }
   const [plane, setPlane] = useState(null); // { x, y } origin for the paper plane animation
   const [showOptions, setShowOptions] = useState(false);
-  
+
   const sendBtnRef = useRef(null);
-  const { ref: rippleRef, onPointerDown: onSendRipple } = useLiquidRipple({ color: 'rgba(255,235,150,0.2)', duration: 480 });
+  const { ref: rippleRef, onPointerDown: onSendRipple } = useLiquidRipple({ color: 'rgba(255,235,150,0.25)', duration: 480 });
 
   // Load the other user's profile
   const { data: otherUser } = useQuery({
@@ -158,30 +157,30 @@ export default function MessageThread({ conversationKey, currentUser, onBack }) 
   const otherName = otherUser?.ranking_display_name || otherUser?.full_name || otherEmail;
 
   return (
-    <div className="flex flex-col h-full bg-background relative">
-      {/* Header Premium */}
-      <div className="px-4 py-3 border-b border-border flex items-center justify-between glass-heavy sticky top-0 z-20">
-        <div className="flex items-center gap-3 min-w-0">
+    <div className="flex flex-col h-full text-white relative">
+      {/* ─────────── HEADER ─────────── */}
+      <div className="px-3 sm:px-4 py-3 flex items-center justify-between bg-[#0A0A0B]/70 backdrop-blur-2xl border-b border-white/5 sticky top-0 z-20">
+        <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={onBack}
-            className="lg:hidden p-1.5 -ml-1.5 rounded-lg hover:bg-muted"
+            className="lg:hidden p-2 -ml-1 rounded-full text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors active:scale-90"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
           <Link
             to={`/profile/${encodeURIComponent(otherEmail)}`}
             className="flex items-center gap-3 min-w-0 group"
           >
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gold/30 to-gold/10 flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 ring-gold/20 group-hover:ring-gold/50">
+            <div className="w-10 h-10 rounded-full bg-white/[0.04] flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 ring-[#FFD700]/25 group-hover:ring-[#FFD700]/50 transition-all">
               {otherUser?.profile_picture_url ? (
                 <img src={otherUser.profile_picture_url} alt="" className="w-full h-full object-cover" />
               ) : (
-                <User className="w-4 h-4 text-gold" />
+                <User className="w-5 h-5 text-[#FFD700]/70" />
               )}
             </div>
             <div className="min-w-0">
-              <p className="font-semibold text-sm truncate group-hover:text-gold transition-colors">{otherName}</p>
-              <p className="text-[10px] text-muted-foreground truncate">
+              <p className="font-semibold text-[15px] truncate text-white group-hover:text-[#FFD700] transition-colors">{otherName}</p>
+              <p className="text-[11px] text-[#8E8E93] truncate">
                 {otherUser?.username ? `@${otherUser.username}` : 'Ver perfil'}
               </p>
             </div>
@@ -189,28 +188,28 @@ export default function MessageThread({ conversationKey, currentUser, onBack }) 
         </div>
 
         {/* Action icons */}
-        <div className="flex items-center gap-1">
-          <button onClick={handleCall} className="p-2 rounded-full hover:bg-muted text-gold transition-colors" title="Ligação de Voz">
+        <div className="flex items-center gap-0.5 flex-shrink-0">
+          <button onClick={handleCall} className="w-9 h-9 rounded-full flex items-center justify-center text-[#FFD700] hover:bg-white/[0.06] transition-colors active:scale-90" title="Ligação de Voz">
             <Phone className="w-[18px] h-[18px]" />
           </button>
-          <button onClick={handleVideoCall} className="p-2 rounded-full hover:bg-muted text-gold transition-colors" title="Chamada de Vídeo">
-            <Video className="w-[20px] h-[20px]" />
+          <button onClick={handleVideoCall} className="w-9 h-9 rounded-full flex items-center justify-center text-[#FFD700] hover:bg-white/[0.06] transition-colors active:scale-90" title="Chamada de Vídeo">
+            <Video className="w-5 h-5" />
           </button>
           <div className="relative">
-            <button onClick={() => setShowOptions(!showOptions)} className="p-2 rounded-full hover:bg-muted text-muted-foreground transition-colors">
+            <button onClick={() => setShowOptions(!showOptions)} className="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors active:scale-90">
               <MoreVertical className="w-5 h-5" />
             </button>
             <AnimatePresence>
               {showOptions && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="absolute right-0 top-full mt-2 w-48 bg-popover border border-border shadow-lg rounded-xl py-1 z-30"
+                  initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                  className="absolute right-0 top-full mt-2 w-52 rounded-2xl py-1.5 z-30 bg-[#1C1C1E]/90 backdrop-blur-2xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
                 >
                   <button
                     onClick={handleDeleteConversation}
-                    className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-destructive/10 flex items-center gap-2 transition-colors"
+                    className="w-full text-left px-4 py-2.5 text-[14px] text-red-400 hover:bg-red-500/10 flex items-center gap-2.5 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                     Apagar Conversa
@@ -222,79 +221,91 @@ export default function MessageThread({ conversationKey, currentUser, onBack }) 
         </div>
       </div>
 
-      {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin">
-        <div className="max-w-3xl mx-auto px-4 py-6 space-y-1">
+      {/* ─────────── MESSAGES ─────────── */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-none">
+        <div className="max-w-3xl mx-auto px-4 py-6 space-y-1.5">
           {isLoading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="w-5 h-5 animate-spin text-gold" />
+              <Loader2 className="w-5 h-5 animate-spin text-[#FFD700]" />
             </div>
           ) : grouped.length === 0 ? (
-            <div className="text-center py-16 text-sm text-muted-foreground">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-muted flex items-center justify-center mb-3">
-                <User className="w-6 h-6 opacity-50" />
+            <div className="text-center py-20">
+              <div className="relative w-16 h-16 mx-auto mb-4">
+                <div className="absolute inset-0 bg-[#FFD700]/10 blur-[30px] rounded-full" />
+                <div className="w-16 h-16 rounded-full bg-white/[0.04] border border-white/10 flex items-center justify-center relative">
+                  <User className="w-6 h-6 text-[#FFD700]/70" />
+                </div>
               </div>
-              <p>Envie a primeira mensagem para <span className="text-foreground font-medium">{otherName}</span></p>
+              <p className="text-[14px] text-[#8E8E93]">
+                Envie a primeira mensagem para <span className="text-white font-medium">{otherName}</span>
+              </p>
             </div>
           ) : (
             grouped.map((item, i) => {
               if (item.type === 'separator') {
                 return (
-                  <div key={`sep-${i}`} className="flex items-center gap-3 py-3">
-                    <div className="flex-1 h-px bg-border" />
-                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  <div key={`sep-${i}`} className="flex items-center gap-3 py-4">
+                    <div className="flex-1 h-px bg-white/[0.07]" />
+                    <span className="text-[10px] uppercase tracking-[0.15em] text-[#8E8E93] font-medium">
                       {format(item.date, "d 'de' MMMM", { locale: ptBR })}
                     </span>
-                    <div className="flex-1 h-px bg-border" />
+                    <div className="flex-1 h-px bg-white/[0.07]" />
                   </div>
                 );
               }
               const m = item.msg;
               const mine = m.sender_email === currentUser.email;
               return (
-                <div key={m.id} className={cn('flex', mine ? 'justify-end' : 'justify-start')}>
+                <motion.div
+                  key={m.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                  className={cn('flex', mine ? 'justify-end' : 'justify-start')}
+                >
                   <div
                     className={cn(
-                      'max-w-[75%] rounded-2xl px-3.5 py-2 text-sm',
+                      'max-w-[78%] rounded-[20px] px-3.5 py-2.5 text-[14px]',
                       mine
-                        ? 'bg-gradient-to-br from-gold to-gold-dark text-background rounded-br-sm'
-                        : 'bg-card border border-border rounded-bl-sm'
+                        ? 'text-black rounded-br-md shadow-[0_4px_16px_rgba(255,215,0,0.18)]'
+                        : 'bg-white/[0.06] border border-white/10 text-white rounded-bl-md backdrop-blur-xl'
                     )}
+                    style={mine ? { background: 'linear-gradient(135deg, #FFE066, #FFD700)' } : undefined}
                   >
                     {m.media_url && (
                       <img
                         src={m.media_url}
                         alt="Mídia enviada"
-                        className="rounded-lg mb-1.5 max-h-80 w-auto object-cover"
+                        className="rounded-xl mb-1.5 max-h-80 w-auto object-cover"
                       />
                     )}
                     {m.content && <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>}
-                    <p className={cn('text-[9px] mt-1 text-right', mine ? 'text-background/70' : 'text-muted-foreground')}>
+                    <p className={cn('text-[9px] mt-1 text-right', mine ? 'text-black/50' : 'text-white/35')}>
                       {format(new Date(m.created_date), 'HH:mm')}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               );
             })
           )}
         </div>
       </div>
 
-      {/* Composer Toolbar */}
-      <div className="border-t border-border p-3 glass-heavy z-20 relative">
-        <div className="max-w-3xl mx-auto">
+      {/* ─────────── COMPOSER ─────────── */}
+      <div className="px-3 pt-2 pb-[max(12px,env(safe-area-inset-bottom))] bg-[#0A0A0B]/70 backdrop-blur-2xl border-t border-white/5 z-20 relative">
+        <div className="max-w-3xl mx-auto mb-[76px] lg:mb-0">
           {media && (
             <div className="mb-2 relative inline-block">
               {media.uploading ? (
-                <div className="w-24 h-24 rounded-lg bg-muted flex items-center justify-center">
-                  <Loader2 className="w-5 h-5 animate-spin text-gold" />
+                <div className="w-24 h-24 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-[#FFD700]" />
                 </div>
               ) : (
                 <>
-                  <img src={media.url} alt="" className="w-24 h-24 rounded-lg object-cover" />
+                  <img src={media.url} alt="" className="w-24 h-24 rounded-xl object-cover border border-white/10" />
                   <button
                     onClick={() => setMedia(null)}
-                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-background border border-border flex items-center justify-center hover:border-destructive hover:text-destructive"
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#1C1C1E] border border-white/15 flex items-center justify-center text-white/70 hover:text-red-400 hover:border-red-400/40 transition-colors"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -303,16 +314,16 @@ export default function MessageThread({ conversationKey, currentUser, onBack }) 
             </div>
           )}
 
-          <div className="flex items-end gap-1.5 p-2 rounded-3xl transition-all duration-200 bg-background/50 border border-border shadow-sm">
-            
+          <div className="flex items-end gap-1.5 p-1.5 rounded-[26px] transition-all duration-200 bg-white/[0.05] border border-white/10 backdrop-blur-2xl focus-within:border-white/20">
+
             {/* Media Upload Button */}
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={sending || media?.uploading}
-              className="w-9 h-9 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-gold transition-colors flex-shrink-0 disabled:opacity-50 ml-1"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white/40 hover:text-[#FFD700] hover:bg-white/[0.06] transition-colors flex-shrink-0 disabled:opacity-40 ml-0.5"
               title="Enviar foto ou vídeo"
             >
-              <ImageIcon className="w-[18px] h-[18px]" />
+              <ImageIcon className="w-[19px] h-[19px]" />
             </button>
             <input
               ref={fileInputRef}
@@ -327,10 +338,10 @@ export default function MessageThread({ conversationKey, currentUser, onBack }) 
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={`Mensagem...`}
+              placeholder="Mensagem..."
               rows={1}
               disabled={sending}
-              className="resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[36px] max-h-32 py-2 text-[15px]"
+              className="resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[40px] max-h-32 py-2.5 text-[15px] text-white placeholder:text-white/30"
             />
 
             {/* Send Button */}
@@ -340,8 +351,8 @@ export default function MessageThread({ conversationKey, currentUser, onBack }) 
               onClick={handleSend}
               disabled={(!input.trim() && !media?.url) || sending || media?.uploading}
               size="icon"
-              className="text-night-950 rounded-full h-10 w-10 flex-shrink-0 relative overflow-hidden ripple-surface"
-              style={{ background: 'linear-gradient(135deg, #E8C77A, #C9A24F)', boxShadow: '0 4px 14px rgba(201,162,79,0.35)' }}
+              className="text-black rounded-full h-10 w-10 flex-shrink-0 relative overflow-hidden ripple-surface disabled:opacity-40"
+              style={{ background: 'linear-gradient(135deg, #FFE066, #FFD700)', boxShadow: '0 4px 16px rgba(255,215,0,0.35)' }}
             >
               {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-[18px] h-[18px]" style={{ marginLeft: '-2px' }} />}
             </Button>
