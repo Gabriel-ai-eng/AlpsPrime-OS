@@ -26,16 +26,17 @@ export default function DirectMessages() {
       {/* =========================================
           COLUNA DA ESQUERDA: LISTA DE CONVERSAS
           ========================================= */}
-      {/* No celular (sem chat ativo): Ocupa 100%. No PC: Fica presa em 320px/384px */}
+      {/* No celular (sem chat ativo): Ocupa 100%. No PC: Fica presa em 380px */}
       <div 
         className={cn(
-          "flex-shrink-0 h-full border-r border-white/5 bg-black/50 backdrop-blur-3xl transition-all duration-300 z-10",
+          "flex-shrink-0 h-full border-r border-white/5 transition-all duration-300 z-10",
           activeKey 
-            ? "hidden lg:flex lg:w-80 xl:w-96" 
-            : "flex-1 flex w-full lg:flex-none lg:w-80 xl:w-96"
+            ? "hidden lg:flex lg:w-[380px]" 
+            : "flex-1 flex w-full lg:flex-none lg:w-[380px]"
         )}
       >
-        <div className="w-full h-full">
+        {/* Fundo de Vidro Fosco Escuro */}
+        <div className="w-full h-full bg-[#0A0A0B]/80 backdrop-blur-3xl">
           <ConversationList
             currentEmail={user.email}
             activeKey={activeKey}
@@ -87,7 +88,7 @@ export default function DirectMessages() {
               className="text-[26px] font-semibold tracking-tight text-white mb-3"
               style={{ textShadow: '0 0 15px rgba(255,255,255,0.2)' }}
             >
-              Suas Mensagens
+              Alps Messenger
             </motion.h2>
             
             <motion.p 
