@@ -9,21 +9,20 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 import AppShell from '@/components/layout/AppShell';
 import Welcome from '@/pages/Welcome';
-import Chat from '@/pages/Chat';
-import ChatHistory from '@/pages/ChatHistory';
 import ImageGen from '@/pages/ImageGen';
 import Profile from '@/pages/Profile';
 import Feed from '@/pages/Feed';
 import Search from '@/pages/Search';
-import DirectMessages from '@/pages/DirectMessages';
 import Verified from '@/pages/Verified';
 import Settings from '@/pages/Settings';
 import Notifications from '@/pages/Notifications';
-import AIRouteGuard from '@/components/AIRouteGuard';
 import HotmartGate from '@/components/access/HotmartGate';
 import { LOGO_URL } from '@/lib/branding';
 import Todos from '@/pages/Todos';
 import Categorias from '@/pages/Categorias';
+
+// Import da nova página de Favoritos
+import Favoritos from '@/pages/Favoritos';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, isAuthenticated, user } = useAuth();
@@ -57,14 +56,15 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Navigate to="/feed" replace />} />
         <Route path="/todos" element={<Todos />} />
         <Route path="/categorias" element={<Categorias />} />
-        <Route path="/chat" element={<AIRouteGuard><Chat /></AIRouteGuard>} />
-        <Route path="/history" element={<ChatHistory />} />
+        
+        {/* Nova rota de Favoritos substituindo as rotas de Chat */}
+        <Route path="/favoritos" element={<Favoritos />} />
+
         <Route path="/image" element={<ImageGen />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/:email" element={<Profile />} />
         <Route path="/feed" element={<Feed />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/chat-dm" element={<DirectMessages />} />
         <Route path="/verified" element={<Verified />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/notifications" element={<Notifications />} />
