@@ -64,6 +64,10 @@ function Sidebar({ user, location, aiUnlocked, onNavigate, onAILocked }) {
             <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider mt-0.5">Ver Perfil</p>
           </div>
         </Link>
+        <Link to="/favoritos" onClick={onNavigate} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+          <Star className="w-4 h-4" />
+          <span>Favoritos</span>
+        </Link>
         <Link to="/settings" onClick={onNavigate} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <Settings className="w-4 h-4" />
           <span>Configurações</span>
@@ -177,25 +181,25 @@ export default function AppShell() {
 
             <div className="relative px-5 pb-8 pt-6 space-y-7">
               <div className="space-y-1">
-                <button onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                <Link to="/todos" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
                     <Grid className="w-4 h-4" />
                   </div>
                   <span className="text-[15px] font-medium text-white/90">Todos</span>
-                </button>
-                <button onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                </Link>
+                <Link to="/categorias" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                     <LayoutList className="w-4 h-4" />
                   </div>
                   <span className="text-[15px] font-medium text-white/90">Categorias</span>
-                </button>
-                <button onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                </Link>
+                <Link to="/favoritos" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-xl bg-yellow-500/20 flex items-center justify-center text-yellow-400 group-hover:scale-110 transition-transform">
                     <Star className="w-4 h-4" />
                   </div>
                   <span className="text-[15px] font-medium text-white/90">Favoritos</span>
-                </button>
-                <button onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                </Link>
+                <button onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none cursor-not-allowed opacity-50">
                   <div className="w-8 h-8 rounded-xl bg-[#C9A24F]/20 flex items-center justify-center text-[#C9A24F] group-hover:scale-110 transition-transform">
                     <Sparkles className="w-4 h-4" />
                   </div>
@@ -255,13 +259,23 @@ export default function AppShell() {
             <Link to="/search" className="p-2 rounded-full hover:bg-white/10 transition-colors outline-none" aria-label="Buscar">
               <SearchIcon className="w-5 h-5 text-white/80 hover:text-white" />
             </Link>
+            
+            {/* Ícone de Favoritos Subistituindo o Bate-papo */}
+            <Link to="/favoritos" className="p-2 rounded-full hover:bg-white/10 transition-colors outline-none" aria-label="Favoritos">
+              <Star className="w-5 h-5 text-white/80 hover:text-white" />
+            </Link>
+
             <div>
               <NotificationsBell userEmail={user?.email} />
             </div>
           </div>
         </header>
 
-        <header className="hidden lg:flex items-center justify-end px-6 h-12 border-b border-border bg-background/60 backdrop-blur-xl sticky top-0 z-20">
+        <header className="hidden lg:flex items-center justify-end px-6 h-12 border-b border-border bg-background/60 backdrop-blur-xl sticky top-0 z-20 gap-2">
+          {/* Ícone de Favoritos no Desktop */}
+          <Link to="/favoritos" className="p-2 rounded-full hover:bg-muted transition-colors outline-none" aria-label="Favoritos">
+             <Star className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+          </Link>
           <NotificationsBell userEmail={user?.email} />
         </header>
 
