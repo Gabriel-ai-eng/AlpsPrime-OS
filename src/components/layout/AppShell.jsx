@@ -206,12 +206,6 @@ export default function AppShell() {
               <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
               <div className="space-y-1">
-                <Link to="/profile" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
-                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-white transition-colors">
-                    <User className="w-4 h-4" />
-                  </div>
-                  <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Perfil</span>
-                </Link>
                 <Link to="/settings" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-white transition-colors">
                     <Settings className="w-4 h-4" />
