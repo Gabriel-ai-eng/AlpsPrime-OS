@@ -161,11 +161,11 @@ export default function AppShell() {
           <div
             className="relative z-10 w-full max-w-md rounded-[44px] flex flex-col overflow-hidden animate-menu-panel-in"
             style={{
-              background: 'linear-gradient(160deg, rgba(44,44,48,0.72) 0%, rgba(18,18,22,0.66) 100%)',
-              backdropFilter: 'blur(44px) saturate(180%) brightness(1.08)',
-              WebkitBackdropFilter: 'blur(44px) saturate(180%) brightness(1.08)',
+              background: 'linear-gradient(160deg, rgba(38,38,42,0.92) 0%, rgba(18,18,22,0.90) 100%)',
+              backdropFilter: 'blur(20px) saturate(160%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(160%)',
               border: '1px solid rgba(255,255,255,0.12)',
-              boxShadow: '0 30px 90px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.18), inset 0 0 40px rgba(255,255,255,0.03)',
+              boxShadow: '0 30px 90px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.18)',
             }}
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/10 to-transparent" />
@@ -250,9 +250,10 @@ export default function AppShell() {
         <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-[#0A0A0B]/95 border-b border-white/10">
           <div>
             <button
-              onClick={() => setMobileOpen(true)}
+              onPointerDown={() => setMobileOpen(true)}
               className="p-2 -ml-2 hover:bg-white/10 rounded-xl transition-colors outline-none"
               aria-label="Menu"
+              style={{ touchAction: 'manipulation' }}
             >
               <Menu className="w-5 h-5 text-white" />
             </button>
