@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Vivart = lazy(() => import('./Vivart'));
-const Sexta  = lazy(() => import('./Sexta'));
-const Titan  = lazy(() => import('./Titan'));
+const Sexta = lazy(() => import('./Sexta'));
+const Titan = lazy(() => import('./Titan'));
 
 const LoadingScreen = () => (
   <div className="absolute inset-0 z-[200000] flex flex-col items-center justify-center bg-black/80 backdrop-blur-xl">
@@ -13,18 +14,26 @@ const LoadingScreen = () => (
 );
 
 const SLIDES = [
-  { id: 'alps',     bg: null,      titulo: true  },
-  { id: 'branco',   bg: '#FFFFFF', titulo: false },
+  { id: 'alps', bg: null, titulo: true },
+  { id: 'branco', bg: '#FFFFFF', titulo: false },
   { id: 'vermelho', bg: '#FF5050', titulo: false },
-  { id: 'verde',    bg: '#5CD65C', titulo: false },
+  { id: 'verde', bg: '#5CD65C', titulo: false },
 ];
 
 const TOTAL = SLIDES.length;
 
 export default function Feed() {
-  const [telaAtual, setTelaAtual]   = useState('hub');
+  const [telaAtual, setTelaAtual] = useState('hub');
   const [slideAtual, setSlideAtual] = useState(0);
   const timerRef = useRef(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.openApp) {
+      setTelaAtual(location.state.openApp);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const resetTimer = () => {
     clearInterval(timerRef.current);
@@ -46,13 +55,9 @@ export default function Feed() {
 
   return (
     <div className="w-full h-[100dvh] bg-black text-white relative overflow-hidden flex flex-col selection:bg-white/30">
-
       {telaAtual === 'hub' && (
         <>
-          {/* ── SLIDER FULL-WIDTH ─────────────────── */}
           <div className="relative w-full flex-shrink-0 overflow-hidden" style={{ height: '38vh' }}>
-
-            {/* trilho dos slides */}
             <div
               className="flex h-full transition-transform duration-500 ease-out"
               style={{
@@ -89,7 +94,6 @@ export default function Feed() {
               ))}
             </div>
 
-            {/* setas */}
             <button
               onClick={() => navSlide(-1)}
               className="absolute left-3 top-1/2 -translate-y-1/2 p-2 text-white/40 hover:text-white transition-colors outline-none active:scale-90"
@@ -106,10 +110,8 @@ export default function Feed() {
             </button>
           </div>
 
-          {/* ── CARDS ─────────────────────────────── */}
           <div className="flex-1 w-full bg-[#121212] overflow-y-auto scrollbar-none">
             <div className="flex flex-col items-center px-6 pt-8 pb-32 gap-8">
-
               <div
                 onClick={() => setTelaAtual('titan')}
                 className="w-full max-w-sm rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
@@ -148,7 +150,6 @@ export default function Feed() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
                 />
               </div>
-
             </div>
           </div>
         </>
@@ -156,10 +157,9 @@ export default function Feed() {
 
       <Suspense fallback={<LoadingScreen />}>
         {telaAtual === 'vivart' && <Vivart onVoltar={() => setTelaAtual('hub')} />}
-        {telaAtual === 'sexta'  && <Sexta  onVoltar={() => setTelaAtual('hub')} />}
-        {telaAtual === 'titan'  && <Titan  onVoltar={() => setTelaAtual('hub')} />}
+        {telaAtual === 'sexta' && <Sexta onVoltar={() => setTelaAtual('hub')} />}
+        {telaAtual === 'titan' && <Titan onVoltar={() => setTelaAtual('hub')} />}
       </Suspense>
-
     </div>
   );
 }
