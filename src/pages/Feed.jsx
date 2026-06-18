@@ -20,12 +20,11 @@ export default function Feed() {
   // ESTADO DO CARROSSEL
   const [slideAtual, setSlideAtual] = useState(0);
 
-  // DADOS DOS SLIDES
+  // DADOS DOS SLIDES (Apenas Banners agora, o título foi para o cabeçalho fixo)
   const slides = [
-    { id: 'alps', type: 'titulo' },
-    { id: 'banner1', type: 'imagem', cor: 'bg-white' },
-    { id: 'banner2', type: 'imagem', cor: 'bg-red-500' },
-    { id: 'banner3', type: 'imagem', cor: 'bg-green-500' },
+    { id: 'banner1', type: 'imagem', cor: 'bg-white/10' },
+    { id: 'banner2', type: 'imagem', cor: 'bg-white/5' },
+    { id: 'banner3', type: 'imagem', cor: 'bg-white/10' },
   ];
 
   const slideAnterior = () => {
@@ -38,20 +37,34 @@ export default function Feed() {
 
   return (
     <div className="w-full h-[100dvh] bg-black text-white font-sans relative overflow-hidden flex flex-col selection:bg-white/30">
-      {/* FUNDO PRINCIPAL (VERDE NA SUA IMAGEM): Continua bg-black */}
 
       {telaAtual === 'hub' && (
         <>
-          {/* CONTEÚDO PRINCIPAL (VERMELHO NA SUA IMAGEM): Adicionado bg-[#121212] */}
-          <div className="flex-1 w-full bg-[#121212] overflow-y-auto overflow-x-hidden scrollbar-none flex flex-col items-center pt-28 px-6 pb-32 z-10 relative animate-fade-in">
+          {/* =========================================
+              CABEÇALHO FIXO PRETO (Onde ficava o retângulo cinza)
+              ========================================= */}
+          <header className="w-full bg-black pt-14 pb-5 flex flex-col items-center justify-center z-20 relative shrink-0 shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
+            <h1
+              className="text-[32px] font-semibold tracking-tight text-white select-none"
+              style={{
+                textShadow:
+                  '0 0 4px rgba(255,255,255,0.9), 0 0 12px rgba(255,255,255,0.6), 0 0 24px rgba(255,255,255,0.4), 0 0 45px rgba(255,255,255,0.2)',
+              }}
+            >
+              Alps OS
+            </h1>
+          </header>
 
-            {/* Efeito Aurora */}
-            <div className="absolute top-[-10%] left-[20%] w-[300px] h-[300px] bg-white/5 blur-[100px] rounded-full pointer-events-none" />
+          {/* =========================================
+              CONTEÚDO PRINCIPAL SCROLLÁVEL (Cor #121212)
+              ========================================= */}
+          <div className="flex-1 w-full bg-[#121212] overflow-y-auto overflow-x-hidden scrollbar-none flex flex-col items-center pt-8 px-6 pb-32 z-10 relative animate-fade-in">
 
-            {/* =========================================
-                SLIDER CARROSSEL ESTILO NETFLIX
-                ========================================= */}
-            <div className="w-full max-w-md flex items-center justify-between mb-12 z-10">
+            {/* Efeito Aurora (Luz de fundo) */}
+            <div className="absolute top-0 left-[20%] w-[300px] h-[300px] bg-white/5 blur-[100px] rounded-full pointer-events-none" />
+
+            {/* SLIDER CARROSSEL ESTILO NETFLIX */}
+            <div className="w-full max-w-md flex items-center justify-between mb-10 z-10">
               
               <button
                 onClick={slideAnterior}
@@ -68,27 +81,10 @@ export default function Feed() {
                   {slides.map((slide) => (
                     <div key={slide.id} className="w-full flex-shrink-0 flex flex-col items-center justify-center px-2">
                       
-                      {slide.type === 'titulo' ? (
-                        <div className="text-center">
-                          <h1
-                            className="text-[46px] font-semibold tracking-tight text-white mb-2 select-none"
-                            style={{
-                              textShadow:
-                                '0 0 4px rgba(255,255,255,0.9), 0 0 12px rgba(255,255,255,0.6), 0 0 24px rgba(255,255,255,0.4), 0 0 45px rgba(255,255,255,0.2)',
-                            }}
-                          >
-                            Alps OS
-                          </h1>
-                          <p className="text-[#8E8E93] text-[14px] font-light tracking-wide">
-                            Um mundo de possibilidades.
-                          </p>
-                        </div>
-                      ) : (
-                        /* Retângulos Coloridos (Para você substituir por imagens depois) */
-                        <div className={`w-full h-24 rounded-[20px] ${slide.cor} shadow-[0_0_30px_rgba(255,255,255,0.05)] overflow-hidden relative`}>
-                          {/* Dica: Quando for por imagem, apague a "cor" acima e coloque a tag img aqui dentro */}
-                        </div>
-                      )}
+                      {/* Retângulos Coloridos dos Banners */}
+                      <div className={`w-full h-24 rounded-[20px] ${slide.cor} shadow-[0_0_30px_rgba(255,255,255,0.05)] border border-white/5 overflow-hidden relative`}>
+                        {/* Dica: Quando for por imagem, apague a "cor" acima e coloque a tag img aqui dentro */}
+                      </div>
 
                     </div>
                   ))}
@@ -109,7 +105,7 @@ export default function Feed() {
               {/* CARD TITAN */}
               <div
                 onClick={() => setTelaAtual('titan')}
-                className="w-full rounded-[32px] overflow-hidden relative aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
+                className="w-full rounded-[32px] overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.08)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
               >
                 <img
                   src="/apps/titan-bg.webp"
@@ -123,7 +119,7 @@ export default function Feed() {
               {/* CARD SEXTA */}
               <div
                 onClick={() => setTelaAtual('sexta')}
-                className="w-full rounded-[32px] overflow-hidden relative aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
+                className="w-full rounded-[32px] overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.08)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
               >
                 <img
                   src="/apps/sexta-bg.webp"
@@ -137,7 +133,7 @@ export default function Feed() {
               {/* CARD VIVART */}
               <div
                 onClick={() => setTelaAtual('vivart')}
-                className="w-full rounded-[32px] overflow-hidden relative aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
+                className="w-full rounded-[32px] overflow-hidden relative shadow-[0_0_50px_rgba(255,255,255,0.08)] aspect-[4/3] group cursor-pointer active:scale-95 transition-transform duration-300"
               >
                 <img
                   src="/apps/vivart-bg.webp"
