@@ -259,11 +259,6 @@ export default function AppShell() {
             <Link to="/search" className="p-2 rounded-full hover:bg-white/10 transition-colors outline-none" aria-label="Buscar">
               <SearchIcon className="w-5 h-5 text-white/80 hover:text-white" />
             </Link>
-            
-            {/* Ícone de Favoritos Subistituindo o Bate-papo */}
-            <Link to="/favoritos" className="p-2 rounded-full hover:bg-white/10 transition-colors outline-none" aria-label="Favoritos">
-              <Star className="w-5 h-5 text-white/80 hover:text-white" />
-            </Link>
 
             <div>
               <NotificationsBell userEmail={user?.email} />
@@ -271,11 +266,7 @@ export default function AppShell() {
           </div>
         </header>
 
-        <header className="hidden lg:flex items-center justify-end px-6 h-12 border-b border-border bg-background/60 backdrop-blur-xl sticky top-0 z-20 gap-2">
-          {/* Ícone de Favoritos no Desktop */}
-          <Link to="/favoritos" className="p-2 rounded-full hover:bg-muted transition-colors outline-none" aria-label="Favoritos">
-             <Star className="w-5 h-5 text-muted-foreground hover:text-foreground" />
-          </Link>
+        <header className="hidden lg:flex items-center justify-end px-6 h-12 border-b border-border bg-background/60 backdrop-blur-xl sticky top-0 z-20">
           <NotificationsBell userEmail={user?.email} />
         </header>
 
