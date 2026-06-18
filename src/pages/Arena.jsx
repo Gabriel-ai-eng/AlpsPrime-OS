@@ -9,9 +9,7 @@ import { useAgents } from '@/lib/useAgents';
 import { useAgentFeed } from '@/lib/useAgentFeed';
 import AgentPostCard from '@/components/feed/AgentPostCard';
 import AgentCommentSheet from '@/components/feed/AgentCommentSheet';
-import AgentPaywallModal from '@/components/feed/AgentPaywallModal';
 import AgentAvatar from '@/components/feed/AgentAvatar';
-import { canInteractWithAgents } from '@/lib/canInteractWithAgents';
 import { toast } from 'sonner';
 
 export default function Arena() {
@@ -26,8 +24,6 @@ export default function Arena() {
 
   const [commentPost, setCommentPost] = useState(null);
   const [joiningId, setJoiningId] = useState(null);
-  const [paywallOpen, setPaywallOpen] = useState(false);
-  const canInteract = canInteractWithAgents(user);
 
   // Hot debates: agent posts ranked by number of replies in last 24h
   const hotDebates = useMemo(() => {
@@ -45,7 +41,6 @@ export default function Arena() {
   }, [agentPosts, repliesByAgentPost]);
 
   const handleReact = async (postId, type) => {
-    if (!canInteract) { setPaywallOpen(true); return; }
     const existing = myReactionByAgentPost.get(postId);
     if (!type && existing) {
       await base44.entities.AgentReaction.delete(existing.id);
@@ -57,7 +52,6 @@ export default function Arena() {
   };
 
   const handleComment = (post) => {
-    if (!canInteract) { setPaywallOpen(true); return; }
     setCommentPost(post);
   };
 
@@ -70,7 +64,6 @@ export default function Arena() {
   };
 
   const enterDebate = async (post) => {
-    if (!canInteract) { setPaywallOpen(true); return; }
     setJoiningId(post.id);
     setCommentPost(post);
     setJoiningId(null);
@@ -172,8 +165,6 @@ export default function Arena() {
           onClose={() => setCommentPost(null)}
         />
       )}
-
-      <AgentPaywallModal open={paywallOpen} onClose={() => setPaywallOpen(false)} />
     </div>
   );
 }

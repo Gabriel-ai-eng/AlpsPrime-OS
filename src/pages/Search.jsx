@@ -11,10 +11,6 @@ import { cn } from '@/lib/utils';
 import { getConversationKey } from '@/lib/chatUtils';
 import { createNotification } from '@/lib/notifications';
 import VerifiedBadge from '@/components/common/VerifiedBadge';
-import UnlimitedAura from '@/components/common/UnlimitedAura';
-import PlanHighlightTag from '@/components/common/PlanHighlightTag';
-
-const PLAN_RANK = { unlimited: 0, pro: 1, free: 2 };
 
 export default function Search() {
   const { user } = useAuth();
@@ -48,14 +44,8 @@ export default function Search() {
 
   const results = useMemo(() => {
     const list = allUsers.filter((u) => u.email !== user?.email);
-    // Highlight: Unlimited first (absolute top), then Pro, then Free
-    const sorted = [...list].sort((a, b) => {
-      const ra = PLAN_RANK[a.plan] ?? 2;
-      const rb = PLAN_RANK[b.plan] ?? 2;
-      return ra - rb;
-    });
-    if (!debounced) return sorted.slice(0, 50);
-    return sorted.filter((u) => {
+    if (!debounced) return list.slice(0, 50);
+    return list.filter((u) => {
       const hay = `${u.full_name || ''} ${u.username || ''} ${u.email || ''} ${u.ranking_display_name || ''}`.toLowerCase();
       return hay.includes(debounced);
     }).slice(0, 100);
@@ -131,24 +121,21 @@ export default function Search() {
                 transition={{ delay: Math.min(i * 0.02, 0.4) }}
                 className="flex items-center gap-3 p-3 bg-card border border-border rounded-xl hover:border-gold/30 transition-colors"
               >
-                <UnlimitedAura plan={u.plan}>
-                  <Link
-                    to={`/profile/${encodeURIComponent(u.email)}`}
-                    className="w-11 h-11 rounded-full bg-gradient-to-br from-gold/30 to-gold/10 flex items-center justify-center overflow-hidden flex-shrink-0 hover:ring-2 hover:ring-gold/40 transition-all block"
-                  >
-                    {u.profile_picture_url ? (
-                      <img src={u.profile_picture_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <User className="w-5 h-5 text-gold" />
-                    )}
-                  </Link>
-                </UnlimitedAura>
+                <Link
+                  to={`/profile/${encodeURIComponent(u.email)}`}
+                  className="w-11 h-11 rounded-full bg-gradient-to-br from-gold/30 to-gold/10 flex items-center justify-center overflow-hidden flex-shrink-0 hover:ring-2 hover:ring-gold/40 transition-all block"
+                >
+                  {u.profile_picture_url ? (
+                    <img src={u.profile_picture_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-5 h-5 text-gold" />
+                  )}
+                </Link>
 
                 <Link to={`/profile/${encodeURIComponent(u.email)}`} className="flex-1 min-w-0 group">
                   <p className="font-semibold text-sm truncate group-hover:text-gold transition-colors inline-flex items-center gap-1">
                     {u.ranking_display_name || u.full_name || 'Usuário'}
-                    <VerifiedBadge plan={u.plan} size={13} />
-                    <PlanHighlightTag plan={u.plan} className="ml-1" />
+                    <VerifiedBadge size={13} />
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
                     {u.username ? `@${u.username}` : u.email}

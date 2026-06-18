@@ -8,15 +8,11 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAIUnlock } from '@/lib/useAIUnlock';
-import { usePostCounts } from '@/lib/usePostCounts';
 import { usePushNotifications } from '@/lib/usePushNotifications';
 import { motion, AnimatePresence } from 'framer-motion';
 import AILockedFullscreen from '@/components/feed/AILockedFullscreen';
 import AIUnlockedCelebration from '@/components/feed/AIUnlockedCelebration';
-import PlanUpgradeCelebration from '@/components/celebrations/PlanUpgradeCelebration';
-import { usePlanUpgradeDetector } from '@/lib/usePlanUpgradeDetector';
 import NotificationsBell from '@/components/notifications/NotificationsBell';
-import PrioritySupportButton from '@/components/support/PrioritySupportButton';
 import BottomNav from '@/components/layout/BottomNav';
 import { useLiquidGlass } from '@/lib/useLiquidGlass';
 
@@ -48,7 +44,7 @@ function AtmosphericOrbs() {
 }
 
 /* ── Sidebar (Desktop) ── */
-function Sidebar({ user, location, aiUnlocked, plan, postsDisplay, postsLimitDisplay, onNavigate, onAILocked }) {
+function Sidebar({ user, location, aiUnlocked, onNavigate, onAILocked }) {
   return (
     <div className="flex flex-col h-full bg-background border-r border-border relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -92,7 +88,6 @@ export default function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [aiLockedOpen, setAiLockedOpen] = useState(false);
   const { aiUnlocked, showCelebration, dismissCelebration } = useAIUnlock();
-  const { celebrationPlan, dismiss: dismissPlanCelebration } = usePlanUpgradeDetector(user);
 
   const { setMode } = useLiquidGlass();
 
@@ -135,13 +130,8 @@ export default function AppShell() {
     setMobileOpen(false);
   }, [location.pathname]);
 
-  const plan = user?.plan ?? 'free';
-  const { remainingToday, limit } = usePostCounts(user?.email, plan);
-  const postsDisplay = remainingToday === Infinity ? '∞' : remainingToday;
-  const postsLimitDisplay = limit === Infinity ? '∞' : limit;
-
   const sidebarProps = {
-    user, location, aiUnlocked, plan, postsDisplay, postsLimitDisplay,
+    user, location, aiUnlocked,
     onAILocked: () => setAiLockedOpen(true),
   };
 
@@ -298,8 +288,6 @@ export default function AppShell() {
 
       <AILockedFullscreen open={aiLockedOpen} onClose={() => setAiLockedOpen(false)} />
       <AIUnlockedCelebration open={showCelebration} onClose={dismissCelebration} />
-      <PlanUpgradeCelebration open={!!celebrationPlan} plan={celebrationPlan} onClose={dismissPlanCelebration} />
-      <PrioritySupportButton user={user} />
     </div>
   );
 }

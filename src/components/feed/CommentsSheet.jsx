@@ -10,7 +10,6 @@ import { toast } from 'sonner';
 import { parseServerDate } from '@/lib/utils';
 import { createNotification } from '@/lib/notifications';
 import VerifiedBadge from '@/components/common/VerifiedBadge';
-import UnlimitedAura from '@/components/common/UnlimitedAura';
 import { useUsersDirectory } from '@/lib/useUsersDirectory';
 
 export default function CommentsSheet({ post, user, onClose, onCommentAdded }) {
@@ -145,16 +144,14 @@ export default function CommentsSheet({ post, user, onClose, onCommentAdded }) {
                 const plan = getPlan(c.author_email, c.author_plan);
                 return (
                 <div key={c.id} className="flex gap-2.5">
-                  <UnlimitedAura plan={plan} size="sm">
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {avatar ? <img src={avatar} alt="" className="w-full h-full object-cover" /> : <User className="w-4 h-4" />}
-                    </div>
-                  </UnlimitedAura>
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {avatar ? <img src={avatar} alt="" className="w-full h-full object-cover" /> : <User className="w-4 h-4" />}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="bg-muted rounded-2xl px-3 py-2">
                       <p className="text-xs font-semibold inline-flex items-center gap-1">
                         {name || 'Usuário'}
-                        <VerifiedBadge plan={plan} size={11} />
+                        <VerifiedBadge size={11} />
                       </p>
                       <p className="text-sm mt-0.5 break-words">{c.content}</p>
                     </div>

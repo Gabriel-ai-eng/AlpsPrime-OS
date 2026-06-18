@@ -3,9 +3,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { TOOLS, TOOL_CATEGORIES } from '@/lib/tools';
 import ToolCard from '@/components/dashboard/ToolCard';
 import { motion } from 'framer-motion';
-import { Sparkles, TrendingUp, Zap } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Sparkles, TrendingUp } from 'lucide-react';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -43,9 +41,7 @@ export default function Dashboard() {
               Escolha uma ferramenta abaixo para começar. Todas as capacidades de IA de ponta em um só lugar.
             </p>
 
-            <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 max-w-3xl">
-              <StatCard icon={Zap} label="Créditos" value={user?.plan === 'unlimited' ? '∞' : (user?.credits ?? 0).toLocaleString()} />
-              <StatCard icon={TrendingUp} label="Plano" value={user?.plan || 'free'} capitalize />
+            <div className="mt-8 grid grid-cols-2 lg:grid-cols-2 gap-3 lg:gap-4 max-w-3xl">
               <StatCard icon={Sparkles} label="Ferramentas" value={TOOLS.filter(t => t.available).length} />
               <StatCard icon={TrendingUp} label="Usado" value={(user?.total_credits_used ?? 0).toLocaleString()} />
             </div>
@@ -76,32 +72,6 @@ export default function Dashboard() {
           );
         })}
 
-        {/* Upgrade CTA for free users */}
-        {user?.plan === 'free' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="relative overflow-hidden rounded-2xl border border-gold/20 p-8 lg:p-10"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-transparent" />
-            <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-              <div>
-                <h3 className="font-display text-2xl lg:text-3xl tracking-tight mb-2">
-                  Desbloqueie todo o <span className="gold-gradient italic">potencial</span>
-                </h3>
-                <p className="text-muted-foreground max-w-md">
-                  Faça upgrade para Pro e tenha acesso a 2.000 créditos mensais, todas as ferramentas e suporte prioritário.
-                </p>
-              </div>
-              <Link to="/plans">
-                <Button className="bg-gradient-to-r from-gold-light via-gold to-gold-dark hover:opacity-90 text-background font-semibold h-12 px-8">
-                  Ver Planos
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
-        )}
       </div>
     </div>
   );

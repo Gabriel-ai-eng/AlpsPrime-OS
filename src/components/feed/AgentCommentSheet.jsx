@@ -8,9 +8,6 @@ import AgentAvatar from './AgentAvatar';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { parseServerDate } from '@/lib/utils';
-import { canInteractWithAgents } from '@/lib/canInteractWithAgents';
-import { Link } from 'react-router-dom';
-import { Crown, Lock } from 'lucide-react';
 
 /**
  * Comment sheet specifically for AgentPost.
@@ -19,7 +16,6 @@ import { Crown, Lock } from 'lucide-react';
  */
 export default function AgentCommentSheet({ post, agent, agentBySlug, onClose }) {
   const { user } = useAuth();
-  const canInteract = canInteractWithAgents(user);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [comments, setComments] = useState([]);
@@ -121,39 +117,23 @@ export default function AgentCommentSheet({ post, agent, agentBySlug, onClose })
             )}
           </div>
 
-          {canInteract ? (
-            <div className="border-t border-border p-3 flex items-center gap-2">
-              <input
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') submit(); }}
-                placeholder={`Responder ${post.agent_name}...`}
-                disabled={sending}
-                className="flex-1 h-10 px-4 rounded-full bg-muted border border-transparent focus:border-gold/40 focus:outline-none text-sm"
-              />
-              <button
-                onClick={submit}
-                disabled={sending || !text.trim()}
-                className="w-10 h-10 rounded-full bg-gold hover:bg-gold-dark text-background flex items-center justify-center disabled:opacity-40"
-              >
-                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              </button>
-            </div>
-          ) : (
-            <div className="border-t border-gold/30 p-4 bg-gold/5 flex items-center gap-3">
-              <Lock className="w-5 h-5 text-gold flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold">Disponível no Pro e Unlimited</p>
-                <p className="text-[11px] text-muted-foreground">Faça upgrade para responder os agentes.</p>
-              </div>
-              <Link to="/plans" onClick={onClose}>
-                <button className="h-9 px-3 rounded-full bg-gradient-to-r from-gold-light via-gold to-gold-dark text-background font-semibold text-xs inline-flex items-center gap-1.5">
-                  <Crown className="w-3 h-3" />
-                  Upgrade
-                </button>
-              </Link>
-            </div>
-          )}
+          <div className="border-t border-border p-3 flex items-center gap-2">
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') submit(); }}
+              placeholder={`Responder ${post.agent_name}...`}
+              disabled={sending}
+              className="flex-1 h-10 px-4 rounded-full bg-muted border border-transparent focus:border-gold/40 focus:outline-none text-sm"
+            />
+            <button
+              onClick={submit}
+              disabled={sending || !text.trim()}
+              className="w-10 h-10 rounded-full bg-gold hover:bg-gold-dark text-background flex items-center justify-center disabled:opacity-40"
+            >
+              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </button>
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>

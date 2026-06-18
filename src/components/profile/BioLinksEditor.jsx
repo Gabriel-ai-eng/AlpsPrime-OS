@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link as LinkIcon, Lock, Plus, Trash2, GripVertical, Loader2, Save } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link as LinkIcon, Plus, Trash2, Loader2, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
@@ -12,39 +11,8 @@ import { BIO_LINK_PRESETS, getBioLinkMeta } from '@/lib/bioLinkPresets';
 const MAX_LINKS = 10;
 
 export default function BioLinksEditor({ user }) {
-  const plan = user?.plan || 'free';
-  const isPaid = plan === 'pro' || plan === 'unlimited';
   const [links, setLinks] = useState(Array.isArray(user?.bio_links) ? user.bio_links : []);
   const [saving, setSaving] = useState(false);
-
-  if (!isPaid) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.17 }}
-        className="relative bg-card border border-border rounded-2xl p-6 overflow-hidden"
-      >
-        <div className="absolute -top-20 -right-20 w-48 h-48 bg-gold/8 rounded-full blur-[80px] pointer-events-none" />
-        <div className="flex items-center gap-2 mb-4">
-          <LinkIcon className="w-4 h-4 text-gold" />
-          <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-            Link na Bio Inteligente
-          </h2>
-          <Lock className="w-3 h-3 text-gold ml-auto" />
-        </div>
-        <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-          Mini landing page no seu perfil com até 10 links: WhatsApp, loja, portfólio, redes sociais e mais — tudo dentro da Sexta.
-          <span className="text-foreground"> Disponível nos planos Pro e Unlimited.</span>
-        </p>
-        <Link to="/plans">
-          <Button className="bg-gradient-to-r from-gold-light via-gold to-gold-dark text-background font-semibold hover:opacity-90">
-            Desbloquear com Pro
-          </Button>
-        </Link>
-      </motion.div>
-    );
-  }
 
   const addLink = () => {
     if (links.length >= MAX_LINKS) {
@@ -103,9 +71,6 @@ export default function BioLinksEditor({ user }) {
         <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           Link na Bio Inteligente
         </h2>
-        <span className="ml-auto text-[10px] uppercase tracking-widest text-gold bg-gold/10 border border-gold/20 px-2 py-0.5 rounded-full">
-          {plan === 'unlimited' ? 'Unlimited' : 'Pro'}
-        </span>
       </div>
       <p className="text-[11px] text-muted-foreground mb-4">
         Mini landing page que aparece no seu perfil público. Até {MAX_LINKS} links.

@@ -12,7 +12,6 @@ import Welcome from '@/pages/Welcome';
 import Chat from '@/pages/Chat';
 import ChatHistory from '@/pages/ChatHistory';
 import ImageGen from '@/pages/ImageGen';
-import Plans from '@/pages/Plans';
 import Profile from '@/pages/Profile';
 import Feed from '@/pages/Feed';
 import Search from '@/pages/Search';
@@ -61,7 +60,6 @@ const AuthenticatedApp = () => {
         <Route path="/chat" element={<AIRouteGuard><Chat /></AIRouteGuard>} />
         <Route path="/history" element={<ChatHistory />} />
         <Route path="/image" element={<ImageGen />} />
-        <Route path="/plans" element={<Plans />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/:email" element={<Profile />} />
         <Route path="/feed" element={<Feed />} />

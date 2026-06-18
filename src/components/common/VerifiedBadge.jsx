@@ -4,31 +4,21 @@ import { cn } from '@/lib/utils';
 
 /**
  * Verified check badge next to a user's name.
- * - Pro: blue check
- * - Unlimited: gold check (rarer, more prestigious)
- * Accepts the user's plan and optional sizing.
+ * Single neutral gold color for all verified users.
  */
-export default function VerifiedBadge({ plan, className, size = 14 }) {
-  if (plan !== 'pro' && plan !== 'unlimited') return null;
-
-  const isGold = plan === 'unlimited';
-  const title = isGold ? 'Verificado Unlimited' : 'Verificado Pro';
-
+export default function VerifiedBadge({ className, size = 14 }) {
   return (
     <span
-      title={title}
-      aria-label={title}
+      title="Verificado"
+      aria-label="Verificado"
       className={cn('inline-flex items-center align-middle', className)}
     >
       <BadgeCheck
         width={size}
         height={size}
-        className={cn(
-          'drop-shadow',
-          isGold ? 'text-gold' : 'text-sky-400'
-        )}
+        className="text-gold drop-shadow"
         strokeWidth={2.5}
-        fill={isGold ? 'rgba(212,175,55,0.15)' : 'rgba(56,189,248,0.15)'}
+        fill="rgba(212,175,55,0.15)"
       />
     </span>
   );

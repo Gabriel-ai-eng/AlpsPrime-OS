@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { useCredits } from '@/lib/useCredits';
 import { useVoice } from '@/lib/useVoice';
 import { incrementUserStats } from '@/lib/userStats';
 import { uploadImageToSupabase } from '@/lib/askGemini';
@@ -39,7 +38,6 @@ const SUGGESTIONS = [
 
 export default function Chat() {
   const { user } = useAuth();
-  const { checkAndConsume } = useCredits();
   const [searchParams, setSearchParams] = useSearchParams();
   const conversationId = searchParams.get('id');
 
@@ -167,25 +165,22 @@ export default function Chat() {
       }
 
       toast.loading('Gerando imagem...', { id: 'img' });
-      const ok = await checkAndConsume(10);
-      if (ok) {
-        const result = await base44.integrations.Core.GenerateImage({ prompt: imgPrompt });
-        if (result?.url) {
-          let finalUrl = result.url;
-          try { finalUrl = await uploadImageToSupabase(result.url, imgPrompt.slice(0, 30)); } catch {}
+      const result = await base44.integrations.Core.GenerateImage({ prompt: imgPrompt });
+      if (result?.url) {
+        let finalUrl = result.url;
+        try { finalUrl = await uploadImageToSupabase(result.url, imgPrompt.slice(0, 30)); } catch {}
 
-          const imageMsg = { role: 'assistant', content: imgPrompt, type: 'image', image_url: finalUrl };
-          newMsgs = [...newMsgs, imageMsg];
-          await incrementUserStats(user, { images: 1 });
-          await base44.entities.UsageHistory.create({
-            tool_id: 'image-gen', tool_name: 'Gerador de Imagens',
-            category: 'image', credits_used: 10,
-            input: imgPrompt, output: finalUrl, output_type: 'image_url',
-          });
-          // Save to Supabase with special marker
-          await saveMessage(convId, 'assistant', `__IMAGE__:${finalUrl}|||${imgPrompt}`);
-          toast.success('Imagem gerada!', { id: 'img' });
-        }
+        const imageMsg = { role: 'assistant', content: imgPrompt, type: 'image', image_url: finalUrl };
+        newMsgs = [...newMsgs, imageMsg];
+        await incrementUserStats(user, { images: 1 });
+        await base44.entities.UsageHistory.create({
+          tool_id: 'image-gen', tool_name: 'Gerador de Imagens',
+          category: 'image', credits_used: 0,
+          input: imgPrompt, output: finalUrl, output_type: 'image_url',
+        });
+        // Save to Supabase with special marker
+        await saveMessage(convId, 'assistant', `__IMAGE__:${finalUrl}|||${imgPrompt}`);
+        toast.success('Imagem gerada!', { id: 'img' });
       }
       toast.dismiss('img');
       return newMsgs;
@@ -217,9 +212,6 @@ export default function Chat() {
   const handleSend = async (textOverride) => {
     const text = (typeof textOverride === 'string' ? textOverride : input).trim();
     if (!text || loading || sendingRef.current) return;
-
-    const ok = await checkAndConsume(1);
-    if (!ok) return;
 
     // Lock: prevent any URL-driven reloads from wiping state during send
     sendingRef.current = true;

@@ -4,10 +4,9 @@ import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import {
-  BarChart3, Eye, Users, Clock, TrendingUp, Download, Lock, Loader2,
+  BarChart3, Eye, Users, Clock, TrendingUp, Download, Loader2,
   Rss, Search, BadgeCheck, PartyPopper, MessageCircle, Trophy, Globe2, MoreHorizontal
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const SOURCE_LABELS = {
@@ -31,47 +30,10 @@ function formatDuration(sec) {
 }
 
 export default function ProfileAnalytics({ user }) {
-  const plan = user?.plan || 'free';
-  const isPaid = plan === 'pro' || plan === 'unlimited';
-
-  if (!isPaid) {
-    return <LockedAnalytics />;
-  }
-
   return <UnlockedAnalytics user={user} />;
 }
 
-function LockedAnalytics() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.18 }}
-      className="relative bg-card border border-border rounded-2xl p-6 overflow-hidden"
-    >
-      <div className="absolute -top-20 -right-20 w-48 h-48 bg-gold/8 rounded-full blur-[80px] pointer-events-none" />
-      <div className="flex items-center gap-2 mb-4">
-        <BarChart3 className="w-4 h-4 text-gold" />
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-          Analytics Profundo
-        </h2>
-        <Lock className="w-3 h-3 text-gold ml-auto" />
-      </div>
-      <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-        Veja quem visita seu perfil, de onde vem, quanto tempo fica e qual post
-        atrai mais visitas. <span className="text-foreground">Disponível nos planos Pro e Unlimited.</span>
-      </p>
-      <Link to="/plans">
-        <Button className="bg-gradient-to-r from-gold-light via-gold to-gold-dark text-background font-semibold hover:opacity-90">
-          Desbloquear com Pro
-        </Button>
-      </Link>
-    </motion.div>
-  );
-}
-
 function UnlockedAnalytics({ user }) {
-  const plan = user.plan;
   const { data, isLoading } = useQuery({
     queryKey: ['profile-analytics', user.email],
     queryFn: async () => {
@@ -122,7 +84,7 @@ function UnlockedAnalytics({ user }) {
           Analytics Profundo
         </h2>
         <span className="ml-auto text-[10px] uppercase tracking-widest text-gold bg-gold/10 border border-gold/20 px-2 py-0.5 rounded-full">
-          {plan === 'unlimited' ? 'Histórico completo' : 'Últimos 7 dias'}
+          Últimos 7 dias
         </span>
       </div>
       <p className="text-[11px] text-muted-foreground mb-5">
@@ -153,17 +115,15 @@ function UnlockedAnalytics({ user }) {
           {/* Top post */}
           {data.top_post && <TopPost post={data.top_post} />}
 
-          {/* Export CSV (Unlimited only) */}
-          {plan === 'unlimited' && (
-            <Button
-              onClick={handleExportCSV}
-              disabled={exporting}
-              variant="outline"
-              className="w-full mt-4 border-gold/30 hover:border-gold/60 hover:bg-gold/5 hover:text-gold gap-2"
-            >
-              <Download className="w-4 h-4" /> Exportar CSV
-            </Button>
-          )}
+          {/* Export CSV */}
+          <Button
+            onClick={handleExportCSV}
+            disabled={exporting}
+            variant="outline"
+            className="w-full mt-4 border-gold/30 hover:border-gold/60 hover:bg-gold/5 hover:text-gold gap-2"
+          >
+            <Download className="w-4 h-4" /> Exportar CSV
+          </Button>
         </>
       )}
     </motion.div>

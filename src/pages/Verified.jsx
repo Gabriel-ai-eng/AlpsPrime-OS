@@ -3,17 +3,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { BadgeCheck, User, Crown, Sparkles, UserPlus, UserCheck, MessageCircle, Loader2 } from 'lucide-react';
+import { BadgeCheck, User, UserPlus, UserCheck, MessageCircle, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { getConversationKey } from '@/lib/chatUtils';
 import { createNotification } from '@/lib/notifications';
 import VerifiedBadge from '@/components/common/VerifiedBadge';
-import UnlimitedAura from '@/components/common/UnlimitedAura';
-import PlanHighlightTag from '@/components/common/PlanHighlightTag';
-
-const PLAN_RANK = { unlimited: 0, pro: 1 };
 
 export default function Verified() {
   const { user } = useAuth();
@@ -36,13 +32,8 @@ export default function Verified() {
   const followedSet = new Set(myFollows.map((f) => f.followed_email));
 
   const verifiedUsers = useMemo(() => {
-    return allUsers
-      .filter((u) => u.plan === 'pro' || u.plan === 'unlimited')
-      .sort((a, b) => (PLAN_RANK[a.plan] ?? 9) - (PLAN_RANK[b.plan] ?? 9));
+    return allUsers.filter((u) => u.is_verified === true || u.plan === 'pro' || u.plan === 'unlimited');
   }, [allUsers]);
-
-  const unlimitedUsers = verifiedUsers.filter((u) => u.plan === 'unlimited');
-  const proUsers = verifiedUsers.filter((u) => u.plan === 'pro');
 
   const handleFollow = async (targetEmail) => {
     const existing = myFollows.find((f) => f.followed_email === targetEmail);
@@ -82,13 +73,13 @@ export default function Verified() {
               <span className="gold-gradient italic">Verificados</span>
             </h1>
             <p className="text-muted-foreground mt-4 text-sm lg:text-base max-w-xl mx-auto">
-              Usuários em destaque que apoiam a Sexta-feira com os planos Pro e Unlimited.
+              Usuários verificados da comunidade Sexta-feira.
             </p>
           </motion.div>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 lg:px-6 py-8 space-y-10">
+      <div className="max-w-3xl mx-auto px-4 lg:px-6 py-8">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-gold" />
@@ -102,113 +93,69 @@ export default function Verified() {
             </p>
           </div>
         ) : (
-          <>
-            {unlimitedUsers.length > 0 && (
-              <Section
-                icon={Crown}
-                title="Unlimited"
-                subtitle="Selo dourado · O nível mais alto"
-                accent="text-gold"
-                users={unlimitedUsers}
-                followedSet={followedSet}
-                currentEmail={user?.email}
-                onFollow={handleFollow}
-                onMessage={handleMessage}
-              />
-            )}
-            {proUsers.length > 0 && (
-              <Section
-                icon={Sparkles}
-                title="Pro"
-                subtitle="Selo azul · Verificado oficial"
-                accent="text-sky-400"
-                users={proUsers}
-                followedSet={followedSet}
-                currentEmail={user?.email}
-                onFollow={handleFollow}
-                onMessage={handleMessage}
-              />
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Section({ icon: Icon, title, subtitle, accent, users, followedSet, currentEmail, onFollow, onMessage }) {
-  return (
-    <div>
-      <div className="flex items-center gap-2 mb-4 px-1">
-        <Icon className={cn('w-4 h-4', accent)} />
-        <h2 className="font-display text-xl tracking-tight">{title}</h2>
-        <span className="text-xs text-muted-foreground">· {subtitle}</span>
-        <span className="ml-auto text-xs text-muted-foreground">{users.length}</span>
-      </div>
-      <div className="space-y-2">
-        {users.map((u, i) => (
-          <motion.div
-            key={u.email}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: Math.min(i * 0.03, 0.4) }}
-            className="flex items-center gap-3 p-3 bg-card border border-border rounded-xl hover:border-gold/30 transition-colors"
-          >
-            <UnlimitedAura plan={u.plan}>
-              <Link
-                to={`/profile/${encodeURIComponent(u.email)}`}
-                className="w-11 h-11 rounded-full bg-gradient-to-br from-gold/30 to-gold/10 flex items-center justify-center overflow-hidden flex-shrink-0 hover:ring-2 hover:ring-gold/40 transition-all block"
+          <div className="space-y-2">
+            {verifiedUsers.map((u, i) => (
+              <motion.div
+                key={u.email}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(i * 0.03, 0.4) }}
+                className="flex items-center gap-3 p-3 bg-card border border-border rounded-xl hover:border-gold/30 transition-colors"
               >
-                {u.profile_picture_url ? (
-                  <img src={u.profile_picture_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-5 h-5 text-gold" />
-                )}
-              </Link>
-            </UnlimitedAura>
-
-            <Link to={`/profile/${encodeURIComponent(u.email)}`} className="flex-1 min-w-0 group">
-              <p className="font-semibold text-sm truncate group-hover:text-gold transition-colors inline-flex items-center gap-1 flex-wrap">
-                {u.ranking_display_name || u.full_name || 'Usuário'}
-                <VerifiedBadge plan={u.plan} size={13} />
-                <PlanHighlightTag plan={u.plan} className="ml-1" />
-              </p>
-              <p className="text-xs text-muted-foreground truncate">
-                {u.username ? `@${u.username}` : u.email}
-              </p>
-              {u.bio && (
-                <p className="text-xs text-muted-foreground/80 truncate mt-0.5 italic">{u.bio}</p>
-              )}
-            </Link>
-
-            {u.email !== currentEmail && (
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                <button
-                  onClick={() => onMessage(u.email)}
-                  className="w-9 h-9 rounded-lg border border-border hover:border-gold/40 hover:bg-gold/5 hover:text-gold text-muted-foreground flex items-center justify-center transition-colors"
-                  title="Enviar mensagem"
+                <Link
+                  to={`/profile/${encodeURIComponent(u.email)}`}
+                  className="w-11 h-11 rounded-full bg-gradient-to-br from-gold/30 to-gold/10 flex items-center justify-center overflow-hidden flex-shrink-0 hover:ring-2 hover:ring-gold/40 transition-all block"
                 >
-                  <MessageCircle className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => onFollow(u.email)}
-                  className={cn(
-                    'h-9 px-3 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all',
-                    followedSet.has(u.email)
-                      ? 'border border-border text-muted-foreground hover:border-destructive/40 hover:text-destructive'
-                      : 'bg-gold hover:bg-gold-dark text-background'
-                  )}
-                >
-                  {followedSet.has(u.email) ? (
-                    <><UserCheck className="w-3.5 h-3.5" /> Seguindo</>
+                  {u.profile_picture_url ? (
+                    <img src={u.profile_picture_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <><UserPlus className="w-3.5 h-3.5" /> Seguir</>
+                    <User className="w-5 h-5 text-gold" />
                   )}
-                </button>
-              </div>
-            )}
-          </motion.div>
-        ))}
+                </Link>
+
+                <Link to={`/profile/${encodeURIComponent(u.email)}`} className="flex-1 min-w-0 group">
+                  <p className="font-semibold text-sm truncate group-hover:text-gold transition-colors inline-flex items-center gap-1 flex-wrap">
+                    {u.ranking_display_name || u.full_name || 'Usuário'}
+                    <VerifiedBadge size={13} />
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {u.username ? `@${u.username}` : u.email}
+                  </p>
+                  {u.bio && (
+                    <p className="text-xs text-muted-foreground/80 truncate mt-0.5 italic">{u.bio}</p>
+                  )}
+                </Link>
+
+                {u.email !== user?.email && (
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <button
+                      onClick={() => handleMessage(u.email)}
+                      className="w-9 h-9 rounded-lg border border-border hover:border-gold/40 hover:bg-gold/5 hover:text-gold text-muted-foreground flex items-center justify-center transition-colors"
+                      title="Enviar mensagem"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleFollow(u.email)}
+                      className={cn(
+                        'h-9 px-3 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all',
+                        followedSet.has(u.email)
+                          ? 'border border-border text-muted-foreground hover:border-destructive/40 hover:text-destructive'
+                          : 'bg-gold hover:bg-gold-dark text-background'
+                      )}
+                    >
+                      {followedSet.has(u.email) ? (
+                        <><UserCheck className="w-3.5 h-3.5" /> Seguindo</>
+                      ) : (
+                        <><UserPlus className="w-3.5 h-3.5" /> Seguir</>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, LayoutGrid, Grip, MessageCircle, Bot, User } from 'lucide-react';
+import { Home, LayoutGrid, Grip, MessageCircle, CreditCard, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useLiquidRipple } from '@/lib/useLiquidRipple';
@@ -11,12 +11,30 @@ const ITEMS = [
   { label: 'Categorias', path: '/categorias', icon: LayoutGrid },
   { label: 'Todos', path: '/todos', icon: Grip, isCenter: true },
   { label: 'Chat', path: '/chat-dm', icon: MessageCircle },
-  { label: 'IA', path: '/chat', icon: Bot },
+  { label: 'Planos', path: null, icon: CreditCard, isDead: true },
 ];
 
 function NavItem({ item, active }) {
   const { ref, onPointerDown } = useLiquidRipple({ color: 'rgba(255,255,255,0.08)', duration: 400 });
   const Icon = item.icon;
+
+  if (item.isDead) {
+    return (
+      <button
+        type="button"
+        className="flex-1 h-full flex items-center justify-center relative outline-none"
+        style={{ WebkitTapHighlightColor: 'transparent' }}
+      >
+        <div className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 relative overflow-hidden">
+          <Icon
+            className="w-6 h-6 transition-all duration-300 relative z-10 text-white/50"
+            fill="none"
+            strokeWidth={1.8}
+          />
+        </div>
+      </button>
+    );
+  }
 
   return (
     <Link
@@ -124,8 +142,10 @@ export default function BottomNav() {
   }, []);
 
   const isActive = (path) =>
-    location.pathname === path ||
-    (path !== '/feed' && location.pathname.startsWith(path));
+    path !== null && (
+      location.pathname === path ||
+      (path !== '/feed' && location.pathname.startsWith(path))
+    );
 
   return (
     <nav
@@ -154,7 +174,7 @@ export default function BottomNav() {
             if (item.isCenter) {
               return <AppCenterpiece key={item.path} active={active} path={item.path} />;
             }
-            return <NavItem key={item.path} item={item} active={active} />;
+            return <NavItem key={item.label} item={item} active={active} />;
           })}
         </div>
       </motion.div>

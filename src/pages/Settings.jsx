@@ -19,7 +19,6 @@ import { cn } from '@/lib/utils';
 import SettingsSection from '@/components/settings/SettingsSection';
 import ToggleRow from '@/components/settings/ToggleRow';
 import InstallShortcutCard from '@/components/settings/InstallShortcutCard';
-import PlanNotificationsSection from '@/components/settings/PlanNotificationsSection';
 import AdminBroadcastSection from '@/components/settings/AdminBroadcastSection';
 
 export default function Settings() {
@@ -264,8 +263,6 @@ export default function Settings() {
             </span>
           </div>
         </SettingsSection>
-
-        <PlanNotificationsSection user={user} />
 
         <SettingsSection
           icon={Bell}

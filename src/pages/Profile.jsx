@@ -8,7 +8,6 @@ import {
   User, Mail, Shield, Crown, Camera,
   Edit3, Check, X, Globe, MapPin, Eye, EyeOff, Trophy, Lock, Loader2, PenLine
 } from 'lucide-react';
-import { usePostCounts } from '@/lib/usePostCounts';
 import { motion } from 'framer-motion';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { MessageCircle } from 'lucide-react';
@@ -19,9 +18,6 @@ import BioLinks from '@/components/profile/BioLinks';
 import BioLinksEditor from '@/components/profile/BioLinksEditor';
 import { ProfileTranslationProvider, ProfileTranslateButton, Translated } from '@/components/profile/ProfileTranslator';
 import VerifiedBadge from '@/components/common/VerifiedBadge';
-import UnlimitedAura from '@/components/common/UnlimitedAura';
-import PlanHighlightTag from '@/components/common/PlanHighlightTag';
-import AuraTooltipBadge from '@/components/common/AuraTooltipBadge';
 import ShareProfileButton from '@/components/profile/ShareProfileButton';
 import { useProfileVisitTracker } from '@/lib/useProfileVisitTracker';
 
@@ -148,12 +144,11 @@ export default function Profile() {
   };
 
   const primaryName = user?.username || user?.full_name || 'Usuário';
-  const isUnlimitedProfile = user.plan === 'unlimited';
 
   return (
-    <ProfileTranslationProvider profileEmail={user.email} isUnlimited={isUnlimitedProfile}>
+    <ProfileTranslationProvider profileEmail={user.email} isUnlimited={true}>
     <div className="min-h-full overflow-x-hidden bg-background text-foreground pb-10">
-      
+
       {/* Banner */}
       <div className="relative h-36 lg:h-48 bg-gradient-to-br from-gold/20 via-gold/5 to-transparent overflow-hidden">
         {user.profile_banner_url && (
@@ -178,15 +173,13 @@ export default function Profile() {
         {/* Avatar row */}
         <div className="flex items-end justify-between -mt-12 mb-6 relative z-10">
           <div className="relative">
-            <UnlimitedAura plan={user.plan} size="lg">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gold-light via-gold to-gold-dark flex items-center justify-center overflow-hidden ring-4 ring-background shadow-xl">
-                {user.profile_picture_url ? (
-                  <img src={user.profile_picture_url} alt={primaryName} className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-10 h-10 text-background" />
-                )}
-              </div>
-            </UnlimitedAura>
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gold-light via-gold to-gold-dark flex items-center justify-center overflow-hidden ring-4 ring-background shadow-xl">
+              {user.profile_picture_url ? (
+                <img src={user.profile_picture_url} alt={primaryName} className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-10 h-10 text-background" />
+              )}
+            </div>
             {!readOnly && (
               <>
                 <button
@@ -203,7 +196,7 @@ export default function Profile() {
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <ShareProfileButton profileEmail={user.email} displayName={primaryName} />
-            
+
             {readOnly && authUser && (
               <Button
                 size="sm"
@@ -236,7 +229,7 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* NOME E PLANO DO USUÁRIO */}
+        {/* NOME DO USUÁRIO */}
         <div className="mb-6">
           {editing && !readOnly ? (
              <div className="mb-3">
@@ -253,26 +246,22 @@ export default function Profile() {
           ) : (
             <h1 className="font-display text-2xl tracking-tight inline-flex items-center gap-2 flex-wrap text-foreground">
               {primaryName}
-              <VerifiedBadge plan={user.plan} size={20} />
-              <PlanHighlightTag plan={user.plan} />
-              {!readOnly && user.plan !== 'unlimited' && <AuraTooltipBadge />}
+              <VerifiedBadge size={20} />
             </h1>
           )}
         </div>
 
         <div className="space-y-6 pb-10">
-          
-          {isUnlimitedProfile && (
-            <div className="flex justify-end">
-              <ProfileTranslateButton />
-            </div>
-          )}
+
+          <div className="flex justify-end">
+            <ProfileTranslateButton />
+          </div>
 
           {/* Identity card */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-            
+
             <div className="space-y-5">
-              
+
               {/* Bio */}
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 block">Biografia</label>
@@ -333,13 +322,6 @@ export default function Profile() {
               </div>
             </div>
           </motion.div>
-
-          {readOnly && (user.plan === 'pro' || user.plan === 'unlimited') && (
-            <p className="text-[11px] text-muted-foreground text-center px-4">
-              <Eye className="w-3 h-3 inline-block mr-1 -mt-0.5 text-gold/70" />
-              Sua identidade está protegida ao visualizar este perfil.
-            </p>
-          )}
 
         </div>
       </div>

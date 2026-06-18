@@ -7,7 +7,6 @@ import { cn, parseServerDate } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { useLiquidRipple } from '@/lib/useLiquidRipple';
 import VerifiedBadge from '@/components/common/VerifiedBadge';
-import UnlimitedAura from '@/components/common/UnlimitedAura';
 import PremiumPaywall from '@/components/feed/PremiumPaywall';
 import ReactionPicker, { REACTION_MAP } from '@/components/feed/ReactionPicker';
 
@@ -61,25 +60,23 @@ export default function PostCard({
       
       {/* Header */}
       <div className="flex items-start gap-3 p-4 relative z-10">
-        <UnlimitedAura plan={plan} size="sm">
-          <Link
-            to={`/profile/${encodeURIComponent(post.author_email)}`}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 hover:ring-2 hover:ring-gold/40 transition-all block"
-          >
-            {avatar ? (
-              <img src={avatar} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <User className="w-5 h-5" />
-            )}
-          </Link>
-        </UnlimitedAura>
+        <Link
+          to={`/profile/${encodeURIComponent(post.author_email)}`}
+          className="w-10 h-10 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 hover:ring-2 hover:ring-gold/40 transition-all block"
+        >
+          {avatar ? (
+            <img src={avatar} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <User className="w-5 h-5" />
+          )}
+        </Link>
         <div className="flex-1 min-w-0">
           <Link
             to={`/profile/${encodeURIComponent(post.author_email)}`}
             className="font-semibold text-sm truncate hover:text-gold transition-colors inline-flex items-center gap-1"
           >
             {name}
-            <VerifiedBadge plan={plan} size={13} />
+            <VerifiedBadge size={13} />
           </Link>
           <p className="text-xs text-muted-foreground">
             {formatDistanceToNow(parseServerDate(post.created_date), { addSuffix: true, locale: ptBR })}

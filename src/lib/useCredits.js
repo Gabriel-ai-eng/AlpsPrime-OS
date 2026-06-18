@@ -1,24 +1,9 @@
-import { base44 } from '@/api/base44Client';
-import { useAuth } from '@/lib/AuthContext';
-import { toast } from 'sonner';
-
+/**
+ * Credits are no longer enforced — all users have unlimited access.
+ * checkAndConsume always returns true.
+ */
 export function useCredits() {
-  const { user, refetchUser } = useAuth();
-
-  const checkAndConsume = async (amount) => {
-    if (!user) return false;
-    if (user.plan === 'unlimited') return true;
-    if ((user.credits ?? 0) < amount) {
-      toast.error('Créditos insuficientes', {
-        description: 'Faça upgrade do seu plano para continuar.',
-      });
-      return false;
-    }
-    await base44.auth.updateMe({
-      credits: (user.credits ?? 0) - amount,
-      total_credits_used: (user.total_credits_used ?? 0) + amount,
-    });
-    if (refetchUser) await refetchUser();
+  const checkAndConsume = async (_amount) => {
     return true;
   };
 

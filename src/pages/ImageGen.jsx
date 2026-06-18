@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useCredits } from '@/lib/useCredits';
 import { generateDalle, uploadImageToSupabase } from '@/lib/askGemini';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -36,7 +35,6 @@ const MODELS = [
 ];
 
 export default function ImageGen() {
-  const { checkAndConsume } = useCredits();
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState([]);
@@ -46,9 +44,6 @@ export default function ImageGen() {
 
   const handleGenerate = async () => {
     if (!prompt.trim() || loading) return;
-
-    const ok = await checkAndConsume(activeModel.cost);
-    if (!ok) return;
 
     setLoading(true);
     let url = null;

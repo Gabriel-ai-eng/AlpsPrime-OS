@@ -67,29 +67,20 @@ export default function PostComposer({ user, onPublish, autoFocus, glassEnabled 
     }
   };
 
-  const isUnlimited = user?.plan === 'unlimited';
-
   return (
-    <div 
+    <div
       className={cn(
         "w-full rounded-[30px] p-5 relative",
-        glassEnabled 
-          ? "glass-card-pro bg-background" 
+        glassEnabled
+          ? "glass-card-pro bg-background"
           : "bg-card border border-border shadow-sm"
       )}
     >
-      {isUnlimited && (
-        <div className="absolute -inset-0.5 rounded-[32px] bg-gradient-to-r from-gold/20 via-gold/10 to-transparent blur-sm pointer-events-none" />
-      )}
-
       <div className="relative flex gap-4">
         <img
           src={user?.profile_picture_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`}
           alt="Avatar"
-          className={cn(
-            "w-12 h-12 rounded-full object-cover border bg-background shrink-0",
-            isUnlimited ? "border-gold/50 shadow-gold-sm" : "border-border"
-          )}
+          className="w-12 h-12 rounded-full object-cover border border-border bg-background shrink-0"
         />
         <div className="flex-1 min-w-0">
           <textarea
@@ -135,8 +126,7 @@ export default function PostComposer({ user, onPublish, autoFocus, glassEnabled 
           onClick={() => document.getElementById('image-upload').click()}
           className={cn(
             "w-12 h-12 rounded-full flex items-center justify-center transition-all flex-shrink-0",
-            "bg-[#c8a96b] hover:bg-[#b59556] text-white",
-            isUnlimited && "shadow-gold-sm"
+            "bg-[#c8a96b] hover:bg-[#b59556] text-white"
           )}
         >
           <ImageIcon className="w-5 h-5" />
@@ -154,8 +144,7 @@ export default function PostComposer({ user, onPublish, autoFocus, glassEnabled 
           onClick={() => document.getElementById('video-upload').click()}
           className={cn(
             "w-12 h-12 rounded-full flex items-center justify-center transition-all flex-shrink-0",
-            "bg-[#c8a96b] hover:bg-[#b59556] text-white",
-            isUnlimited && "shadow-gold-sm"
+            "bg-[#c8a96b] hover:bg-[#b59556] text-white"
           )}
         >
           <Video className="w-5 h-5" />
