@@ -1,0 +1,79 @@
+{
+  "name": "UploadedFile",
+  "type": "object",
+  "properties": {
+    "uploader_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio que fez o upload"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL p\u00fablica permanente retornada pelo Base44 UploadFile"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Nome original do arquivo"
+    },
+    "file_type": {
+      "type": "string",
+      "description": "MIME type do arquivo (ex: image/jpeg, video/mp4)"
+    },
+    "file_size_kb": {
+      "type": "number",
+      "description": "Tamanho do arquivo em kilobytes"
+    },
+    "context": {
+      "type": "string",
+      "enum": [
+        "profile_picture",
+        "profile_banner",
+        "post_image",
+        "dm_media",
+        "ai_generated",
+        "camera_capture",
+        "gallery",
+        "other"
+      ],
+      "default": "other",
+      "description": "Contexto/origem do upload dentro do app"
+    }
+  },
+  "required": [
+    "uploader_email",
+    "file_url"
+  ],
+  "rls": {
+    "create": {
+      "data.uploader_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.uploader_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.uploader_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
