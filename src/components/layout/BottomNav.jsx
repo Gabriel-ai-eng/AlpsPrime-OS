@@ -9,7 +9,7 @@ import { useAuth } from '@/lib/AuthContext';
 const ITEMS = [
   { label: 'Início', path: '/feed', icon: Home },
   { label: 'Categorias', path: '/categorias', icon: LayoutGrid },
-  { label: 'Todos', path: '/todos', icon: Grip, isCenter: true },
+  { label: 'Perfil', path: '/profile', icon: User, isCenter: true },
   { label: 'Chat', path: '/chat-dm', icon: MessageCircle },
   { label: 'IA', path: null, icon: Bot, isDead: true },
 ];
