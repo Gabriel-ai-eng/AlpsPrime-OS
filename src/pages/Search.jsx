@@ -1,39 +1,27 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search as SearchIcon, ArrowRight, X, Command } from 'lucide-react';
+import { Search as SearchIcon, X, Command } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// CONFIGURAÇÃO EXCLUSIVA DOS SUB-APPS (Usando as imagens reais do Feed)
+// CONFIGURAÇÃO DOS SUB-APPS (Apenas Nome, Rota e a Imagem de Fundo)
 const SUB_APPS = [
   {
     id: 'sexta',
     name: 'Sexta AI',
-    tagline: 'Agente Cognitivo Proativo',
-    description: 'Inteligência artificial conversacional avançada, análise de contexto e memória global do ecossistema.',
-    path: '/feed', 
-    image: '/apps/sexta-bg.webp', // Imagem oficial do feed
-    glow: 'from-amber-500/20 to-transparent',
-    badge: 'Core AI'
+    path: '/feed', // Ajuste a rota se tiver URLs específicas para cada app
+    image: '/apps/sexta-bg.webp',
   },
   {
     id: 'titan',
     name: 'Titan',
-    tagline: 'Automação Absoluta',
-    description: 'Motor de execução em segundo plano, fluxos de automação massiva e integração com ferramentas de produtividade.',
     path: '/feed', 
-    image: '/apps/titan-bg.webp', // Imagem oficial do feed
-    glow: 'from-emerald-500/20 to-transparent',
-    badge: 'Engine'
+    image: '/apps/titan-bg.webp',
   },
   {
     id: 'vivart',
     name: 'Vivart',
-    tagline: 'Estúdio de Geração Criativa',
-    description: 'Renderização de imagens neurais em alta fidelidade, assets digitais e galeria criativa da comunidade.',
     path: '/feed',
-    image: '/apps/vivart-bg.webp', // Imagem oficial do feed
-    glow: 'from-purple-500/20 to-transparent',
-    badge: 'Creative'
+    image: '/apps/vivart-bg.webp',
   }
 ];
 
@@ -41,29 +29,26 @@ export default function Search() {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
-  // Filtro inteligente
+  // Filtro prático apenas pelo nome do aplicativo
   const filteredApps = useMemo(() => {
     if (!query.trim()) return SUB_APPS;
     return SUB_APPS.filter(app => 
-      app.name.toLowerCase().includes(query.toLowerCase()) ||
-      app.tagline.toLowerCase().includes(query.toLowerCase()) ||
-      app.description.toLowerCase().includes(query.toLowerCase())
+      app.name.toLowerCase().includes(query.toLowerCase())
     );
   }, [query]);
 
   return (
-    // Espaçamento superior reduzido drasticamente para pt-6
     <div className="w-full h-[100dvh] bg-black text-white font-sans overflow-y-auto overflow-x-hidden scrollbar-none flex flex-col items-center pt-6 px-6 pb-32 relative select-none">
       
       {/* Luz ambiente sutil no fundo */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[300px] bg-white/[0.02] blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="w-full max-w-md flex flex-col gap-8 z-10">
+      <div className="w-full max-w-sm flex flex-col items-center gap-8 z-10">
         
         {/* =========================================
-            CAMPO DE BUSCA PREMIUM (Spotlight puxado para cima)
+            CAMPO DE BUSCA PREMIUM
             ========================================= */}
-        <div className="relative w-full">
+        <div className="relative w-full max-w-md">
           <div className="absolute inset-0 rounded-2xl bg-white/[0.04] backdrop-blur-3xl border border-white/10 transition-all duration-300 focus-within:border-white/20 focus-within:shadow-[0_0_20px_rgba(255,215,0,0.1)] group" />
           
           <div className="relative flex items-center h-12 px-4 gap-3">
@@ -95,78 +80,42 @@ export default function Search() {
         </div>
 
         {/* =========================================
-            LISTA DE RESULTADOS
+            GRELHA DE SUB-APPS (Visual Idêntico ao Feed)
             ========================================= */}
-        <div className="flex flex-col gap-4">
-          <p className="text-[11px] font-medium tracking-[0.2em] text-[#8E8E93] uppercase pl-1">
-            {query ? `Resultados encontrados (${filteredApps.length})` : 'Aplicativos Disponíveis'}
-          </p>
-
-          <div className="flex flex-col gap-3">
-            <AnimatePresence mode="popLayout">
-              {filteredApps.length > 0 ? (
-                filteredApps.map((app, index) => (
-                  <motion.div
-                    key={app.id}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 28, delay: index * 0.05 }}
-                    onClick={() => navigate(app.path)}
-                    className="w-full rounded-[24px] bg-[#1C1C1E]/60 hover:bg-[#1C1C1E]/90 border border-white/5 hover:border-white/10 p-5 flex flex-col justify-between relative overflow-hidden cursor-pointer group active:scale-[0.99] transition-all duration-300"
-                  >
-                    {/* Brilho radial interno ao passar o mouse */}
-                    <div className={`absolute -right-12 -top-12 w-36 h-36 blur-[40px] opacity-0 group-hover:opacity-30 bg-gradient-to-br ${app.glow} transition-opacity duration-700 pointer-events-none`} />
-
-                    <div className="flex items-start justify-between w-full z-10 mb-2">
-                      
-                      <div className="flex items-center gap-4">
-                        {/* =========================================
-                            IMAGEM REAL DO FEED COMO ÍCONE
-                            ========================================= */}
-                        <div className="w-14 h-14 rounded-[14px] overflow-hidden border border-white/10 shadow-lg flex-shrink-0 relative group-hover:scale-105 transition-transform duration-500">
-                          <img 
-                            src={app.image} 
-                            alt={`${app.name} Icon`} 
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-
-                        <div>
-                          <h3 className="text-white font-semibold text-[16px] tracking-tight flex items-center gap-2">
-                            {app.name}
-                            <span className="text-[10px] font-medium tracking-normal px-2 py-0.5 rounded-full bg-white/5 border border-white/5 text-white/40">
-                              {app.badge}
-                            </span>
-                          </h3>
-                          <p className="text-[#8E8E93] text-[12px] font-medium">{app.tagline}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="w-8 h-8 rounded-full bg-white/5 border border-white/5 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all transform translate-x-2 group-hover:translate-x-0 mt-3">
-                        <ArrowRight className="w-4 h-4 text-white/70" />
-                      </div>
-                    </div>
-
-                    {/* Descrição alinhada com o texto acima */}
-                    <p className="text-white/50 text-[13px] leading-relaxed z-10 font-normal pl-[72px] pr-4 mt-1">
-                      {app.description}
-                    </p>
-                  </motion.div>
-                ))
-              ) : (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="w-full py-12 flex flex-col items-center justify-center text-center px-4"
+        <div className="w-full flex flex-col gap-6 mt-2">
+          <AnimatePresence mode="popLayout">
+            {filteredApps.length > 0 ? (
+              filteredApps.map((app) => (
+                <motion.div
+                  key={app.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                  onClick={() => navigate(app.path)}
+                  className="w-full rounded-[32px] overflow-hidden relative aspect-[4/3] group cursor-pointer active:scale-95 transition-all shadow-[0_0_50px_rgba(255,255,255,0.05)] border border-white/5 hover:border-white/10"
                 >
-                  <SearchIcon className="w-8 h-8 text-white/10 mb-3" />
-                  <p className="text-sm text-[#8E8E93] font-medium">Nenhum aplicativo correspondente.</p>
-                  <p className="text-xs text-white/20 mt-1">Tente buscar por "Titan" ou "Sexta".</p>
+                  <img 
+                    src={app.image} 
+                    alt={app.name}
+                    decoding="async"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
+                  />
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+              ))
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="w-full py-12 flex flex-col items-center justify-center text-center px-4"
+              >
+                <SearchIcon className="w-8 h-8 text-white/10 mb-3" />
+                <p className="text-sm text-[#8E8E93] font-medium">Nenhum aplicativo correspondente.</p>
+                <p className="text-xs text-white/20 mt-1">Busque por "Titan", "Sexta" ou "Vivart".</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
       </div>
