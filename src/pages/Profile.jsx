@@ -103,34 +103,52 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadingAvatar(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    await base44.auth.updateMe({ profile_picture_url: file_url });
-    toast.success('Foto atualizada!');
-    setUploadingAvatar(false);
-    window.location.reload();
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.auth.updateMe({ profile_picture_url: file_url });
+      const updated = await base44.auth.me();
+      setUser(updated);
+      setViewedUser(updated);
+      toast.success('Foto atualizada!');
+    } catch (err) {
+      toast.error('Erro ao atualizar foto.');
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const handleBannerUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadingBanner(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    await base44.auth.updateMe({ profile_banner_url: file_url });
-    toast.success('Capa atualizada!');
-    setUploadingBanner(false);
-    window.location.reload();
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.auth.updateMe({ profile_banner_url: file_url });
+      const updated = await base44.auth.me();
+      setUser(updated);
+      setViewedUser(updated);
+      toast.success('Capa atualizada!');
+    } catch (err) {
+      toast.error('Erro ao atualizar capa.');
+    } finally {
+      setUploadingBanner(false);
+    }
   };
 
   const handleSave = async () => {
     setSaving(true);
-    await base44.auth.updateMe({
-      username: form.username,
-      bio: form.bio
-    });
-    setSaving(false);
-    setEditing(false);
-    toast.success('Perfil atualizado com sucesso!');
-    setTimeout(() => window.location.reload(), 800);
+    try {
+      await base44.auth.updateMe({ username: form.username, bio: form.bio });
+      const updated = await base44.auth.me();
+      setUser(updated);
+      setViewedUser(updated);
+      toast.success('Perfil atualizado com sucesso!');
+      setEditing(false);
+    } catch (err) {
+      toast.error('Erro ao salvar perfil.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
