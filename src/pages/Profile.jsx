@@ -6,11 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
   User, Camera, Edit3, Check, X, Loader2, PenLine, 
-  MessageCircle, Activity, Smartphone, Gamepad2, 
-  Trophy, History, Clock, Calendar, ChevronRight
+  MessageCircle, Activity, Smartphone, Clock, History, Calendar, ChevronRight
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getConversationKey } from '@/lib/chatUtils';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -184,27 +183,32 @@ export default function Profile() {
       >
         {/* --- IDENTITY LAYER --- */}
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-end gap-5 mb-6">
-          {/* Avatar */}
+          {/* Avatar Clickable */}
           <div className="relative inline-block">
-            <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-black flex items-center justify-center shadow-2xl relative overflow-hidden ring-[6px] ring-black z-10">
+            <div 
+              onClick={() => !readOnly && avatarInputRef.current?.click()}
+              className={cn(
+                "w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-black flex items-center justify-center shadow-2xl relative overflow-hidden ring-[6px] ring-black z-10",
+                !readOnly && "cursor-pointer group"
+              )}
+            >
               <div className="w-full h-full rounded-full bg-zinc-900 overflow-hidden relative">
                 {user.profile_picture_url ? (
-                  <img src={user.profile_picture_url} alt={primaryName} className="w-full h-full object-cover" />
+                  <img src={user.profile_picture_url} alt={primaryName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 ) : (
                   <User className="w-12 h-12 text-zinc-600 absolute inset-0 m-auto" />
+                )}
+                
+                {/* Overlay da Câmera diretamente no avatar principal (Estilo Apple) */}
+                {!readOnly && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px]">
+                    {uploadingAvatar ? <Loader2 className="w-6 h-6 animate-spin text-white" /> : <Camera className="w-7 h-7 text-white" />}
+                  </div>
                 )}
               </div>
             </div>
             {!readOnly && (
-              <>
-                <button
-                  onClick={() => avatarInputRef.current?.click()}
-                  className="absolute bottom-1 right-1 w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center border-[3px] border-black hover:bg-zinc-700 transition-colors z-20 shadow-lg"
-                >
-                  {uploadingAvatar ? <span className="w-4 h-4 border-2 border-t-white rounded-full animate-spin" /> : <Camera className="w-4 h-4 text-white" />}
-                </button>
-                <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-              </>
+              <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
             )}
           </div>
 
@@ -380,24 +384,6 @@ export default function Profile() {
                       <span className="text-xs text-zinc-600 font-medium">Semanal</span>
                     </div>
                   </div>
-                </div>
-
-                {/* Card: Últimas Conquistas */}
-                <div className="bg-black/40 border border-white/5 hover:border-white/10 transition-colors rounded-2xl p-5 md:col-span-2">
-                   <p className="text-xs text-zinc-500 font-medium mb-4 flex items-center gap-2">
-                     <Trophy className="w-4 h-4 text-yellow-500" /> Últimas conquistas
-                   </p>
-                   <div className="flex flex-wrap gap-2">
-                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-semibold">
-                       🏆 Primeiro Login
-                     </span>
-                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
-                       ⚡ 10 horas online
-                     </span>
-                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-                       🎮 Primeira vitória
-                     </span>
-                   </div>
                 </div>
 
                 {/* Card: Histórico Recente */}
