@@ -38,7 +38,7 @@ export default function Feed() {
   const resetTimer = () => {
     clearInterval(timerRef.current);
     timerRef.current = setInterval(
-      () => setSlideAtual((prev) => (prev + 1) % TOTAL),
+      () => setSlideAtual(prev => (prev + 1) % TOTAL),
       5000
     );
   };
@@ -49,23 +49,18 @@ export default function Feed() {
   }, []);
 
   const navSlide = (dir) => {
-    setSlideAtual((prev) => (prev + dir + TOTAL) % TOTAL);
+    setSlideAtual(prev => ((prev + dir + TOTAL) % TOTAL));
     resetTimer();
   };
 
   return (
     <div className="w-full h-[100dvh] bg-black text-white relative overflow-hidden flex flex-col selection:bg-white/30">
       {telaAtual === 'hub' && (
-        <>
-          <header className="sticky top-0 z-50 w-full bg-black">
-            <div className="flex items-center justify-center h-14 border-b border-white/10">
-              <span className="text-[#8E8E93] font-light tracking-[0.32em] text-[18px] select-none px-2 truncate">
-                Sexta-feira
-              </span>
-            </div>
-          </header>
-
-          <div className="relative w-full flex-shrink-0 overflow-hidden" style={{ height: '38vh' }}>
+        /* O NOVO CONTAINER QUE ENGLOBA O SLIDE E O FEED PARA ROLAREM JUNTOS */
+        <div className="flex-1 w-full overflow-y-auto scrollbar-none bg-[#121212]">
+          
+          {/* SLIDE "ALPS OS" */}
+          <div className="relative w-full flex-shrink-0 overflow-hidden bg-black" style={{ height: '38vh' }}>
             <div
               className="flex h-full transition-transform duration-500 ease-out"
               style={{
@@ -118,49 +113,49 @@ export default function Feed() {
             </button>
           </div>
 
-          <div className="flex-1 w-full bg-[#121212] overflow-y-auto scrollbar-none">
-            <div className="flex flex-col items-center px-6 pt-8 pb-32 gap-8">
-              <div
-                onClick={() => setTelaAtual('titan')}
-                className="w-full max-w-sm rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
-              >
-                <img
-                  src="/apps/titan-bg.webp"
-                  alt="Titan App"
-                  decoding="async"
-                  fetchpriority="high"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
-                />
-              </div>
+          {/* LISTA DE APLICATIVOS DO FEED */}
+          <div className="w-full flex flex-col items-center px-6 pt-8 pb-32 gap-8">
+            <div
+              onClick={() => setTelaAtual('titan')}
+              className="w-full max-w-sm rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
+            >
+              <img
+                src="/apps/titan-bg.webp"
+                alt="Titan App"
+                decoding="async"
+                fetchpriority="high"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
+              />
+            </div>
 
-              <div
-                onClick={() => setTelaAtual('sexta')}
-                className="w-full max-w-sm rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
-              >
-                <img
-                  src="/apps/sexta-bg.webp"
-                  alt="Sexta App"
-                  decoding="async"
-                  fetchpriority="high"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
-                />
-              </div>
+            <div
+              onClick={() => setTelaAtual('sexta')}
+              className="w-full max-w-sm rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
+            >
+              <img
+                src="/apps/sexta-bg.webp"
+                alt="Sexta App"
+                decoding="async"
+                fetchpriority="high"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
+              />
+            </div>
 
-              <div
-                onClick={() => setTelaAtual('vivart')}
-                className="w-full max-w-sm rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
-              >
-                <img
-                  src="/apps/vivart-bg.webp"
-                  alt="Vivart App"
-                  decoding="async"
-                  fetchpriority="high"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
-                />
-              </div>
+            <div
+              onClick={() => setTelaAtual('vivart')}
+              className="w-full max-w-sm rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
+            >
+              <img
+                src="/apps/vivart-bg.webp"
+                alt="Vivart App"
+                decoding="async"
+                fetchpriority="high"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
+              />
             </div>
           </div>
-        </>
+          
+        </div>
       )}
 
       <Suspense fallback={<LoadingScreen />}>
