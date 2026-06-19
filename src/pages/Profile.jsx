@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
+import { uploadToSupabase } from '@/lib/supabaseUpload';
 import { getConversationKey } from '@/lib/chatUtils';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -105,20 +106,17 @@ export default function Profile() {
     
     setUploadingAvatar(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const file_url = await uploadToSupabase(file, 'avatars');
       await base44.auth.updateMe({ profile_picture_url: file_url });
-      
       await refetchUser();
       const updated = await base44.auth.me();
       setViewedUser(updated);
       toast.success('Foto atualizada!');
     } catch (err) {
       console.error('Avatar upload error:', err);
-      // O ALERTA VAI TE MOSTRAR O ERRO REAL NA TELA
-      alert('Erro no Upload do Avatar: ' + err.message);
+      toast.error('Erro ao atualizar foto.');
     } finally {
       setUploadingAvatar(false);
-      // Limpa a memória para você conseguir testar a MESMA foto várias vezes
       if (avatarInputRef.current) avatarInputRef.current.value = '';
     }
   };
@@ -129,20 +127,17 @@ export default function Profile() {
     
     setUploadingBanner(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const file_url = await uploadToSupabase(file, 'banners');
       await base44.auth.updateMe({ profile_banner_url: file_url });
-      
       await refetchUser();
       const updated = await base44.auth.me();
       setViewedUser(updated);
       toast.success('Capa atualizada!');
     } catch (err) {
       console.error('Banner upload error:', err);
-      // O ALERTA VAI TE MOSTRAR O ERRO REAL NA TELA
-      alert('Erro no Upload da Capa: ' + err.message);
+      toast.error('Erro ao atualizar capa.');
     } finally {
       setUploadingBanner(false);
-      // Limpa a memória para você conseguir testar a MESMA foto várias vezes
       if (bannerInputRef.current) bannerInputRef.current.value = '';
     }
   };
