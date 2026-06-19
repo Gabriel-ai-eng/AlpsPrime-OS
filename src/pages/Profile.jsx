@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
   User, Camera, Edit3, Check, X, Loader2, PenLine, 
-  MessageCircle, Activity, Smartphone, Clock, History, Calendar, ChevronRight
+  MessageCircle, Calendar
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -143,7 +143,6 @@ export default function Profile() {
 
   const primaryName = user?.username || user?.full_name || 'Usuário';
 
-  // Variantes de animação Framer Motion
   const containerVariants = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.1 } }
@@ -155,7 +154,7 @@ export default function Profile() {
 
   return (
     <ProfileTranslationProvider profileEmail={user.email} isUnlimited={true}>
-    <div className="min-h-full overflow-x-hidden bg-black text-white pb-20">
+    <div className="min-h-full overflow-x-hidden bg-black text-white pb-10">
 
       {/* --- BANNER --- */}
       <div className="relative h-40 lg:h-56 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black overflow-hidden border-b border-white/5">
@@ -182,7 +181,7 @@ export default function Profile() {
         className="max-w-4xl mx-auto px-5 lg:px-8 -mt-16 sm:-mt-20 relative z-10"
       >
         {/* --- IDENTITY LAYER --- */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-end gap-5 mb-6">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-end gap-5 mb-4">
           {/* Avatar Clickable */}
           <div className="relative inline-block">
             <div 
@@ -199,7 +198,7 @@ export default function Profile() {
                   <User className="w-12 h-12 text-zinc-600 absolute inset-0 m-auto" />
                 )}
                 
-                {/* Overlay da Câmera diretamente no avatar principal (Estilo Apple) */}
+                {/* Overlay da Câmera diretamente no avatar principal */}
                 {!readOnly && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px]">
                     {uploadingAvatar ? <Loader2 className="w-6 h-6 animate-spin text-white" /> : <Camera className="w-7 h-7 text-white" />}
@@ -253,7 +252,7 @@ export default function Profile() {
         </motion.div>
 
         {/* --- ACTION BUTTONS --- */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-3 w-full border-b border-white/10 pb-8 mb-8">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-3 w-full border-b border-white/10 pb-5 mb-5">
           
           <div className="flex-1 w-full">
             <ShareProfileButton profileEmail={user.email} displayName={primaryName} />
@@ -290,130 +289,31 @@ export default function Profile() {
           )}
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* --- LEFT COLUMN: BIO --- */}
-          <motion.div variants={itemVariants} className="lg:col-span-1 space-y-8">
-            <div className="bg-zinc-900/30 border border-white/5 rounded-3xl p-6 backdrop-blur-md">
-              <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                Biografia
-              </h2>
-              {editing && !readOnly ? (
-                <Textarea
-                  value={form.bio}
-                  onChange={(e) => setForm(f => ({ ...f, bio: e.target.value }))}
-                  placeholder="Conte um pouco sobre você..."
-                  rows={4}
-                  maxLength={200}
-                  className="resize-none bg-black/50 border-white/10 focus-visible:ring-zinc-700 text-white rounded-xl p-4"
-                />
-              ) : user.bio ? (
-                <Translated id="bio" as="p" className="text-[15px] text-zinc-300 leading-relaxed">
-                  {user.bio}
-                </Translated>
-              ) : (
-                <p className="text-[15px] text-zinc-600 leading-relaxed italic">Nenhuma biografia adicionada.</p>
-              )}
-            </div>
-          </motion.div>
+        {/* --- SECTION: BIO --- */}
+        <motion.div variants={itemVariants} className="w-full">
+          <div className="bg-zinc-900/30 border border-white/5 rounded-3xl p-6 backdrop-blur-md">
+            <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+              Biografia
+            </h2>
+            {editing && !readOnly ? (
+              <Textarea
+                value={form.bio}
+                onChange={(e) => setForm(f => ({ ...f, bio: e.target.value }))}
+                placeholder="Conte um pouco sobre você..."
+                rows={4}
+                maxLength={200}
+                className="resize-none bg-black/50 border-white/10 focus-visible:ring-zinc-700 text-white rounded-xl p-4"
+              />
+            ) : user.bio ? (
+              <Translated id="bio" as="p" className="text-[15px] text-zinc-300 leading-relaxed">
+                {user.bio}
+              </Translated>
+            ) : (
+              <p className="text-[15px] text-zinc-600 leading-relaxed italic">Nenhuma biografia adicionada.</p>
+            )}
+          </div>
+        </motion.div>
 
-          {/* --- RIGHT COLUMN: ACTIVITY HUB --- */}
-          <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6">
-            <div className="bg-zinc-900/30 border border-white/5 rounded-3xl p-6 sm:p-8 backdrop-blur-md">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                  <Activity className="w-4 h-4" /> Atividade Recente
-                </h2>
-                <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white h-8 text-xs font-medium">
-                  Ver tudo <ChevronRight className="w-3 h-3 ml-1" />
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
-                {/* Card: Último app usado */}
-                <div className="bg-black/40 border border-white/5 hover:border-white/10 transition-colors rounded-2xl p-5 flex flex-col justify-between group">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
-                      <Smartphone className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-zinc-500 font-medium">Último app usado</p>
-                      <h3 className="text-white font-semibold group-hover:text-blue-400 transition-colors">Projeto Armor</h3>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card: Tempo online */}
-                <div className="bg-black/40 border border-white/5 hover:border-white/10 transition-colors rounded-2xl p-5 flex flex-col justify-between group">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
-                      <Clock className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-zinc-500 font-medium">Tempo online hoje</p>
-                      <h3 className="text-white font-semibold group-hover:text-purple-400 transition-colors">3h 42m</h3>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card: Apps mais usados */}
-                <div className="bg-black/40 border border-white/5 hover:border-white/10 transition-colors rounded-2xl p-5 md:col-span-2">
-                  <p className="text-xs text-zinc-500 font-medium mb-4">Apps mais usados</p>
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400"><Smartphone className="w-4 h-4" /></div>
-                        <span className="text-sm font-medium text-zinc-200">Projeto Armor</span>
-                      </div>
-                      <span className="text-xs text-zinc-600 font-medium">Frequente</span>
-                    </div>
-                    <div className="w-full h-px bg-white/5" />
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400"><Smartphone className="w-4 h-4" /></div>
-                        <span className="text-sm font-medium text-zinc-200">Alps AI</span>
-                      </div>
-                      <span className="text-xs text-zinc-600 font-medium">Diário</span>
-                    </div>
-                    <div className="w-full h-px bg-white/5" />
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400"><Smartphone className="w-4 h-4" /></div>
-                        <span className="text-sm font-medium text-zinc-200">Alps Files</span>
-                      </div>
-                      <span className="text-xs text-zinc-600 font-medium">Semanal</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card: Histórico Recente */}
-                <div className="bg-black/40 border border-white/5 hover:border-white/10 transition-colors rounded-2xl p-5 md:col-span-2">
-                  <p className="text-xs text-zinc-500 font-medium mb-4 flex items-center gap-2">
-                    <History className="w-4 h-4 text-zinc-400" /> Histórico recente
-                  </p>
-                  <div className="relative pl-4 border-l border-white/10 space-y-4">
-                    <div className="relative">
-                      <div className="absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full bg-zinc-600 ring-4 ring-black" />
-                      <p className="text-sm text-zinc-300">Atualizou o perfil</p>
-                      <span className="text-[11px] text-zinc-600 mt-0.5 block">Há 1 hora</span>
-                    </div>
-                    <div className="relative">
-                      <div className="absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full bg-zinc-600 ring-4 ring-black" />
-                      <p className="text-sm text-zinc-300">Jogou <span className="font-semibold text-white">Projeto Armor</span></p>
-                      <span className="text-[11px] text-zinc-600 mt-0.5 block">Há 3 horas</span>
-                    </div>
-                    <div className="relative">
-                      <div className="absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full bg-zinc-600 ring-4 ring-black" />
-                      <p className="text-sm text-zinc-300">Abriu <span className="font-semibold text-white">Alps AI</span></p>
-                      <span className="text-[11px] text-zinc-600 mt-0.5 block">Hoje pela manhã</span>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </motion.div>
-        </div>
       </motion.div>
     </div>
     </ProfileTranslationProvider>
