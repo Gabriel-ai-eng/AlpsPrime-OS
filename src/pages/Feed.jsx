@@ -38,7 +38,7 @@ export default function Feed() {
   const resetTimer = () => {
     clearInterval(timerRef.current);
     timerRef.current = setInterval(
-      () => setSlideAtual(prev => (prev + 1) % TOTAL),
+      () => setSlideAtual((prev) => (prev + 1) % TOTAL),
       5000
     );
   };
@@ -49,7 +49,7 @@ export default function Feed() {
   }, []);
 
   const navSlide = (dir) => {
-    setSlideAtual(prev => ((prev + dir + TOTAL) % TOTAL));
+    setSlideAtual((prev) => (prev + dir + TOTAL) % TOTAL);
     resetTimer();
   };
 
@@ -57,6 +57,14 @@ export default function Feed() {
     <div className="w-full h-[100dvh] bg-black text-white relative overflow-hidden flex flex-col selection:bg-white/30">
       {telaAtual === 'hub' && (
         <>
+          <header className="sticky top-0 z-50 w-full bg-black">
+            <div className="flex items-center justify-center h-14 border-b border-white/10">
+              <span className="text-[#8E8E93] font-light tracking-[0.32em] text-[18px] select-none px-2 truncate">
+                Sexta-feira
+              </span>
+            </div>
+          </header>
+
           <div className="relative w-full flex-shrink-0 overflow-hidden" style={{ height: '38vh' }}>
             <div
               className="flex h-full transition-transform duration-500 ease-out"
