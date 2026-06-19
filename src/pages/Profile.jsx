@@ -102,38 +102,48 @@ export default function Profile() {
   const handleAvatarUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
     setUploadingAvatar(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       await base44.auth.updateMe({ profile_picture_url: file_url });
+      
       await refetchUser();
       const updated = await base44.auth.me();
       setViewedUser(updated);
       toast.success('Foto atualizada!');
     } catch (err) {
       console.error('Avatar upload error:', err);
-      toast.error('Erro ao atualizar foto.');
+      // O ALERTA VAI TE MOSTRAR O ERRO REAL NA TELA
+      alert('Erro no Upload do Avatar: ' + err.message);
     } finally {
       setUploadingAvatar(false);
+      // Limpa a memória para você conseguir testar a MESMA foto várias vezes
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
     }
   };
 
   const handleBannerUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
     setUploadingBanner(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       await base44.auth.updateMe({ profile_banner_url: file_url });
+      
       await refetchUser();
       const updated = await base44.auth.me();
       setViewedUser(updated);
       toast.success('Capa atualizada!');
     } catch (err) {
       console.error('Banner upload error:', err);
-      toast.error('Erro ao atualizar capa.');
+      // O ALERTA VAI TE MOSTRAR O ERRO REAL NA TELA
+      alert('Erro no Upload da Capa: ' + err.message);
     } finally {
       setUploadingBanner(false);
+      // Limpa a memória para você conseguir testar a MESMA foto várias vezes
+      if (bannerInputRef.current) bannerInputRef.current.value = '';
     }
   };
 
