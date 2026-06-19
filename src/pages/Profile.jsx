@@ -18,7 +18,7 @@ import ShareProfileButton from '@/components/profile/ShareProfileButton';
 import { useProfileVisitTracker } from '@/lib/useProfileVisitTracker';
 
 export default function Profile() {
-  const { user: authUser, setUser } = useAuth();
+  const { user: authUser, refetchUser } = useAuth();
   const { email: paramEmail } = useParams();
   const navigate = useNavigate();
   const decodedParamEmail = paramEmail ? decodeURIComponent(paramEmail) : null;
@@ -106,11 +106,12 @@ export default function Profile() {
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       await base44.auth.updateMe({ profile_picture_url: file_url });
+      await refetchUser();
       const updated = await base44.auth.me();
-      setUser(updated);
       setViewedUser(updated);
       toast.success('Foto atualizada!');
     } catch (err) {
+      console.error('Avatar upload error:', err);
       toast.error('Erro ao atualizar foto.');
     } finally {
       setUploadingAvatar(false);
@@ -124,11 +125,12 @@ export default function Profile() {
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       await base44.auth.updateMe({ profile_banner_url: file_url });
+      await refetchUser();
       const updated = await base44.auth.me();
-      setUser(updated);
       setViewedUser(updated);
       toast.success('Capa atualizada!');
     } catch (err) {
+      console.error('Banner upload error:', err);
       toast.error('Erro ao atualizar capa.');
     } finally {
       setUploadingBanner(false);
@@ -139,8 +141,8 @@ export default function Profile() {
     setSaving(true);
     try {
       await base44.auth.updateMe({ username: form.username, bio: form.bio });
+      await refetchUser();
       const updated = await base44.auth.me();
-      setUser(updated);
       setViewedUser(updated);
       toast.success('Perfil atualizado com sucesso!');
       setEditing(false);
