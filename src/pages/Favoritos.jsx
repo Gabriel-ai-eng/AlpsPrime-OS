@@ -6,33 +6,8 @@ import { cn } from '@/lib/utils';
 export default function Favoritos() {
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Dados de exemplo para preencher a tela inicialmente
-  const [favorites, setFavorites] = useState([
-    { 
-      id: 1, 
-      title: 'Logo Circular Dourada', 
-      subtitle: 'Animação de carregamento contínuo',
-      category: 'Motion Graphics', 
-      icon: Video,
-      date: 'Hoje' 
-    },
-    { 
-      id: 2, 
-      title: 'Smiley Face Line-Art', 
-      subtitle: 'Transição de piscada para admiração',
-      category: 'Animação', 
-      icon: Sparkles,
-      date: 'Há 2 dias' 
-    },
-    { 
-      id: 3, 
-      title: 'Setup de Luz Cinematográfica', 
-      subtitle: 'Fundo preto com reflexos premium',
-      category: 'Ambiente', 
-      icon: ImageIcon,
-      date: 'Semana passada' 
-    }
-  ]);
+  // Estado inicial vazio. Os sub-apps favoritados pelo usuário serão adicionados aqui.
+  const [favorites, setFavorites] = useState([]);
 
   const filteredFavorites = favorites.filter(fav => 
     fav.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -62,7 +37,7 @@ export default function Favoritos() {
           </h1>
         </div>
         <p className="text-[#8E8E93] text-[15px] font-light ml-1">
-          Sua coleção pessoal de itens salvos e inspirações.
+          Sua coleção pessoal de apps preferidos.
         </p>
       </motion.div>
 
