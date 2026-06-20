@@ -466,7 +466,7 @@ create index if not exists idx_follow_followed_email on public.follow (followed_
 create index if not exists idx_notification_recipient_email on public.notification (recipient_email);
 create index if not exists idx_direct_message_sender_email on public.direct_message (sender_email);
 create index if not exists idx_direct_message_receiver_email on public.direct_message (receiver_email);
-create index if not exists idx_conversation_conversation_key on public.conversation (conversation_key);
+create index if not exists idx_direct_message_conversation_key on public.direct_message (conversation_key);
 create index if not exists idx_card_answer_card_id on public.card_answer (card_id);
 create index if not exists idx_ia_memory_user_email on public.ia_memory (user_email);
 create index if not exists idx_profile_visit_profile_email on public.profile_visit (profile_email);
