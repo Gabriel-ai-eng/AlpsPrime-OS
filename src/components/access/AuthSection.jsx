@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  diagnoseAccess,
+  hasPaidAccess,
   signInWithPassword,
   signUp,
   verifySignupOtp,
@@ -40,30 +40,16 @@ export default function AuthSection({ onClose }) {
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const [noAccess, setNoAccess] = useState(false);
-  const [debug, setDebug] = useState(null); // resultado do rastreador
 
   const goFeed = () => window.location.assign('/feed');
   const cleanEmail = () => email.trim().toLowerCase();
-  const reset = (m) => { setMode(m); setStep('form'); setError(''); setInfo(''); setNoAccess(false); setDebug(null); };
+  const reset = (m) => { setMode(m); setStep('form'); setError(''); setInfo(''); setNoAccess(false); };
 
   const ensureAccess = async () => {
-    // Roda o diagnóstico e guarda o resultado para o rastreador na tela.
-    const d = await diagnoseAccess(cleanEmail());
-    setDebug(d);
-
-    if (d.allowed) { setNoAccess(false); return true; }
-
-    // Mensagem específica conforme o motivo real da falha.
-    if (!d.supabaseConfigured) {
-      setError('O app não está conectado ao Supabase (faltam as variáveis VITE_ no Vercel + Redeploy). Veja o rastreador abaixo.');
-      setNoAccess(false);
-    } else if (d.rpcError) {
-      setError('Não consegui verificar o acesso no Supabase. Veja o detalhe no rastreador abaixo.');
-      setNoAccess(false);
-    } else {
-      setError('Este e-mail ainda não tem acesso. Use o mesmo e-mail da compra na Hotmart — só ele libera o cadastro/login.');
-      setNoAccess(true);
-    }
+    const ok = await hasPaidAccess(cleanEmail());
+    if (ok) { setNoAccess(false); return true; }
+    setError('Este e-mail ainda não tem acesso. Use o mesmo e-mail da compra na Hotmart — só ele libera o cadastro/login.');
+    setNoAccess(true);
     return false;
   };
 
@@ -286,38 +272,6 @@ export default function AuthSection({ onClose }) {
 
             {error && <p className="text-xs text-red-400 px-1 pt-1">{error}</p>}
             {info && !error && <p className="text-xs text-emerald-400 px-1 pt-1">{info}</p>}
-
-            {/* 🔎 Rastreador: mostra exatamente o que aconteceu na verificação de acesso */}
-            {debug && (
-              <div className="mt-2 rounded-xl border border-white/10 bg-black/30 p-3 text-[11px] leading-relaxed font-mono text-white/80 space-y-0.5">
-                <div className="text-white/50 uppercase tracking-widest text-[10px] mb-1">🔎 Rastreador de acesso</div>
-                <div>E-mail testado: <span className="text-white">{debug.email || '(vazio)'}</span></div>
-                <div>VITE_SUPABASE_URL: {debug.urlSet ? <span className="text-emerald-400">✓ presente</span> : <span className="text-red-400">✗ faltando</span>}</div>
-                <div>VITE_SUPABASE_ANON_KEY: {debug.keySet ? <span className="text-emerald-400">✓ presente</span> : <span className="text-red-400">✗ faltando</span>}</div>
-                <div>
-                  Supabase conectado:{' '}
-                  {debug.supabaseConfigured
-                    ? <span className="text-emerald-400">SIM ({debug.supabaseHost})</span>
-                    : <span className="text-red-400">NÃO</span>}
-                </div>
-                <div>É admin (entra sem pagar): {debug.isAdmin ? <span className="text-emerald-400">SIM</span> : <span className="text-white/60">não</span>}</div>
-                {debug.supabaseConfigured && !debug.isAdmin && (
-                  <div>
-                    Função tem_acesso:{' '}
-                    {debug.rpcError
-                      ? <span className="text-red-400">ERRO — {debug.rpcError}</span>
-                      : debug.rpcOk === true
-                        ? <span className="text-emerald-400">liberou (true)</span>
-                        : <span className="text-yellow-400">negou (false) — e-mail não está em acessos_pagos com ativo=true</span>}
-                  </div>
-                )}
-                <div className="pt-1 border-t border-white/10 mt-1">
-                  Resultado: {debug.allowed
-                    ? <span className="text-emerald-400 font-bold">PODE ENTRAR ✓</span>
-                    : <span className="text-red-400 font-bold">BLOQUEADO ✗</span>}
-                </div>
-              </div>
-            )}
 
             <button
               type="submit"
