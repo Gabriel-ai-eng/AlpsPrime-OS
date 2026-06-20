@@ -132,3 +132,49 @@ esquemas do Base44) e rode. Ele cria as 38 tabelas + a tabela de perfis
 - `src/api/entityTables.js` — mapa Entidade → tabela.
 - `src/api/entitiesAdapter.js` — adaptador de dados sobre o Supabase + `me`/`updateMe`.
 - `src/api/base44Client.js` — agora usa o adaptador (Supabase) no lugar do Base44.
+
+---
+
+# Fase 3 — Funções de servidor (em andamento)
+
+As antigas funções do Base44 (`base44.functions.invoke`) viram **funções
+serverless no Vercel**, na pasta `api/`. O frontend chama `POST /api/fn/<nome>`
+enviando o JWT do Supabase; o servidor valida e responde em JSON.
+
+Arquitetura:
+- `api/fn/[name].js` — ponte/despachante (valida o login e chama o handler).
+- `api/_lib/handlers.js` — implementação de cada função.
+- `api/_lib/admin.js` — Supabase com **service_role** (ignora RLS) + espelho do
+  adaptador de entidades no servidor.
+- `api/_lib/auth.js` — valida o token e carrega o perfil do usuário.
+
+## 8. Variáveis de ambiente no Vercel (servidor)
+
+Estas já devem existir (foram usadas no webhook); confirme e adicione as novas:
+
+| Nome | Para quê |
+|------|----------|
+| `SUPABASE_URL` | mesmo URL do projeto (já usado pelo webhook) |
+| `SUPABASE_SERVICE_KEY` | chave **service_role** (só no servidor; já usada pelo webhook) |
+| `SUPABASE_STORAGE_BUCKET` | nome do bucket de imagens (ex.: `uploads`) |
+| `GEMINI_API_KEY` | chave da API do Google Gemini (para o chat de IA) |
+
+## 9. Storage (upload de imagens)
+
+No Supabase: **Storage → New bucket** → crie um bucket **público** chamado
+`uploads` (ou o nome que puser em `SUPABASE_STORAGE_BUCKET`). É ele que guarda
+fotos de perfil/banner e mídias dos posts.
+
+## 10. Funções já migradas nesta fase
+
+`getUsersCount`, `listPublicUsers`, `getPublicProfile`, `uploadImageToSupabase`,
+`askGemini`, `getVotingFeed`, `castVote`, `getVotingResults`.
+
+## 11. Ainda faltam (próximas levas)
+
+As demais ~48 funções (Mercado Pago/pagamentos, equipes/convites, mensagens e
+notificações no servidor, conteúdo premium, geração de imagem DALL·E, agentes de
+IA do feed, saques, etc.) ainda retornam **501** quando chamadas — o app não
+quebra, mas esses recursos específicos ficam indisponíveis até serem migrados.
+Cada uma é adicionada incrementalmente em `api/_lib/handlers.js`, seguindo o
+mesmo padrão das já migradas.

@@ -6,7 +6,32 @@
 // As funções de servidor (base44.functions.invoke) ainda não foram migradas
 // (Fase 3): por enquanto avisam no console e rejeitam, sem derrubar o app.
 import { entities, me, updateMe } from '@/api/entitiesAdapter';
+import { supabase } from '@/api/supabaseClient';
 import { signOut } from '@/lib/auth';
+
+// Chama as funções de servidor migradas para o Vercel (api/fn/<nome>).
+// Mantém o mesmo contrato do Base44: retorna { data } com o corpo JSON.
+async function invoke(name, payload = {}) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const res = await fetch(`/api/fn/${name}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+    },
+    body: JSON.stringify(payload || {}),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    if (res.status === 501) {
+      console.warn(`[base44.functions] "${name}" ainda não migrado (Fase 3).`);
+    }
+    const err = new Error(json?.error || `Erro na função ${name}`);
+    err.status = res.status;
+    throw err;
+  }
+  return { data: json };
+}
 
 export const base44 = {
   entities,
@@ -16,13 +41,6 @@ export const base44 = {
     logout: (redirect) => signOut(typeof redirect === 'string' ? redirect : '/'),
     setToken: () => {},
   },
-  functions: {
-    invoke: async (name) => {
-      console.warn(`[base44.functions] "${name}" ainda não foi migrado para o Supabase (Fase 3).`);
-      const err = new Error(`Função "${name}" indisponível (migração para Supabase pendente).`);
-      err.code = 'FUNCTION_NOT_MIGRATED';
-      throw err;
-    },
-  },
+  functions: { invoke },
   integrations: {},
 };
