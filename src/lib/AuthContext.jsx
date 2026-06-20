@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase, mapSupabaseUser } from '@/api/supabaseClient';
 import { signOut as supabaseSignOut } from '@/lib/auth';
+import { me as fetchProfile } from '@/api/entitiesAdapter';
 
 const AuthContext = createContext();
 
@@ -10,12 +11,23 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
 
-  const applySession = (session) => {
-    const u = mapSupabaseUser(session?.user);
-    setUser(u);
-    setIsAuthenticated(!!u);
+  const applySession = async (session) => {
+    const base = mapSupabaseUser(session?.user);
+    setUser(base);
+    setIsAuthenticated(!!base);
     setIsLoadingAuth(false);
     setAuthChecked(true);
+
+    // Carrega o perfil completo da tabela `usuarios` (foto, capa, bio, etc.)
+    // e mescla, para esses dados não sumirem ao recarregar a página.
+    if (base) {
+      try {
+        const profile = await fetchProfile();
+        if (profile) setUser((prev) => ({ ...prev, ...profile }));
+      } catch (e) {
+        console.error('[auth] não consegui carregar o perfil de usuarios:', e?.message);
+      }
+    }
   };
 
   useEffect(() => {
