@@ -23,7 +23,19 @@ export const AuthProvider = ({ children }) => {
     if (base) {
       try {
         const profile = await fetchProfile();
-        if (profile) setUser((prev) => ({ ...prev, ...profile }));
+        if (profile) {
+          setUser((prev) => ({ ...prev, ...profile }));
+
+          // Sincroniza (1x) os campos visuais com o metadata da sessão, para que
+          // nas próximas vezes a foto/capa apareçam INSTANTÂNEO, sem esperar o banco.
+          const meta = session?.user?.user_metadata || {};
+          const campos = ['profile_picture_url', 'profile_banner_url', 'username', 'full_name'];
+          const dados = {};
+          campos.forEach((k) => { if (profile[k] && profile[k] !== meta[k]) dados[k] = profile[k]; });
+          if (Object.keys(dados).length) {
+            supabase.auth.updateUser({ data: dados }).catch(() => {});
+          }
+        }
       } catch (e) {
         console.error('[auth] não consegui carregar o perfil de usuarios:', e?.message);
       }

@@ -123,5 +123,16 @@ export async function updateMe(patch = {}) {
   const { data, error } = await supabase
     .from('usuarios').upsert(row, { onConflict: 'id' }).select().maybeSingle();
   if (error) throw error;
+
+  // Espelha os campos visuais no metadata da sessão (que o navegador já tem
+  // guardado), para que apareçam INSTANTANEAMENTE ao recarregar — sem esperar
+  // a ida ao banco. A tabela `usuarios` continua sendo a fonte da verdade.
+  const espelho = {};
+  for (const k of ['profile_picture_url', 'profile_banner_url', 'username', 'full_name', 'avatar']) {
+    if (k in patch) espelho[k] = patch[k];
+  }
+  if (Object.keys(espelho).length) {
+    try { await supabase.auth.updateUser({ data: espelho }); } catch (e) { /* não crítico */ }
+  }
   return data;
 }
