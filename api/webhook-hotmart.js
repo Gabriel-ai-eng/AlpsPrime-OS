@@ -40,7 +40,8 @@ export default async function handler(req, res) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
-  const resposta = await fetch(`${supabaseUrl}/rest/v1/acessos_pagos`, {
+  // Atualização feita aqui: ?on_conflict=email adicionado à URL
+  const resposta = await fetch(`${supabaseUrl}/rest/v1/acessos_pagos?on_conflict=email`, {
     method: 'POST',
     headers: {
       'apikey': supabaseKey,
