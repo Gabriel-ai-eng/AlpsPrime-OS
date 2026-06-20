@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import AuthSection from '@/components/access/AuthSection';
 import { motion } from 'framer-motion';
-import { Mail, ShoppingBag, Sparkles, Image as ImageIcon, MessageCircle, ChevronDown } from 'lucide-react';
+import { Mail, ShoppingBag, Image as ImageIcon, MessageCircle, ChevronDown } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
 
 const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
@@ -82,22 +82,14 @@ export default function Welcome() {
         <section className="flex flex-col pt-10 pb-16 sm:pt-16 sm:pb-24 lg:flex-row lg:items-center lg:gap-12">
           {/* Texto + CTA */}
           <div className="flex flex-col items-center text-center lg:flex-1 lg:items-start lg:text-left">
-            <motion.span
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-gold/20 bg-gold/[0.06] px-3 py-1 text-xs font-medium text-gold/90"
-            >
-              <Sparkles className="h-3.5 w-3.5" /> Sua central de IA em português
-            </motion.span>
-
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl"
             >
-              Converse, crie,<br />
-              <span className="gold-gradient">tudo num só lugar.</span>
+              Tudo da Alps Prime.<br />
+              <span className="gold-gradient">Em um só lugar.</span>
             </motion.h1>
 
             <motion.p
