@@ -11,8 +11,11 @@ export async function getUserFromReq(req) {
   if (!token) return { user: null, error: 'sem token de login na requisição' };
 
   // Se a service key do servidor não estiver configurada, a validação falha aqui.
-  if (!process.env.SUPABASE_SERVICE_KEY || !process.env.SUPABASE_URL) {
-    return { user: null, error: 'SUPABASE_URL / SUPABASE_SERVICE_KEY ausentes no Vercel (servidor)' };
+  const faltando = [];
+  if (!process.env.SUPABASE_URL) faltando.push('SUPABASE_URL');
+  if (!process.env.SUPABASE_SERVICE_KEY) faltando.push('SUPABASE_SERVICE_KEY');
+  if (faltando.length) {
+    return { user: null, error: `faltando/vazio no Vercel: ${faltando.join(' e ')} (precisa Redeploy após salvar)` };
   }
 
   const { data, error } = await admin.auth.getUser(token);
