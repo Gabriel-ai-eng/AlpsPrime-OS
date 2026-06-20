@@ -1,4 +1,5 @@
-import { supabase } from '@/api/supabaseClient';
+import { supabase, SUPABASE_CONFIGURED, SUPABASE_HOST } from '@/api/supabaseClient';
+import { ADMIN_EMAILS } from '@/lib/branding';
 
 /**
  * Camada de autenticação baseada no Supabase Auth.
@@ -7,18 +8,59 @@ import { supabase } from '@/api/supabaseClient';
 
 const clean = (email) => (email || '').trim().toLowerCase();
 
+export const isAdminEmail = (email) =>
+  ADMIN_EMAILS.map((x) => x.toLowerCase()).includes(clean(email));
+
 // --- Acesso pago (tabela acessos_pagos, preenchida pelo webhook da Hotmart) ---
-// Usa a função RPC `tem_acesso` (SECURITY DEFINER) para não expor a tabela ao
-// frontend — ela retorna só true/false para um e-mail. Ver SUPABASE_SETUP.md.
+// Admin entra sempre. Caso contrário, consulta a função RPC `tem_acesso`
+// (SECURITY DEFINER) que devolve só true/false para um e-mail.
 export async function hasPaidAccess(email) {
   const e = clean(email);
   if (!e) return false;
+  if (isAdminEmail(e)) return true;
   const { data, error } = await supabase.rpc('tem_acesso', { p_email: e });
   if (error) {
     console.error('[acesso] erro ao consultar tem_acesso:', error.message);
     return false;
   }
   return data === true;
+}
+
+/**
+ * Diagnóstico do acesso — usado pelo RASTREADOR na tela de login.
+ * Retorna cada etapa para mostrar EXATAMENTE onde está falhando.
+ */
+export async function diagnoseAccess(email) {
+  const e = clean(email);
+  const info = {
+    email: e,
+    supabaseConfigured: SUPABASE_CONFIGURED,
+    supabaseHost: SUPABASE_HOST,
+    isAdmin: isAdminEmail(e),
+    rpcOk: null,        // true/false retornado pela função tem_acesso
+    rpcError: null,     // mensagem de erro, se houver
+    allowed: false,     // resultado final (pode entrar?)
+  };
+
+  if (!e) { info.rpcError = 'E-mail vazio.'; return info; }
+
+  // Admin entra sem depender do banco.
+  if (info.isAdmin) { info.allowed = true; return info; }
+
+  if (!SUPABASE_CONFIGURED) {
+    info.rpcError = 'Supabase não configurado no app (faltam VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY no Vercel + Redeploy).';
+    return info;
+  }
+
+  try {
+    const { data, error } = await supabase.rpc('tem_acesso', { p_email: e });
+    if (error) { info.rpcError = error.message; return info; }
+    info.rpcOk = data === true;
+    info.allowed = data === true;
+  } catch (err) {
+    info.rpcError = err?.message || 'Falha ao conectar no Supabase.';
+  }
+  return info;
 }
 
 // --- Login / Cadastro ---

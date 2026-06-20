@@ -15,6 +15,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
+// Diagnóstico: usados pelo rastreador na tela de login para mostrar o estado.
+export const SUPABASE_CONFIGURED = Boolean(supabaseUrl && supabaseAnonKey);
+export const SUPABASE_HOST = (() => {
+  try { return new URL(supabaseUrl).host; } catch { return null; }
+})();
+
 export const supabase = createClient(
   supabaseUrl || 'http://localhost:54321',
   supabaseAnonKey || 'missing-anon-key',
