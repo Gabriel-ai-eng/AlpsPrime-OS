@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import AuthSection from '@/components/access/AuthSection';
-import { motion, useReducedMotion } from 'framer-motion';
-import { Mail, ShoppingBag, Sparkles, Image as ImageIcon, MessageCircle, ChevronDown, Check, Send } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Mail, ShoppingBag, Sparkles, Image as ImageIcon, MessageCircle, ChevronDown, Check } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
 
 const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
@@ -35,84 +35,6 @@ function FaqItem({ q, a }) {
   );
 }
 
-/* ---- Prévia do produto: mockup de telemóvel com a Sexta-feira ---- */
-function AppPreview() {
-  const reduce = useReducedMotion();
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.35, type: 'spring', stiffness: 140, damping: 20 }}
-      className="relative mx-auto w-full max-w-[270px]"
-    >
-      <div className="absolute -inset-6 -z-10 rounded-[3rem] bg-gold/15 blur-3xl" />
-
-      <motion.div
-        animate={reduce ? {} : { y: [0, -10, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-        className="rounded-[2.5rem] border border-white/10 bg-[#0c0c11] p-3 shadow-2xl shadow-black/60"
-      >
-        <div className="mx-auto mb-2 h-1.5 w-16 rounded-full bg-white/10" />
-
-        {/* Cabeçalho do app */}
-        <div className="flex items-center gap-2 border-b border-white/5 px-2 pb-3 pt-1">
-          <img src={LOGO_URL} alt="" className="h-7 w-7 rounded-lg object-cover" />
-          <div className="flex-1 leading-tight">
-            <p className="text-xs font-semibold text-white">Sexta-feira</p>
-            <span className="text-[10px] text-gold/80">online</span>
-          </div>
-          <span className="h-2 w-2 rounded-full bg-emerald-400" />
-        </div>
-
-        {/* Conversa */}
-        <div className="min-h-[250px] space-y-2.5 px-2 py-4">
-          <div className="flex items-end gap-1.5">
-            <img src={LOGO_URL} alt="" className="h-5 w-5 rounded-md object-cover" />
-            <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-white/[0.06] px-3 py-2 text-[11px] leading-snug text-white/85">
-              Oi! Sou a Sexta-feira. O que vamos criar hoje?
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <div
-              className="max-w-[80%] rounded-2xl rounded-br-sm px-3 py-2 text-[11px] leading-snug text-background"
-              style={{ background: 'linear-gradient(135deg, #E8C77A, #C9A24F)' }}
-            >
-              Cria uma arte de uma montanha nevada ao amanhecer
-            </div>
-          </div>
-
-          <div className="flex items-end gap-1.5">
-            <img src={LOGO_URL} alt="" className="h-5 w-5 rounded-md object-cover" />
-            <div className="max-w-[80%] space-y-1.5">
-              <div
-                className="aspect-[4/3] w-40 rounded-xl border border-white/10"
-                style={{ background: 'linear-gradient(160deg, #15233f 0%, #4b6a9e 55%, #E8C77A 130%)' }}
-              />
-              <div className="rounded-2xl rounded-bl-sm bg-white/[0.06] px-3 py-2 text-[11px] leading-snug text-white/85">
-                Pronto. Aqui está.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Barra de envio */}
-        <div className="flex items-center gap-2 px-2 pb-1">
-          <div className="flex-1 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] text-white/40">
-            Fala comigo…
-          </div>
-          <div
-            className="flex h-8 w-8 items-center justify-center rounded-full text-background"
-            style={{ background: 'linear-gradient(135deg, #E8C77A, #C9A24F)' }}
-          >
-            <Send className="h-3.5 w-3.5" />
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
-
 export default function Welcome() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [showAuth, setShowAuth] = useState(false);
@@ -140,19 +62,7 @@ export default function Welcome() {
   if (showAuth) return <AuthSection onClose={() => setShowAuth(false)} />;
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white overflow-x-hidden">
-      {/* ---- Fundo futurista (discreto) ---- */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-15%] left-1/2 -translate-x-1/2 w-[680px] h-[680px] bg-gold/10 rounded-full blur-[180px]" />
-        <div
-          className="absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage: 'linear-gradient(#C9A24F 1px, transparent 1px), linear-gradient(90deg, #C9A24F 1px, transparent 1px)',
-            backgroundSize: '64px 64px',
-          }}
-        />
-      </div>
-
+    <div className="min-h-screen bg-black text-white overflow-x-hidden">
       {/* ---- Barra superior ---- */}
       <header className="relative z-10 mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-8">
         <div className="flex items-center gap-2.5">
@@ -240,11 +150,6 @@ export default function Welcome() {
               )}
             </motion.div>
           </div>
-
-          {/* Prévia do produto */}
-          <div className="mt-14 lg:mt-0 lg:flex-1">
-            <AppPreview />
-          </div>
         </section>
 
         {/* ---- RECURSOS ---- */}
@@ -279,20 +184,6 @@ export default function Welcome() {
           <h2 className="mb-8 text-center font-display text-2xl font-bold sm:text-3xl">Perguntas frequentes</h2>
           <div className="space-y-3">
             {FAQ.map((item) => <FaqItem key={item.q} {...item} />)}
-          </div>
-
-          {/* CTA final */}
-          <div className="mt-12 text-center">
-            <a
-              href={CHECKOUT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hotmart-fb hotmart__button-checkout inline-flex h-14 items-center justify-center gap-2.5 rounded-2xl px-8 font-semibold text-background shadow-lg shadow-gold/20 transition-opacity hover:opacity-90"
-              style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
-            >
-              <ShoppingBag className="h-5 w-5" />
-              Garantir acesso — R$ 19,90
-            </a>
           </div>
         </section>
       </main>
