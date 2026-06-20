@@ -65,6 +65,43 @@ export const handlers = {
     return { url: data.publicUrl, path };
   },
 
+  // Upload de ARQUIVO enviado do navegador (foto de perfil/capa).
+  // Recebe a imagem em base64 e sobe pelo servidor com a service key,
+  // então NÃO depende de regras (RLS) do Storage — só do bucket existir.
+  async uploadFile({ user, body }) {
+    const { file_base64, content_type, file_name, folder } = body || {};
+    if (!file_base64) { const e = new Error('Arquivo vazio (file_base64 ausente).'); e.status = 400; throw e; }
+
+    const bucket = process.env.SUPABASE_STORAGE_BUCKET;
+    if (!bucket) {
+      const e = new Error('Bucket não configurado: defina SUPABASE_STORAGE_BUCKET no Vercel.');
+      e.status = 500; throw e;
+    }
+
+    const ct = content_type || 'image/jpeg';
+    const raw = String(file_base64);
+    const base64 = raw.includes(',') ? raw.split(',')[1] : raw; // aceita dataURL ou base64 puro
+    let buffer;
+    try { buffer = Buffer.from(base64, 'base64'); }
+    catch { const e = new Error('Imagem inválida (base64).'); e.status = 400; throw e; }
+
+    const ext = (ct.split('/')[1] || 'jpg').split(';')[0];
+    const safe = (file_name || `img-${Date.now()}`).replace(/[^a-z0-9-_]/gi, '_');
+    const path = `${folder || 'uploads'}/${String(user.email).replace(/[^a-z0-9]/gi, '_')}/${safe}-${Date.now()}.${ext}`;
+
+    const { error: upErr } = await admin.storage
+      .from(bucket)
+      .upload(path, buffer, { contentType: ct, upsert: true });
+    if (upErr) {
+      // mensagem clara: "Bucket not found", etc.
+      const e = new Error(`Falha no upload (bucket "${bucket}"): ${upErr.message}`);
+      e.status = 500; throw e;
+    }
+
+    const { data } = admin.storage.from(bucket).getPublicUrl(path);
+    return { url: data.publicUrl, path, bucket };
+  },
+
   async askGemini({ body }) {
     const prompt = body?.prompt;
     if (!prompt || typeof prompt !== 'string') {

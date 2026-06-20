@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
-import { uploadToSupabase } from '@/lib/supabaseUpload';
+import { uploadProfileImage } from '@/lib/supabaseUpload';
 import { getConversationKey } from '@/lib/chatUtils';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -63,6 +63,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [uploadDebug, setUploadDebug] = useState(null); // rastreador de upload
   const avatarInputRef = useRef(null);
   const bannerInputRef = useRef(null);
 
@@ -100,46 +101,42 @@ export default function Profile() {
 
   const readOnly = isViewingOther;
 
-  const handleAvatarUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    setUploadingAvatar(true);
+  // Sobe a imagem e salva no perfil, registrando cada etapa no rastreador.
+  const uploadAndSave = async (file, folder, campo, titulo, setUploading, inputRef) => {
+    setUploading(true);
+    setUploadDebug({ titulo, etapa: 'preparando imagem…' });
     try {
-      const file_url = await uploadToSupabase(file, 'avatars');
-      await base44.auth.updateMe({ profile_picture_url: file_url });
-      await refetchUser();
-      const updated = await base44.auth.me();
-      setViewedUser(updated);
-      toast.success('Foto atualizada!');
+      const { url, debug } = await uploadProfileImage(file, folder);
+      setUploadDebug({ titulo, ...debug, salvouPerfil: 'salvando…' });
+      try {
+        await base44.auth.updateMe({ [campo]: url });
+        await refetchUser();
+        const updated = await base44.auth.me();
+        setViewedUser(updated);
+        setUploadDebug((d) => ({ ...d, salvouPerfil: true }));
+        toast.success(folder === 'banners' ? 'Capa atualizada!' : 'Foto atualizada!');
+      } catch (saveErr) {
+        setUploadDebug((d) => ({ ...d, salvouPerfil: false, erroSalvar: saveErr?.message || 'falha ao salvar' }));
+        toast.error('A imagem subiu, mas falhou ao salvar no perfil.');
+      }
     } catch (err) {
-      console.error('Avatar upload error:', err);
-      toast.error('Erro ao atualizar foto.');
+      console.error(`${titulo} upload error:`, err);
+      setUploadDebug({ titulo, ...(err?.debug || { erro: err?.message || 'Falha no upload.' }) });
+      toast.error(folder === 'banners' ? 'Erro ao atualizar capa.' : 'Erro ao atualizar foto.');
     } finally {
-      setUploadingAvatar(false);
-      if (avatarInputRef.current) avatarInputRef.current.value = '';
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = '';
     }
   };
 
-  const handleBannerUpload = async (e) => {
+  const handleAvatarUpload = (e) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    
-    setUploadingBanner(true);
-    try {
-      const file_url = await uploadToSupabase(file, 'banners');
-      await base44.auth.updateMe({ profile_banner_url: file_url });
-      await refetchUser();
-      const updated = await base44.auth.me();
-      setViewedUser(updated);
-      toast.success('Capa atualizada!');
-    } catch (err) {
-      console.error('Banner upload error:', err);
-      toast.error('Erro ao atualizar capa.');
-    } finally {
-      setUploadingBanner(false);
-      if (bannerInputRef.current) bannerInputRef.current.value = '';
-    }
+    if (file) uploadAndSave(file, 'avatars', 'profile_picture_url', 'Foto de perfil', setUploadingAvatar, avatarInputRef);
+  };
+
+  const handleBannerUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) uploadAndSave(file, 'banners', 'profile_banner_url', 'Foto de capa', setUploadingBanner, bannerInputRef);
   };
 
   const handleSave = async () => {
@@ -180,6 +177,41 @@ export default function Profile() {
   return (
     <ProfileTranslationProvider profileEmail={user.email} isUnlimited={true}>
     <div className="min-h-full overflow-x-hidden bg-black text-white pb-10">
+
+      {/* 🔎 Rastreador de upload de foto/capa */}
+      {uploadDebug && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[100000] w-[92%] max-w-md rounded-xl border border-white/10 bg-black/95 p-3 text-[11px] leading-relaxed font-mono text-white/80 shadow-2xl space-y-0.5">
+          <div className="flex items-center justify-between text-white/50 uppercase tracking-widest text-[10px] mb-1">
+            <span>🔎 Rastreador — {uploadDebug.titulo}</span>
+            <button type="button" onClick={() => setUploadDebug(null)} className="text-white/70 hover:text-white normal-case tracking-normal">fechar ✕</button>
+          </div>
+          {uploadDebug.arquivo && (
+            <div>Arquivo: <span className="text-white">{uploadDebug.arquivo}</span> ({uploadDebug.tipo}, {uploadDebug.tamanhoOriginalKB} KB)</div>
+          )}
+          {uploadDebug.payloadKB > 0 && <div>Enviado ao servidor: {uploadDebug.payloadKB} KB</div>}
+          <div>
+            Upload no Storage:{' '}
+            {uploadDebug.serverOk == null
+              ? <span className="text-yellow-400">{uploadDebug.etapa || '…'}</span>
+              : uploadDebug.serverOk
+                ? <span className="text-emerald-400">OK{uploadDebug.bucket ? ` (bucket: ${uploadDebug.bucket})` : ''}</span>
+                : <span className="text-red-400">ERRO</span>}
+          </div>
+          {uploadDebug.serverOk === false && uploadDebug.erro && (
+            <div className="text-red-400">Motivo: {uploadDebug.erro}{uploadDebug.statusHttp ? ` (HTTP ${uploadDebug.statusHttp})` : ''}</div>
+          )}
+          {uploadDebug.serverOk && (
+            <div>
+              Salvar no perfil:{' '}
+              {uploadDebug.salvouPerfil === true
+                ? <span className="text-emerald-400">OK ✓</span>
+                : uploadDebug.salvouPerfil === false
+                  ? <span className="text-red-400">ERRO — {uploadDebug.erroSalvar}</span>
+                  : <span className="text-yellow-400">…</span>}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* --- BANNER --- */}
       <div className="relative h-40 lg:h-56 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black overflow-hidden border-b border-white/5">
