@@ -1,4 +1,4 @@
-import { supabase, SUPABASE_CONFIGURED, SUPABASE_HOST } from '@/api/supabaseClient';
+import { supabase, SUPABASE_CONFIGURED, SUPABASE_HOST, SUPABASE_URL_SET, SUPABASE_KEY_SET } from '@/api/supabaseClient';
 import { ADMIN_EMAILS } from '@/lib/branding';
 
 /**
@@ -35,6 +35,8 @@ export async function diagnoseAccess(email) {
   const info = {
     email: e,
     supabaseConfigured: SUPABASE_CONFIGURED,
+    urlSet: SUPABASE_URL_SET,
+    keySet: SUPABASE_KEY_SET,
     supabaseHost: SUPABASE_HOST,
     isAdmin: isAdminEmail(e),
     rpcOk: null,        // true/false retornado pela função tem_acesso

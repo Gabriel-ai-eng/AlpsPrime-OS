@@ -17,6 +17,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 // Diagnóstico: usados pelo rastreador na tela de login para mostrar o estado.
 export const SUPABASE_CONFIGURED = Boolean(supabaseUrl && supabaseAnonKey);
+export const SUPABASE_URL_SET = Boolean(supabaseUrl);
+export const SUPABASE_KEY_SET = Boolean(supabaseAnonKey);
 export const SUPABASE_HOST = (() => {
   try { return new URL(supabaseUrl).host; } catch { return null; }
 })();

@@ -292,11 +292,13 @@ export default function AuthSection({ onClose }) {
               <div className="mt-2 rounded-xl border border-white/10 bg-black/30 p-3 text-[11px] leading-relaxed font-mono text-white/80 space-y-0.5">
                 <div className="text-white/50 uppercase tracking-widest text-[10px] mb-1">🔎 Rastreador de acesso</div>
                 <div>E-mail testado: <span className="text-white">{debug.email || '(vazio)'}</span></div>
+                <div>VITE_SUPABASE_URL: {debug.urlSet ? <span className="text-emerald-400">✓ presente</span> : <span className="text-red-400">✗ faltando</span>}</div>
+                <div>VITE_SUPABASE_ANON_KEY: {debug.keySet ? <span className="text-emerald-400">✓ presente</span> : <span className="text-red-400">✗ faltando</span>}</div>
                 <div>
                   Supabase conectado:{' '}
                   {debug.supabaseConfigured
                     ? <span className="text-emerald-400">SIM ({debug.supabaseHost})</span>
-                    : <span className="text-red-400">NÃO — faltam variáveis VITE_ no Vercel + Redeploy</span>}
+                    : <span className="text-red-400">NÃO</span>}
                 </div>
                 <div>É admin (entra sem pagar): {debug.isAdmin ? <span className="text-emerald-400">SIM</span> : <span className="text-white/60">não</span>}</div>
                 {debug.supabaseConfigured && !debug.isAdmin && (
