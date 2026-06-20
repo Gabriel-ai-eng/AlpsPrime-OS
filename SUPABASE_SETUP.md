@@ -93,3 +93,42 @@ Você tem duas opções para o cadastro:
 - `src/components/access/HotmartGate.jsx` — bloqueia o app até o acesso ser liberado.
 
 Depois de fazer os passos 1–3 e o Redeploy, o login/cadastro deve funcionar.
+
+---
+
+# Fase 2 — Tabelas de dados (feed, perfil, mensagens, etc.)
+
+Esta fase recria as **38 entidades do Base44** como tabelas no Supabase e liga o
+app a elas através de um **adaptador** (`src/api/entitiesAdapter.js`), que mantém
+a mesma interface `base44.entities.X.filter/list/get/create/update/delete`. Por
+isso os componentes do app **não precisaram ser reescritos um a um**.
+
+## 5. Rodar o SQL das tabelas
+
+No Supabase: **SQL Editor → New query**, cole **todo** o conteúdo do ficheiro
+[`supabase/schema.sql`](supabase/schema.sql) (gerado automaticamente a partir dos
+esquemas do Base44) e rode. Ele cria as 38 tabelas + a tabela de perfis
+`usuarios`, com índices e segurança (RLS) ativada.
+
+> O perfil do usuário fica na tabela **`usuarios`** (ligada ao login pelo `id`
+> do Supabase Auth). Ele é criado automaticamente no primeiro acesso.
+
+## 6. Observações importantes
+
+- **Segurança (RLS):** por enquanto, cada tabela tem uma política permissiva
+  (qualquer usuário logado pode ler/escrever). Isso faz o app voltar a funcionar
+  rápido. Numa etapa de reforço, dá para apertar as regras por tabela usando as
+  regras `rls` que já existem nos ficheiros `base44/entities/*.jsonc`.
+- **Funções de servidor (Fase 3):** tudo que dependia de `base44.functions.invoke`
+  (IA/Gemini, Mercado Pago, convites de equipe, upload de imagem, etc.) ainda
+  **não funciona** — por ora essas chamadas só avisam no console e falham sem
+  derrubar o app. Serão migradas na Fase 3.
+- **Dados antigos:** o `schema.sql` cria a estrutura vazia. Se você exportou os
+  dados do Base44, a importação para essas tabelas é um passo à parte.
+
+## 7. O que foi implementado nesta fase
+
+- `supabase/schema.sql` — as 38 tabelas + `usuarios` (gerado).
+- `src/api/entityTables.js` — mapa Entidade → tabela.
+- `src/api/entitiesAdapter.js` — adaptador de dados sobre o Supabase + `me`/`updateMe`.
+- `src/api/base44Client.js` — agora usa o adaptador (Supabase) no lugar do Base44.
