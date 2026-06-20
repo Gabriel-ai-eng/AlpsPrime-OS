@@ -37,6 +37,5 @@ export const ENTITY_TABLES = {
   "User": "usuarios",
   "UserStats": "user_stats",
   "Vote": "vote",
-  "WeeklyTrend": "weekly_trend",
-  "Withdrawal": "withdrawal"
+  "WeeklyTrend": "weekly_trend"
 };

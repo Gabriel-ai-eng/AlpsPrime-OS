@@ -207,4 +207,200 @@ export const handlers = {
       },
     };
   },
+
+  // --- Geração de imagem (tela ImageGen) ---
+  async generateDalle({ body }) {
+    const { prompt, size = '1024x1024', quality = 'standard', style = 'vivid' } = body || {};
+    if (!prompt || typeof prompt !== 'string') {
+      const e = new Error('prompt is required (string)'); e.status = 400; throw e;
+    }
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) { const e = new Error('OPENAI_API_KEY not configured'); e.status = 500; throw e; }
+
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({ model: 'dall-e-3', prompt, n: 1, size, quality, style }),
+    });
+    if (!response.ok) {
+      const t = await response.text();
+      console.error('DALL-E error:', response.status, t);
+      const e = new Error(`DALL-E API error: ${response.status}`); e.status = 500; throw e;
+    }
+    const data = await response.json();
+    const url = data?.data?.[0]?.url;
+    if (!url) { const e = new Error('No image URL returned by DALL-E'); e.status = 500; throw e; }
+    return { url, revised_prompt: data?.data?.[0]?.revised_prompt || prompt };
+  },
+
+  // --- Analytics do perfil (tela Profile, planos Pro/Unlimited) ---
+  async getProfileAnalytics({ user }) {
+    const plan = user.plan || 'free';
+    if (plan !== 'pro' && plan !== 'unlimited') {
+      const e = new Error('Plano Pro ou Unlimited necessário'); e.status = 403; throw e;
+    }
+    const cutoffDate = plan === 'pro' ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) : null;
+    const allVisits = await entities.ProfileVisit.filter({ profile_email: user.email }, '-created_date', 5000);
+    const visits = (cutoffDate ? allVisits.filter((v) => new Date(v.created_date) >= cutoffDate) : allVisits)
+      .filter((v) => !v.is_self);
+
+    const durations = visits.map((v) => v.duration_seconds || 0).filter((d) => d > 0);
+    const sourceCounts = {};
+    const postCounts = {};
+    for (const v of visits) {
+      sourceCounts[v.source || 'direct'] = (sourceCounts[v.source || 'direct'] || 0) + 1;
+      if (v.post_clicked_id) postCounts[v.post_clicked_id] = (postCounts[v.post_clicked_id] || 0) + 1;
+    }
+    let topPost = null;
+    const topPostId = Object.keys(postCounts).sort((a, b) => postCounts[b] - postCounts[a])[0];
+    if (topPostId) {
+      const post = await entities.Post.get(topPostId).catch(() => null);
+      if (post) topPost = { id: post.id, content: post.content?.slice(0, 100), media_url: post.media_url, media_type: post.media_type, click_count: postCounts[topPostId] };
+    }
+    const timeline = [];
+    const now = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const day = new Date(now); day.setHours(0, 0, 0, 0); day.setDate(day.getDate() - i);
+      const next = new Date(day); next.setDate(next.getDate() + 1);
+      timeline.push({
+        date: day.toISOString().slice(0, 10),
+        count: allVisits.filter((v) => { const d = new Date(v.created_date); return d >= day && d < next && !v.is_self; }).length,
+      });
+    }
+    return {
+      plan,
+      window: plan === 'pro' ? '7d' : 'all',
+      totals: {
+        total_visits: visits.length,
+        unique_visitors: new Set(visits.map((v) => v.visitor_email).filter(Boolean)).size,
+        avg_duration_seconds: durations.length ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0,
+      },
+      sources: sourceCounts,
+      top_post: topPost,
+      timeline,
+    };
+  },
+
+  // --- Tradução de perfil Unlimited (tela Profile) ---
+  async translateProfileContent({ body }) {
+    const SUPPORTED = { en: 'English', es: 'Spanish (Español)', fr: 'French (Français)', de: 'German (Deutsch)', it: 'Italian (Italiano)', pt: 'Portuguese (Português)', ja: 'Japanese (日本語)', zh: 'Chinese (中文)' };
+    const { profile_email, target_lang, items } = body || {};
+    if (!profile_email || !target_lang || !Array.isArray(items)) {
+      const e = new Error('profile_email, target_lang and items are required'); e.status = 400; throw e;
+    }
+    if (!SUPPORTED[target_lang]) { const e = new Error('Unsupported language'); e.status = 400; throw e; }
+
+    const owners = await entities.User.filter({ email: profile_email });
+    const owner = owners?.[0];
+    if (!owner) { const e = new Error('Profile not found'); e.status = 404; throw e; }
+    if (owner.plan !== 'unlimited') { const e = new Error('Translation only available for Unlimited profiles'); e.status = 403; throw e; }
+
+    const cleanItems = items.map((it) => ({ id: String(it?.id ?? ''), text: String(it?.text ?? '').trim() }))
+      .filter((it) => it.id && it.text).slice(0, 60);
+    if (cleanItems.length === 0) return { translations: {} };
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) { const e = new Error('Missing GEMINI_API_KEY'); e.status = 500; throw e; }
+
+    const prompt = `You are a professional translator. Translate each item below into ${SUPPORTED[target_lang]}.
+Rules:
+- Return ONLY valid JSON: { "translations": { "<id>": "<translated text>", ... } }
+- Preserve emojis, hashtags, mentions (@user), URLs and line breaks.
+- Keep tone, register and casual style natural for native speakers.
+- Do NOT add explanations or quotes around values.
+- If an item is already in the target language, return it unchanged.
+
+Items:
+${JSON.stringify(cleanItems)}`;
+
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json', temperature: 0.2 } }),
+    });
+    if (!res.ok) { const e = new Error('Translation service error'); e.status = 500; throw e; }
+    const data = await res.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    let parsed = {};
+    try { parsed = JSON.parse(text); } catch { parsed = {}; }
+    return { translations: parsed.translations || {} };
+  },
+
+  // --- Curtir comentário (feed) ---
+  async likeComment({ user, body }) {
+    const comment_id = body?.comment_id;
+    if (!comment_id) { const e = new Error('comment_id required'); e.status = 400; throw e; }
+    const comment = await entities.Comment.get(comment_id).catch(() => null);
+    if (!comment) { const e = new Error('Comentário não encontrado.'); e.status = 404; throw e; }
+
+    const existing = await entities.CommentLike.filter({ comment_id, user_email: user.email });
+    if (existing.length) {
+      await entities.CommentLike.delete(existing[0].id);
+      return { ok: true, liked: false };
+    }
+    await entities.CommentLike.create({ comment_id, user_email: user.email, comment_author_email: comment.author_email });
+    return { ok: true, liked: true };
+  },
+
+  // --- Comunicado para todos (admin, tela Settings) ---
+  async broadcastNotification({ user, body }) {
+    if (!user || user.role !== 'admin') { const e = new Error('Unauthorized'); e.status = 401; throw e; }
+    const type = body?.type;
+    const title = String(body?.title || '').trim();
+    const text = String(body?.body || '').trim();
+    if (type !== 'update' && type !== 'app') { const e = new Error('Tipo inválido. Use "update" ou "app".'); e.status = 400; throw e; }
+    if (!title) { const e = new Error('O título é obrigatório.'); e.status = 400; throw e; }
+
+    const users = await entities.User.list('-created_date', 5000);
+    let sent = 0;
+    for (const u of users) {
+      if (!u.email) continue;
+      try {
+        await entities.Notification.create({
+          recipient_email: u.email,
+          actor_email: 'sexta-feira@system',
+          actor_name: title,
+          actor_avatar: '',
+          type,
+          post_preview: text,
+          read: false,
+        });
+        sent++;
+      } catch (e) { console.error('broadcast falhou para', u.email, e.message); }
+    }
+    return { ok: true, sent, total: users.length };
+  },
+
+  // --- Excluir conta (tela Settings) ---
+  async deleteMyAccount({ user }) {
+    const email = user.email;
+    const delBy = async (entity, filter) => {
+      let records = [];
+      try { records = await entities[entity].filter(filter, '-created_date', 1000); } catch { records = []; }
+      for (const r of records) {
+        try { await entities[entity].delete(r.id); } catch (e) { console.error(`del ${entity} ${r.id}:`, e?.message); }
+      }
+    };
+    await delBy('Post', { author_email: email });
+    await delBy('Comment', { author_email: email });
+    await delBy('PostInteraction', { user_email: email });
+    await delBy('Follow', { follower_email: email });
+    await delBy('Follow', { followed_email: email });
+    await delBy('DirectMessage', { sender_email: email });
+    await delBy('DirectMessage', { receiver_email: email });
+    await delBy('Notification', { recipient_email: email });
+    await delBy('Notification', { actor_email: email });
+    await delBy('Challenge', { user_email: email });
+    await delBy('UserStats', { user_email: email });
+    await delBy('UsageHistory', { created_by: email });
+    await delBy('Conversation', { created_by: email });
+
+    try { await entities.User.delete(user.id); } catch (e) {
+      console.error('del usuarios:', e?.message);
+      const err = new Error('Não foi possível excluir a conta. Tente novamente.'); err.status = 500; throw err;
+    }
+    // Remove também o login do Supabase Auth
+    try { await admin.auth.admin.deleteUser(user.id); } catch (e) { console.error('del auth user:', e?.message); }
+    return { ok: true };
+  },
 };

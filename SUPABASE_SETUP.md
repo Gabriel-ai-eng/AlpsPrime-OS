@@ -157,7 +157,8 @@ Estas já devem existir (foram usadas no webhook); confirme e adicione as novas:
 | `SUPABASE_URL` | mesmo URL do projeto (já usado pelo webhook) |
 | `SUPABASE_SERVICE_KEY` | chave **service_role** (só no servidor; já usada pelo webhook) |
 | `SUPABASE_STORAGE_BUCKET` | nome do bucket de imagens (ex.: `uploads`) |
-| `GEMINI_API_KEY` | chave da API do Google Gemini (para o chat de IA) |
+| `GEMINI_API_KEY` | chave da API do Google Gemini (chat de IA e tradução de perfil) |
+| `OPENAI_API_KEY` | chave da OpenAI (geração de imagem DALL·E, tela "ImageGen") |
 
 ## 9. Storage (upload de imagens)
 
@@ -165,16 +166,32 @@ No Supabase: **Storage → New bucket** → crie um bucket **público** chamado
 `uploads` (ou o nome que puser em `SUPABASE_STORAGE_BUCKET`). É ele que guarda
 fotos de perfil/banner e mídias dos posts.
 
-## 10. Funções já migradas nesta fase
+## 10. Funções já migradas (telas visíveis da plataforma)
 
 `getUsersCount`, `listPublicUsers`, `getPublicProfile`, `uploadImageToSupabase`,
-`askGemini`, `getVotingFeed`, `castVote`, `getVotingResults`.
+`askGemini`, `getVotingFeed`, `castVote`, `getVotingResults`, `generateDalle`,
+`getProfileAnalytics`, `translateProfileContent`, `likeComment`,
+`broadcastNotification`, `deleteMyAccount`.
 
-## 11. Ainda faltam (próximas levas)
+## 11. Removido de propósito (não existe na plataforma)
 
-As demais ~48 funções (Mercado Pago/pagamentos, equipes/convites, mensagens e
-notificações no servidor, conteúdo premium, geração de imagem DALL·E, agentes de
-IA do feed, saques, etc.) ainda retornam **501** quando chamadas — o app não
-quebra, mas esses recursos específicos ficam indisponíveis até serem migrados.
-Cada uma é adicionada incrementalmente em `api/_lib/handlers.js`, seguindo o
-mesmo padrão das já migradas.
+A pedido — **saque (carteira/withdraw) e Mercado Pago foram excluídos** do
+projeto, pois não há essas telas no Alps OS:
+- Frontend: pasta `src/components/monetization/` (carteira, saque, vendas).
+- Backend: `processWithdrawal`, `confirmWithdrawal`, `createMPCheckout`,
+  `mpCreatePixPayment`, `mpCreateCardPayment`, `mpCreateBoletoPayment`,
+  `mpCheckPaymentStatus`.
+- Entidade `Withdrawal` (removida do schema e do mapa).
+- Se você já tinha rodado o `schema.sql` antes, pode remover a tabela antiga
+  com: `drop table if exists public.withdrawal cascade;`
+
+> Conteúdo premium (`unlockPremiumPost`) também não foi migrado por depender de
+> pagamento (parte da mesma economia). Continua retornando 501.
+
+## 12. Ainda não migrado (subsistemas de fundo, não são telas)
+
+Funções acionadas por agendamento/eventos, não por clique do usuário — feed de
+agentes de IA (`agentDailyTick`, `generateAgentPost`, `generateAgentReply`,
+`replyToAgentComment`…), equipes/convites (telas não publicadas), e gatilhos
+(`onPostCreated`, `welcomeNewUser`…). Retornam 501 sem quebrar o app; podem ser
+migradas depois se virarem telas visíveis.

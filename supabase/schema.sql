@@ -4,8 +4,6 @@
 -- (id, created_date, updated_date, created_by) para o adaptador funcionar.
 -- ============================================================
 
-create extension if not exists pgcrypto;
-
 create table if not exists public.agent (
   id uuid primary key default gen_random_uuid(),
   created_date timestamptz default now(),
@@ -648,25 +646,6 @@ create table if not exists public.weekly_trend (
 alter table public.weekly_trend enable row level security;
 drop policy if exists "weekly_trend_auth_all" on public.weekly_trend;
 create policy "weekly_trend_auth_all" on public.weekly_trend for all to authenticated using (true) with check (true);
-
-create table if not exists public.withdrawal (
-  id uuid primary key default gen_random_uuid(),
-  created_date timestamptz default now(),
-  updated_date timestamptz default now(),
-  created_by text,
-  "user_email" text,
-  "user_name" text,
-  "amount" numeric,
-  "method" text default 'pix',
-  "pix_key" text,
-  "status" text default 'pending',
-  "confirm_token" text,
-  "confirmed_at" text,
-  "notes" text
-);
-alter table public.withdrawal enable row level security;
-drop policy if exists "withdrawal_auth_all" on public.withdrawal;
-create policy "withdrawal_auth_all" on public.withdrawal for all to authenticated using (true) with check (true);
 
 -- Índices para acelerar os filtros mais comuns
 create index if not exists idx_post_author_email on public.post ("author_email");
