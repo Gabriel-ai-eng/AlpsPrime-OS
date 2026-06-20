@@ -170,7 +170,16 @@ fotos de perfil/banner e mídias dos posts.
 
 `getUsersCount`, `listPublicUsers`, `getPublicProfile`, `uploadImageToSupabase`,
 `askGemini`, `generateDalle`, `getProfileAnalytics`, `translateProfileContent`,
-`likeComment`, `broadcastNotification`, `deleteMyAccount`.
+`broadcastNotification`, `deleteMyAccount`.
+
+> Limpeza geral: removi ~10 telas sem rota (Arena, Team, Chat, ChatHistory,
+> DirectMessages, Dashboard, Gallery, History, Challenges, AutomacoesAtivas) e,
+> em cascata, ~120 componentes/hooks que só elas usavam — tudo confirmado sem
+> uso pelo `npm run build`. O `likeComment` também saiu (a UI de curtir
+> comentário foi removida junto). As 16 páginas que restam são exatamente as que
+> têm rota na plataforma (mais Sexta/Titan/Vivart, carregadas pelo Feed).
+> A pasta `base44/functions/` (código Deno antigo) foi mantida só como
+> referência histórica — não roda em lugar nenhum.
 
 ## 11. Removido de propósito (não existe na plataforma)
 

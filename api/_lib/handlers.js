@@ -217,22 +217,6 @@ ${JSON.stringify(cleanItems)}`;
     return { translations: parsed.translations || {} };
   },
 
-  // --- Curtir comentário (feed) ---
-  async likeComment({ user, body }) {
-    const comment_id = body?.comment_id;
-    if (!comment_id) { const e = new Error('comment_id required'); e.status = 400; throw e; }
-    const comment = await entities.Comment.get(comment_id).catch(() => null);
-    if (!comment) { const e = new Error('Comentário não encontrado.'); e.status = 404; throw e; }
-
-    const existing = await entities.CommentLike.filter({ comment_id, user_email: user.email });
-    if (existing.length) {
-      await entities.CommentLike.delete(existing[0].id);
-      return { ok: true, liked: false };
-    }
-    await entities.CommentLike.create({ comment_id, user_email: user.email, comment_author_email: comment.author_email });
-    return { ok: true, liked: true };
-  },
-
   // --- Comunicado para todos (admin, tela Settings) ---
   async broadcastNotification({ user, body }) {
     if (!user || user.role !== 'admin') { const e = new Error('Unauthorized'); e.status = 401; throw e; }
