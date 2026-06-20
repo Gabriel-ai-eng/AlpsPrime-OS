@@ -8,10 +8,17 @@ import { admin } from './admin.js';
 export async function getUserFromReq(req) {
   const header = req.headers?.authorization || req.headers?.Authorization || '';
   const token = String(header).replace(/^Bearer\s+/i, '').trim();
-  if (!token) return null;
+  if (!token) return { user: null, error: 'sem token de login na requisição' };
+
+  // Se a service key do servidor não estiver configurada, a validação falha aqui.
+  if (!process.env.SUPABASE_SERVICE_KEY || !process.env.SUPABASE_URL) {
+    return { user: null, error: 'SUPABASE_URL / SUPABASE_SERVICE_KEY ausentes no Vercel (servidor)' };
+  }
 
   const { data, error } = await admin.auth.getUser(token);
-  if (error || !data?.user) return null;
+  if (error || !data?.user) {
+    return { user: null, error: error?.message || 'token inválido/expirado' };
+  }
   const u = data.user;
 
   let profile = null;
@@ -23,9 +30,12 @@ export async function getUserFromReq(req) {
   }
 
   return {
-    ...(profile || {}),
-    id: u.id,
-    email: u.email,
-    role: profile?.role || u.app_metadata?.role || 'user',
+    user: {
+      ...(profile || {}),
+      id: u.id,
+      email: u.email,
+      role: profile?.role || u.app_metadata?.role || 'user',
+    },
+    error: null,
   };
 }

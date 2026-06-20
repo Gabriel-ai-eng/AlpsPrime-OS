@@ -20,9 +20,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const user = await getUserFromReq(req);
+    const { user, error: authError } = await getUserFromReq(req);
     if (!user && !PUBLIC_FUNCTIONS.has(name)) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({
+        error: `Não autenticado no servidor (${authError || 'sem usuário'}). Confira SUPABASE_URL e SUPABASE_SERVICE_KEY no Vercel.`,
+      });
     }
 
     const body = req.body && typeof req.body === 'object' ? req.body : {};
