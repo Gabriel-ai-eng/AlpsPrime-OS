@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import AuthSection from '@/components/access/AuthSection';
 import { motion } from 'framer-motion';
-import { Mail, ShoppingBag, Sparkles, Image as ImageIcon, MessageCircle, ChevronDown, Check } from 'lucide-react';
+import { Mail, ShoppingBag, Sparkles, Image as ImageIcon, MessageCircle, ChevronDown } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
 
 const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
@@ -62,12 +62,12 @@ export default function Welcome() {
   if (showAuth) return <AuthSection onClose={() => setShowAuth(false)} />;
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white overflow-x-hidden" style={{ fontFamily: "'Open Sans', sans-serif" }}>
       {/* ---- Barra superior ---- */}
       <header className="relative z-10 mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-8">
         <div className="flex items-center gap-2.5">
           <img src={LOGO_URL} alt="Alps OS" className="h-8 w-8 rounded-lg object-cover" />
-          <span className="font-display text-lg font-bold gold-gradient">Alps OS</span>
+          <span className="text-lg font-bold gold-gradient">Alps OS</span>
         </div>
         <button
           onClick={() => setShowAuth(true)}
@@ -94,7 +94,7 @@ export default function Welcome() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl"
+              className="text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl"
             >
               Converse, crie,<br />
               <span className="gold-gradient">tudo num só lugar.</span>
@@ -125,7 +125,7 @@ export default function Welcome() {
                 style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
               >
                 <ShoppingBag className="h-5 w-5" />
-                Garantir acesso — R$ 19,90
+                Garantir acesso
               </a>
               <button
                 onClick={() => setShowAuth(true)}
@@ -135,26 +135,12 @@ export default function Welcome() {
                 Já comprei — entrar
               </button>
             </motion.div>
-
-            {/* Chips de confiança */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.45 }}
-              className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-white/50 lg:justify-start"
-            >
-              <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-gold" /> Acesso vitalício</span>
-              <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-gold" /> Pagamento único</span>
-              {totalUsers >= 50 && (
-                <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-gold" /> {totalUsers.toLocaleString('pt-BR')} usuários</span>
-              )}
-            </motion.div>
           </div>
         </section>
 
         {/* ---- RECURSOS ---- */}
         <section className="pb-16 sm:pb-24">
-          <h2 className="mb-3 text-center font-display text-2xl font-bold sm:text-3xl">O que você ganha</h2>
+          <h2 className="mb-3 text-center text-2xl font-bold sm:text-3xl">O que você ganha</h2>
           <p className="mx-auto mb-10 max-w-md text-center text-sm text-white/50">Tudo o que precisas de IA, reunido numa plataforma só.</p>
           <div className="grid gap-4 sm:grid-cols-3">
             {FEATURES.map((f, i) => (
@@ -181,7 +167,7 @@ export default function Welcome() {
 
         {/* ---- FAQ ---- */}
         <section className="mx-auto max-w-2xl pb-16 sm:pb-24">
-          <h2 className="mb-8 text-center font-display text-2xl font-bold sm:text-3xl">Perguntas frequentes</h2>
+          <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">Perguntas frequentes</h2>
           <div className="space-y-3">
             {FAQ.map((item) => <FaqItem key={item.q} {...item} />)}
           </div>
