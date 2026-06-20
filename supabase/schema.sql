@@ -406,20 +406,6 @@ alter table public.post_interaction enable row level security;
 drop policy if exists "post_interaction_auth_all" on public.post_interaction;
 create policy "post_interaction_auth_all" on public.post_interaction for all to authenticated using (true) with check (true);
 
-create table if not exists public.post_unlock (
-  id uuid primary key default gen_random_uuid(),
-  created_date timestamptz default now(),
-  updated_date timestamptz default now(),
-  created_by text,
-  "post_id" text,
-  "buyer_email" text,
-  "creator_email" text,
-  "amount_brl" numeric
-);
-alter table public.post_unlock enable row level security;
-drop policy if exists "post_unlock_auth_all" on public.post_unlock;
-create policy "post_unlock_auth_all" on public.post_unlock for all to authenticated using (true) with check (true);
-
 create table if not exists public.profile_visit (
   id uuid primary key default gen_random_uuid(),
   created_date timestamptz default now(),
@@ -617,35 +603,6 @@ create table if not exists public.user_stats (
 alter table public.user_stats enable row level security;
 drop policy if exists "user_stats_auth_all" on public.user_stats;
 create policy "user_stats_auth_all" on public.user_stats for all to authenticated using (true) with check (true);
-
-create table if not exists public.vote (
-  id uuid primary key default gen_random_uuid(),
-  created_date timestamptz default now(),
-  updated_date timestamptz default now(),
-  created_by text,
-  "post_id" text,
-  "voter_email" text,
-  "round_id" text
-);
-alter table public.vote enable row level security;
-drop policy if exists "vote_auth_all" on public.vote;
-create policy "vote_auth_all" on public.vote for all to authenticated using (true) with check (true);
-
-create table if not exists public.weekly_trend (
-  id uuid primary key default gen_random_uuid(),
-  created_date timestamptz default now(),
-  updated_date timestamptz default now(),
-  created_by text,
-  "tag" text,
-  "title" text,
-  "description" text,
-  "starts_at" text,
-  "ends_at" text,
-  "active" boolean default true
-);
-alter table public.weekly_trend enable row level security;
-drop policy if exists "weekly_trend_auth_all" on public.weekly_trend;
-create policy "weekly_trend_auth_all" on public.weekly_trend for all to authenticated using (true) with check (true);
 
 -- Índices para acelerar os filtros mais comuns
 create index if not exists idx_post_author_email on public.post ("author_email");

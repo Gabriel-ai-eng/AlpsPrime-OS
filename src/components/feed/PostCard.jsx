@@ -7,7 +7,6 @@ import { cn, parseServerDate } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { useLiquidRipple } from '@/lib/useLiquidRipple';
 import VerifiedBadge from '@/components/common/VerifiedBadge';
-import PremiumPaywall from '@/components/feed/PremiumPaywall';
 import ReactionPicker, { REACTION_MAP } from '@/components/feed/ReactionPicker';
 
 export default function PostCard({
@@ -27,8 +26,6 @@ export default function PostCard({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const isOwnPost = post.author_email === currentUserEmail;
-  const isPremium = !!post.is_premium && Number(post.premium_price) > 0;
-  const canSeeMedia = !isPremium || isOwnPost || isUnlocked;
   // Always prefer the live (current) profile picture/name/plan over the snapshot stored on the post
   const avatar = liveAvatar || post.author_avatar;
   const name = liveName || post.author_name || 'Usuário';
@@ -126,34 +123,12 @@ export default function PostCard({
 
       {/* Media */}
       {post.media_url && post.media_type === 'image' && (
-        canSeeMedia ? (
-          <div className="relative z-10">
-            <img src={post.media_url} alt="" className="w-full max-h-[600px] object-cover" />
-            {isPremium && isOwnPost && (
-              <div className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-background/80 backdrop-blur-sm border border-gold/30 text-[10px] uppercase tracking-widest text-gold font-bold">
-                💎 Premium
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="relative w-full max-h-[600px] overflow-hidden z-10">
-            <img src={post.media_url} alt="" className="w-full max-h-[600px] object-cover blur-2xl scale-110" />
-          </div>
-        )
+        <div className="relative z-10">
+          <img src={post.media_url} alt="" className="w-full max-h-[600px] object-cover" />
+        </div>
       )}
       {post.media_url && post.media_type === 'video' && (
-        canSeeMedia ? (
-          <video src={post.media_url} controls className="w-full max-h-[600px] relative z-10" />
-        ) : (
-          <div className="relative w-full h-72 overflow-hidden bg-muted z-10">
-            <video src={post.media_url} className="w-full h-full object-cover blur-2xl scale-110" muted />
-          </div>
-        )
-      )}
-
-      {/* Paywall */}
-      {isPremium && !canSeeMedia && (
-        <PremiumPaywall post={post} />
+        <video src={post.media_url} controls className="w-full max-h-[600px] relative z-10" />
       )}
 
       {/* Stats (if any) */}
@@ -179,7 +154,7 @@ export default function PostCard({
         <ReactionPicker
           currentReaction={myReaction}
           onSelect={(type) => onReact(post.id, type)}
-          variant={isPremium ? 'premium' : 'default'}
+          variant="default"
         />
         <ActionButton icon={MessageCircle} label="Comentar" onClick={() => onComment(post)} />
         <ActionButton icon={Share2} label="Compartilhar" onClick={() => onShare(post)} />

@@ -24,7 +24,6 @@ export const ENTITY_TABLES = {
   "PlaylabWorld": "playlab_world",
   "Post": "post",
   "PostInteraction": "post_interaction",
-  "PostUnlock": "post_unlock",
   "ProfileVisit": "profile_visit",
   "QuestionCard": "question_card",
   "Reaction": "reaction",
@@ -35,7 +34,5 @@ export const ENTITY_TABLES = {
   "UploadedFile": "uploaded_file",
   "UsageHistory": "usage_history",
   "User": "usuarios",
-  "UserStats": "user_stats",
-  "Vote": "vote",
-  "WeeklyTrend": "weekly_trend"
+  "UserStats": "user_stats"
 };

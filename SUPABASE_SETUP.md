@@ -169,24 +169,33 @@ fotos de perfil/banner e mídias dos posts.
 ## 10. Funções já migradas (telas visíveis da plataforma)
 
 `getUsersCount`, `listPublicUsers`, `getPublicProfile`, `uploadImageToSupabase`,
-`askGemini`, `getVotingFeed`, `castVote`, `getVotingResults`, `generateDalle`,
-`getProfileAnalytics`, `translateProfileContent`, `likeComment`,
-`broadcastNotification`, `deleteMyAccount`.
+`askGemini`, `generateDalle`, `getProfileAnalytics`, `translateProfileContent`,
+`likeComment`, `broadcastNotification`, `deleteMyAccount`.
 
 ## 11. Removido de propósito (não existe na plataforma)
 
-A pedido — **saque (carteira/withdraw) e Mercado Pago foram excluídos** do
-projeto, pois não há essas telas no Alps OS:
-- Frontend: pasta `src/components/monetization/` (carteira, saque, vendas).
+A pedido, removi seções que não existem no Alps OS:
+
+**Saque / carteira / Mercado Pago:**
+- Frontend: pasta `src/components/monetization/`.
 - Backend: `processWithdrawal`, `confirmWithdrawal`, `createMPCheckout`,
   `mpCreatePixPayment`, `mpCreateCardPayment`, `mpCreateBoletoPayment`,
   `mpCheckPaymentStatus`.
-- Entidade `Withdrawal` (removida do schema e do mapa).
-- Se você já tinha rodado o `schema.sql` antes, pode remover a tabela antiga
-  com: `drop table if exists public.withdrawal cascade;`
+- Entidade `Withdrawal`.
 
-> Conteúdo premium (`unlockPremiumPost`) também não foi migrado por depender de
-> pagamento (parte da mesma economia). Continua retornando 501.
+**Conteúdo premium (paywall):**
+- Frontend: `src/components/feed/PremiumPaywall.jsx` + lógica de paywall no
+  `PostCard.jsx` (a mídia agora aparece sempre).
+- Backend: `unlockPremiumPost`, `getMyUnlockedPosts`. Entidade `PostUnlock`.
+
+**Votação (tela não publicada):**
+- Frontend: `src/pages/Voting.jsx`.
+- Backend: `castVote`, `getVotingFeed`, `getVotingResults`, `setWeeklyTrend`.
+- Entidades `Vote` e `WeeklyTrend`.
+
+> Se você já rodou o `schema.sql` antes destas remoções, pode limpar as tabelas
+> antigas com:
+> `drop table if exists public.withdrawal, public.post_unlock, public.vote, public.weekly_trend cascade;`
 
 ## 12. Ainda não migrado (subsistemas de fundo, não são telas)
 
@@ -195,3 +204,6 @@ agentes de IA (`agentDailyTick`, `generateAgentPost`, `generateAgentReply`,
 `replyToAgentComment`…), equipes/convites (telas não publicadas), e gatilhos
 (`onPostCreated`, `welcomeNewUser`…). Retornam 501 sem quebrar o app; podem ser
 migradas depois se virarem telas visíveis.
+
+> Observação: `PostCard.jsx` (card de post social) ficou sem uso na plataforma
+> atual (o feed usa `AgentPostCard`); foi mantido apenas limpo do premium.

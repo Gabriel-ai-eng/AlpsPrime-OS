@@ -1,15 +1,5 @@
 import { admin, entities } from './admin.js';
 
-// round_id = ISO ano-semana (usado na votação)
-function getRoundId(date) {
-  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
-  return `${d.getUTCFullYear()}-${String(weekNo).padStart(2, '0')}`;
-}
-
 const publicUserFields = (u) => ({
   id: u.id,
   email: u.email,
@@ -107,105 +97,6 @@ export const handlers = {
     const data = await response.json();
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     return { text };
-  },
-
-  async getVotingFeed({ user }) {
-    const now = new Date();
-    const roundId = getRoundId(now);
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-    const allPosts = await entities.Post.list('-likes_count', 200);
-    const allUsers = await entities.User.list('-created_date', 5000);
-    const optedOut = new Set(allUsers.filter((u) => u.voting_opt_in === false).map((u) => u.email));
-
-    const candidates = allPosts
-      .filter((p) => new Date(p.created_date) >= sevenDaysAgo)
-      .filter((p) => !p.is_premium)
-      .filter((p) => !optedOut.has(p.author_email))
-      .slice(0, 30);
-
-    const allVotes = await entities.Vote.filter({ round_id: roundId }, '-created_date', 5000);
-    const counts = {};
-    allVotes.forEach((v) => { counts[v.post_id] = (counts[v.post_id] || 0) + 1; });
-    const myVote = allVotes.find((v) => v.voter_email === user.email);
-
-    const brtDay = (now.getUTCDay() + (now.getUTCHours() < 3 ? -1 : 0) + 7) % 7;
-    const isVotingDay = brtDay === 4;
-
-    return {
-      round_id: roundId,
-      is_voting_day: isVotingDay,
-      my_vote_post_id: myVote?.post_id || null,
-      candidates: candidates.map((p) => ({
-        id: p.id,
-        author_email: p.author_email,
-        author_name: p.author_name,
-        author_avatar: p.author_avatar,
-        author_plan: p.author_plan,
-        content: p.content,
-        media_url: p.media_url,
-        media_type: p.media_type,
-        likes_count: p.likes_count || 0,
-        comments_count: p.comments_count || 0,
-        votes: counts[p.id] || 0,
-        created_date: p.created_date,
-      })),
-    };
-  },
-
-  async castVote({ user, body }) {
-    const post_id = body?.post_id;
-    if (!post_id) { const e = new Error('post_id required'); e.status = 400; throw e; }
-
-    const now = new Date();
-    const brtDay = (now.getUTCDay() + (now.getUTCHours() < 3 ? -1 : 0) + 7) % 7;
-    if (brtDay !== 4) { const e = new Error('A votação só fica aberta às quintas-feiras.'); e.status = 403; throw e; }
-
-    const roundId = getRoundId(now);
-    const post = await entities.Post.get(post_id).catch(() => null);
-    if (!post) { const e = new Error('Post não encontrado'); e.status = 404; throw e; }
-    if (post.author_email === user.email) { const e = new Error('Você não pode votar no próprio post.'); e.status = 400; throw e; }
-
-    const existing = await entities.Vote.filter({ voter_email: user.email, round_id: roundId });
-    if (existing.length > 0) await entities.Vote.update(existing[0].id, { post_id });
-    else await entities.Vote.create({ post_id, voter_email: user.email, round_id: roundId });
-
-    return { ok: true, round_id: roundId };
-  },
-
-  async getVotingResults() {
-    const now = new Date();
-    const dow = now.getDay();
-    let targetDate = new Date(now);
-    if (dow === 5 || dow === 6 || dow === 0) {
-      const back = dow === 0 ? 3 : dow === 6 ? 2 : 1;
-      targetDate.setDate(now.getDate() - back);
-    }
-    const roundId = getRoundId(targetDate);
-
-    const votes = await entities.Vote.filter({ round_id: roundId }, '-created_date', 5000);
-    if (!votes.length) return { round_id: roundId, winner: null, total_votes: 0 };
-
-    const tally = {};
-    votes.forEach((v) => { tally[v.post_id] = (tally[v.post_id] || 0) + 1; });
-    const [topPostId, topVotes] = Object.entries(tally).sort((a, b) => b[1] - a[1])[0];
-
-    const post = await entities.Post.get(topPostId).catch(() => null);
-    if (!post) return { round_id: roundId, winner: null, total_votes: votes.length };
-
-    return {
-      round_id: roundId,
-      total_votes: votes.length,
-      winner: {
-        post_id: post.id,
-        author_email: post.author_email,
-        author_name: post.author_name,
-        author_avatar: post.author_avatar,
-        content: post.content,
-        media_url: post.media_url,
-        votes: topVotes,
-      },
-    };
   },
 
   // --- Geração de imagem (tela ImageGen) ---
