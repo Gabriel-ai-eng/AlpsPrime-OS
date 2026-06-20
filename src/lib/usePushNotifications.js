@@ -86,7 +86,7 @@ export function usePushNotifications(userEmail) {
       try {
         new Notification(title, {
           body,
-          icon: '/favicon.ico',
+          icon: '/favicon.png',
           tag: `sf-${n.id}`,
         });
       } catch {

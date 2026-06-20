@@ -14,14 +14,14 @@ export default function AIUnlockedCelebration({ open, onClose }) {
       if (Notification.permission === 'granted') {
         new Notification('Sexta-feira IA desbloqueada', {
           body: 'Você provou que é criativo o suficiente. A Sexta Feira acordou para você.',
-          icon: '/favicon.ico',
+          icon: '/favicon.png',
         });
       } else if (Notification.permission !== 'denied') {
         Notification.requestPermission().then((p) => {
           if (p === 'granted') {
             new Notification('Sexta-feira IA desbloqueada', {
               body: 'Você provou que é criativo o suficiente. A Sexta Feira acordou para você.',
-              icon: '/favicon.ico',
+              icon: '/favicon.png',
             });
           }
         });
