@@ -1,18 +1,27 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import {
+  hasPaidAccess,
+  signInWithPassword,
+  signUp,
+  verifySignupOtp,
+  resendSignupOtp,
+  requestPasswordReset,
+  resetPasswordWithCode,
+} from '@/lib/auth';
 import { Mail, Lock, User, ArrowLeft, Loader2, KeyRound, Eye, EyeOff, ShoppingBag } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
 
 // Checkout da Hotmart (mesmo usado no Welcome/HotmartGate).
 const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
 
-// Extrai uma mensagem amigável do erro da API do Base44.
+// Extrai uma mensagem amigável do erro do Supabase Auth.
 function msgErro(e) {
-  const d = e?.response?.data || e?.data || {};
-  const raw = d.detail || d.message || e?.message || '';
-  if (/incorrect|invalid cred|unauthorized|401/i.test(raw)) return 'E-mail ou senha incorretos.';
-  if (/already|exists|registered/i.test(raw)) return 'Este e-mail já tem uma conta. Tente entrar.';
-  if (/otp|code|token/i.test(raw)) return 'Código inválido ou expirado.';
+  const raw = e?.message || e?.error_description || '';
+  if (/invalid login|invalid cred|wrong password|incorrect|401/i.test(raw)) return 'E-mail ou senha incorretos.';
+  if (/already registered|already exists|user already/i.test(raw)) return 'Este e-mail já tem uma conta. Tente entrar.';
+  if (/otp|code|token|expired|invalid/i.test(raw)) return 'Código inválido ou expirado.';
+  if (/password.*(6|short|least)/i.test(raw)) return 'A senha precisa ter pelo menos 6 caracteres.';
+  if (/email.*confirm|not confirmed/i.test(raw)) return 'Confirme seu e-mail antes de entrar.';
   return raw || 'Não foi possível concluir. Tente novamente.';
 }
 
@@ -38,8 +47,8 @@ export default function AuthSection({ onClose }) {
 
   const ensureAccess = async () => {
     try {
-      const res = await base44.functions.invoke('checkEmailAccess', { email: cleanEmail() });
-      if (res?.data && res.data.hasAccess === false) {
+      const ok = await hasPaidAccess(cleanEmail());
+      if (!ok) {
         setError('Este e-mail ainda não tem acesso. Use o mesmo e-mail da sua compra na Hotmart — só ele libera o cadastro/login.');
         setNoAccess(true);
         return false;
@@ -47,6 +56,7 @@ export default function AuthSection({ onClose }) {
       setNoAccess(false);
       return true;
     } catch {
+      // Em caso de falha na consulta, não bloqueia o usuário aqui.
       return true;
     }
   };
@@ -55,7 +65,7 @@ export default function AuthSection({ onClose }) {
     setLoading(true); setError('');
     try {
       if (!(await ensureAccess())) { setLoading(false); return; }
-      await base44.auth.loginViaEmailPassword(cleanEmail(), password);
+      await signInWithPassword(cleanEmail(), password);
       goFeed();
     } catch (e) { setError(msgErro(e)); setLoading(false); }
   };
@@ -64,12 +74,9 @@ export default function AuthSection({ onClose }) {
     setLoading(true); setError('');
     try {
       if (!(await ensureAccess())) { setLoading(false); return; }
-      const res = await base44.auth.register({
-        email: cleanEmail(),
-        password,
-        full_name: fullName.trim(),
-      });
-      if (res?.access_token) { base44.auth.setToken(res.access_token); goFeed(); return; }
+      const res = await signUp(cleanEmail(), password, fullName.trim());
+      // Se a confirmação de e-mail estiver desligada no Supabase, já vem sessão.
+      if (res?.session) { goFeed(); return; }
       setStep('otp');
       setInfo('Enviamos um código de confirmação para o seu e-mail.');
       setLoading(false);
@@ -79,8 +86,7 @@ export default function AuthSection({ onClose }) {
   const handleVerify = async () => {
     setLoading(true); setError('');
     try {
-      const res = await base44.auth.verifyOtp({ email: cleanEmail(), otpCode: otpCode.trim() });
-      if (res?.access_token) base44.auth.setToken(res.access_token);
+      await verifySignupOtp(cleanEmail(), otpCode.trim());
       goFeed();
     } catch (e) { setError(msgErro(e)); setLoading(false); }
   };
@@ -88,7 +94,7 @@ export default function AuthSection({ onClose }) {
   const handleResend = async () => {
     setError(''); setInfo('');
     try {
-      await base44.auth.resendOtp(cleanEmail());
+      await resendSignupOtp(cleanEmail());
       setInfo('Código reenviado. Verifique seu e-mail.');
     } catch (e) { setError(msgErro(e)); }
   };
@@ -96,7 +102,7 @@ export default function AuthSection({ onClose }) {
   const handleForgotRequest = async () => {
     setLoading(true); setError('');
     try {
-      await base44.auth.resetPasswordRequest(cleanEmail());
+      await requestPasswordReset(cleanEmail());
       setStep('reset');
       setInfo('Enviamos as instruções para o seu e-mail. Cole o código recebido e defina a nova senha.');
       setLoading(false);
@@ -106,7 +112,7 @@ export default function AuthSection({ onClose }) {
   const handleResetPassword = async () => {
     setLoading(true); setError('');
     try {
-      await base44.auth.resetPassword({ resetToken: resetToken.trim(), newPassword });
+      await resetPasswordWithCode(cleanEmail(), resetToken.trim(), newPassword);
       setPassword(''); setNewPassword(''); setResetToken('');
       reset('login');
       setInfo('Senha redefinida! Agora é só entrar com a nova senha.');

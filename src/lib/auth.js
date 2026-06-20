@@ -1,0 +1,93 @@
+import { supabase } from '@/api/supabaseClient';
+
+/**
+ * Camada de autenticação baseada no Supabase Auth.
+ * Substitui o antigo base44.auth.* (o backend do Base44 não existe mais).
+ */
+
+const clean = (email) => (email || '').trim().toLowerCase();
+
+// --- Acesso pago (tabela acessos_pagos, preenchida pelo webhook da Hotmart) ---
+// Usa a função RPC `tem_acesso` (SECURITY DEFINER) para não expor a tabela ao
+// frontend — ela retorna só true/false para um e-mail. Ver SUPABASE_SETUP.md.
+export async function hasPaidAccess(email) {
+  const e = clean(email);
+  if (!e) return false;
+  const { data, error } = await supabase.rpc('tem_acesso', { p_email: e });
+  if (error) {
+    console.error('[acesso] erro ao consultar tem_acesso:', error.message);
+    return false;
+  }
+  return data === true;
+}
+
+// --- Login / Cadastro ---
+export async function signInWithPassword(email, password) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: clean(email),
+    password,
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function signUp(email, password, fullName) {
+  const { data, error } = await supabase.auth.signUp({
+    email: clean(email),
+    password,
+    options: { data: { full_name: (fullName || '').trim() } },
+  });
+  if (error) throw error;
+  // Se "Confirm email" estiver desligado no Supabase, já vem uma session aqui.
+  return data;
+}
+
+// Código de 6 dígitos enviado por e-mail no cadastro (Supabase: verifyOtp).
+export async function verifySignupOtp(email, token) {
+  const { data, error } = await supabase.auth.verifyOtp({
+    email: clean(email),
+    token: (token || '').trim(),
+    type: 'signup',
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function resendSignupOtp(email) {
+  const { error } = await supabase.auth.resend({ type: 'signup', email: clean(email) });
+  if (error) throw error;
+}
+
+// --- Recuperação de senha (via código de recuperação) ---
+export async function requestPasswordReset(email) {
+  const { error } = await supabase.auth.resetPasswordForEmail(clean(email));
+  if (error) throw error;
+}
+
+export async function resetPasswordWithCode(email, token, newPassword) {
+  // 1) valida o código de recuperação (cria uma sessão temporária)
+  const { error: vErr } = await supabase.auth.verifyOtp({
+    email: clean(email),
+    token: (token || '').trim(),
+    type: 'recovery',
+  });
+  if (vErr) throw vErr;
+  // 2) define a nova senha
+  const { error: uErr } = await supabase.auth.updateUser({ password: newPassword });
+  if (uErr) throw uErr;
+}
+
+// --- Sessão ---
+export async function getSession() {
+  const { data } = await supabase.auth.getSession();
+  return data?.session || null;
+}
+
+export async function signOut(redirectTo = '/') {
+  try {
+    await supabase.auth.signOut();
+  } catch (e) {
+    console.error('[auth] erro ao sair:', e?.message);
+  }
+  if (typeof window !== 'undefined') window.location.assign(redirectTo);
+}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
+import { signOut } from '@/lib/auth';
 import {
   User, LogOut, Menu, X, Search as SearchIcon,
   Settings, HelpCircle, Grid, LayoutList, Star, Sparkles
@@ -76,7 +77,7 @@ function Sidebar({ user, location, aiUnlocked, onNavigate, onAILocked }) {
           <HelpCircle className="w-4 h-4" />
           <span>Suporte</span>
         </a>
-        <button onClick={() => base44.auth.logout()} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+        <button onClick={() => signOut()} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <LogOut className="w-4 h-4" />
           <span>Sair</span>
         </button>
@@ -222,7 +223,7 @@ export default function AppShell() {
                   </div>
                   <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Suporte</span>
                 </a>
-                <button onClick={() => { setMobileOpen(false); base44.auth.logout(window.location.origin); }} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-500/10 transition-colors group outline-none">
+                <button onClick={() => { setMobileOpen(false); signOut(window.location.origin); }} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-500/10 transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-red-400 group-hover:border-red-400/20 transition-colors">
                     <LogOut className="w-4 h-4" />
                   </div>

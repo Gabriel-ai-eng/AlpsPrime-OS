@@ -14,6 +14,7 @@ import ProfileAnalytics from '@/components/profile/ProfileAnalytics';
 
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
+import { signOut } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import SettingsSection from '@/components/settings/SettingsSection';
@@ -90,7 +91,7 @@ export default function Settings() {
     try {
       await base44.functions.invoke('deleteMyAccount', {});
       toast.success('Conta excluída. Até breve.');
-      setTimeout(() => base44.auth.logout(), 1200);
+      setTimeout(() => signOut(), 1200);
     } catch (e) {
       toast.error('Erro ao excluir conta. Tente novamente.');
       setDeletingAccount(false);

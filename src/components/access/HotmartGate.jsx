@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { hasPaidAccess, signOut } from '@/lib/auth';
 import { Loader2, ShoppingBag, RefreshCcw, LogOut, Lock } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
 import { motion } from 'framer-motion';
@@ -17,9 +17,8 @@ export default function HotmartGate({ userEmail, children }) {
 
   const check = async () => {
     try {
-      const res = await base44.functions.invoke('checkMyAccess', {});
-      const data = res?.data || {};
-      setHasAccess(!!data.hasAccess);
+      const ok = await hasPaidAccess(userEmail);
+      setHasAccess(ok);
     } catch {
       setHasAccess(false);
     } finally {
@@ -129,7 +128,7 @@ export default function HotmartGate({ userEmail, children }) {
           </p>
 
           <button
-            onClick={() => base44.auth.logout()}
+            onClick={() => signOut()}
             className="mt-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors"
           >
             <LogOut className="w-3 h-3" /> Sair da conta
