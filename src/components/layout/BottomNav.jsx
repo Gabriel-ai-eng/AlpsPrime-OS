@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, LayoutGrid, Grip, Star, Bot, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,21 +47,24 @@ function NavItem({ item, active }) {
         className="flex-1 h-full flex items-center justify-center relative outline-none"
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
-        <AnimatePresence>
-          {balloon && (
-            <motion.div
-              key={balloon}
-              initial={{ opacity: 0, y: 8, scale: 0.92 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 4, scale: 0.92 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-              className="fixed left-4 bottom-[88px] whitespace-nowrap rounded-2xl bg-[#2C2C2E] border border-white/10 px-4 py-2 text-sm font-medium text-white shadow-xl pointer-events-none z-[999]"
-            >
-              {balloon}
-              <span className="absolute -bottom-[5px] left-5 w-2.5 h-2.5 bg-[#2C2C2E] border-b border-r border-white/10 rotate-45" />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {createPortal(
+          <AnimatePresence>
+            {balloon && (
+              <motion.div
+                key={balloon}
+                initial={{ opacity: 0, y: 8, scale: 0.92 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 4, scale: 0.92 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+                className="fixed left-4 bottom-[96px] whitespace-nowrap rounded-2xl bg-[#2C2C2E] border border-white/10 px-4 py-2 text-sm font-medium text-white shadow-xl pointer-events-none z-[9999]"
+              >
+                {balloon}
+                <span className="absolute -bottom-[5px] left-5 w-2.5 h-2.5 bg-[#2C2C2E] border-b border-r border-white/10 rotate-45" />
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
         <div className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 relative overflow-hidden">
           <Icon
             className="w-6 h-6 transition-all duration-300 relative z-10 text-white/50"
