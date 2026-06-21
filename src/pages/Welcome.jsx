@@ -7,11 +7,7 @@ import { LOGO_URL } from '@/lib/branding';
 
 const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
 
-const FEATURES = [
-  { icon: MessageSquare, title: 'Converse com a Sexta-feira', desc: 'Uma IA que responde, ajuda e cria com você — em português, na hora.' },
-  { icon: Sparkles, title: 'Crie imagens', desc: 'Descreva o que imagina e receba a arte pronta em segundos.' },
-  { icon: Users, title: 'Feed da comunidade', desc: 'Acompanhe novidades, compartilhe e veja o que outros estão criando.' },
-];
+const FEATURES = [];
 
 const FAQ = [
   { q: 'O que é o Alps OS?', a: 'É um ecossistema privado de serviços da Alps Prime, tudo em um só lugar' },
@@ -110,8 +106,6 @@ export default function Welcome() {
 
         {/* ---- RECURSOS ---- */}
         <section className="pb-16 sm:pb-24">
-          <h2 className="mb-3 text-center text-2xl font-bold sm:text-3xl">O que você ganha</h2>
-          <p className="mx-auto mb-10 max-w-md text-center text-sm text-white/50">Tudo o que precisas de IA, reunido numa plataforma só.</p>
           <div className="grid gap-4 sm:grid-cols-3">
             {FEATURES.map((f, i) => (
               <motion.div
