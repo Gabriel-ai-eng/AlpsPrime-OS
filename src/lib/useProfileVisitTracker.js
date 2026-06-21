@@ -8,7 +8,7 @@ import { base44 } from '@/api/base44Client';
 function detectSource() {
   try {
     const last = sessionStorage.getItem('sf_last_path') || '';
-    if (last.startsWith('/feed')) return 'feed';
+    if (last.startsWith('/home')) return 'feed';
     if (last.startsWith('/search')) return 'search';
     if (last.startsWith('/verified')) return 'verified';
     if (last.startsWith('/sextou')) return 'sextou';

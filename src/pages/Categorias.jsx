@@ -59,7 +59,7 @@ export default function Categorias() {
           return (
             <div
               key={app.id}
-              onClick={() => navigate('/feed')}
+              onClick={() => navigate('/home')}
               className="flex items-center gap-4 p-4 rounded-3xl bg-[#1C1C1E]/50 border border-white/5 active:scale-[0.98] transition-all cursor-pointer"
             >
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${app.bgIcone}`}>

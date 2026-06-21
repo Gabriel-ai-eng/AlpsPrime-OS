@@ -11,7 +11,7 @@ import AppShell from '@/components/layout/AppShell';
 import Welcome from '@/pages/Welcome';
 import ImageGen from '@/pages/ImageGen';
 import Profile from '@/pages/Profile';
-import Feed from '@/pages/Feed';
+import Home from '@/pages/Home';
 import Search from '@/pages/Search';
 import Verified from '@/pages/Verified';
 import Settings from '@/pages/Settings';
@@ -54,7 +54,7 @@ const AuthenticatedApp = () => {
     <HotmartGate userEmail={user?.email}>
     <Routes>
       <Route element={<AppShell />}>
-        <Route path="/" element={<Navigate to="/feed" replace />} />
+        <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/todos" element={<Todos />} />
         <Route path="/categorias" element={<Categorias />} />
         
@@ -64,7 +64,9 @@ const AuthenticatedApp = () => {
         <Route path="/image" element={<ImageGen />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/:email" element={<Profile />} />
-        <Route path="/feed" element={<Feed />} />
+        <Route path="/home" element={<Home />} />
+        {/* Compatibilidade: links antigos /feed (PWA, bookmarks) vão para /home */}
+        <Route path="/feed" element={<Navigate to="/home" replace />} />
         <Route path="/search" element={<Search />} />
         <Route path="/verified" element={<Verified />} />
         <Route path="/settings" element={<Settings />} />

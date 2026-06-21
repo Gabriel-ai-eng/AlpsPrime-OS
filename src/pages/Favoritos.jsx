@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 // Lista global de apps disponíveis no seu sistema
 const ALL_APPS = [
-  { id: 'sexta', title: 'Sexta-feira', subtitle: 'Sua assistente de inteligência artificial', category: 'IA', icon: Sparkles, path: '/feed' },
+  { id: 'sexta', title: 'Sexta-feira', subtitle: 'Sua assistente de inteligência artificial', category: 'IA', icon: Sparkles, path: '/home' },
   { id: 'vivart', title: 'Vivart', subtitle: 'Estúdio de criação de imagens com IA', category: 'Criatividade', icon: ImageIcon, path: '/image' },
   { id: 'titan', title: 'Projeto Titan', subtitle: 'Gestão e automação avançada', category: 'Produtividade', icon: Shield, path: '/titan' },
   { id: 'arena', title: 'Cyber Arena', subtitle: 'Plataforma de jogos e desafios', category: 'Jogos', icon: Gamepad2, path: '/arena' },

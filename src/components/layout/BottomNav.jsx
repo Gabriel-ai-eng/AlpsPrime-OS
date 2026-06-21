@@ -18,7 +18,7 @@ const FRASES_IA = [
 ];
 
 const ITEMS = [
-  { label: 'Início', path: '/feed', icon: Home },
+  { label: 'Início', path: '/home', icon: Home },
   { label: 'Categorias', path: '/categorias', icon: LayoutGrid },
   { label: 'Perfil', path: '/profile', icon: User, isCenter: true },
   { label: 'Favoritos', path: '/favoritos', icon: Star },
@@ -199,7 +199,7 @@ export default function BottomNav() {
   const isActive = (path) =>
     path !== null && (
       location.pathname === path ||
-      (path !== '/feed' && location.pathname.startsWith(path))
+      (path !== '/home' && location.pathname.startsWith(path))
     );
 
   return (

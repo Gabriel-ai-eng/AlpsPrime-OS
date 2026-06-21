@@ -41,7 +41,7 @@ export default function AuthSection({ onClose }) {
   const [info, setInfo] = useState('');
   const [noAccess, setNoAccess] = useState(false);
 
-  const goFeed = () => window.location.assign('/feed');
+  const goFeed = () => window.location.assign('/home');
   const cleanEmail = () => email.trim().toLowerCase();
   const reset = (m) => { setMode(m); setStep('form'); setError(''); setInfo(''); setNoAccess(false); };
 

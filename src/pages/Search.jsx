@@ -86,7 +86,7 @@ export default function Search() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 30 }}
                   // Envia o id do aplicativo no estado da navegação
-                  onClick={() => navigate('/feed', { state: { openApp: app.id } })}
+                  onClick={() => navigate('/home', { state: { openApp: app.id } })}
                   className="w-full rounded-[32px] overflow-hidden relative aspect-[4/3] group cursor-pointer active:scale-95 transition-all outline-none"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >

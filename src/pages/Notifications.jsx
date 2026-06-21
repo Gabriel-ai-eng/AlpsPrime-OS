@@ -99,7 +99,7 @@ export default function Notifications() {
         navigate(`/chat-dm`);
       }
     } else if ((n.type === 'like' || n.type === 'comment') && n.post_id) {
-      navigate(`/feed?post=${n.post_id}`);
+      navigate(`/home?post=${n.post_id}`);
     }
   };
 

@@ -7,9 +7,9 @@ const Sexta = lazy(() => import('./Sexta'));
 const Titan = lazy(() => import('./Titan'));
 
 const LoadingScreen = () => (
-  <div className="absolute inset-0 z-[200000] flex flex-col items-center justify-center bg-black/80 backdrop-blur-xl">
-    <Loader2 className="w-8 h-8 text-white/40 animate-spin mb-4" />
-    <span className="text-white/40 text-xs tracking-[0.2em] uppercase font-medium">
+  <div className="absolute inset-0 z-[200000] flex flex-col items-center justify-center bg-background/80 backdrop-blur-xl">
+    <Loader2 className="w-8 h-8 text-muted-foreground animate-spin mb-4" />
+    <span className="text-muted-foreground text-xs tracking-[0.2em] uppercase font-medium">
       Iniciando
     </span>
   </div>
@@ -24,7 +24,7 @@ const SLIDES = [
 
 const TOTAL = SLIDES.length;
 
-export default function Feed() {
+export default function Home() {
   const [telaAtual, setTelaAtual] = useState('hub');
   const [slideAtual, setSlideAtual] = useState(0);
   const timerRef = useRef(null);
@@ -56,13 +56,11 @@ export default function Feed() {
   };
 
   return (
-    <div className="w-full h-[100dvh] bg-black text-white relative overflow-hidden flex flex-col selection:bg-white/30">
+    <div className="w-full h-[100dvh] bg-background text-foreground relative overflow-hidden flex flex-col">
       {telaAtual === 'hub' && (
         <>
-          {/* SEU HEADER ORIGINAL CONTINUA FORA DAQUI (não duplicamos mais) */}
+          <div className="flex-1 w-full bg-background overflow-y-auto scrollbar-none">
 
-          <div className="flex-1 w-full bg-[#121212] overflow-y-auto scrollbar-none">
-            
             {/* SLIDER */}
             <div
               className="relative w-full flex-shrink-0 overflow-hidden"
@@ -86,17 +84,11 @@ export default function Feed() {
                   >
                     {slide.titulo && (
                       <div className="text-center px-6">
-                        <h1
-                          className="text-[46px] font-semibold tracking-tight text-white mb-2 select-none"
-                          style={{
-                            textShadow:
-                              '0 0 4px rgba(255,255,255,0.9), 0 0 12px rgba(255,255,255,0.6), 0 0 24px rgba(255,255,255,0.4), 0 0 45px rgba(255,255,255,0.2)',
-                          }}
-                        >
+                        <h1 className="text-[46px] font-semibold tracking-tight gold-gradient mb-2 select-none">
                           Alps OS
                         </h1>
 
-                        <p className="text-[#8E8E93] text-[14px] font-light tracking-wide">
+                        <p className="text-muted-foreground text-[14px] font-light tracking-wide">
                           Um mundo de possibilidades.
                         </p>
                       </div>
@@ -107,24 +99,24 @@ export default function Feed() {
 
               <button
                 onClick={() => navSlide(-1)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-2 text-white/40 hover:text-white transition-colors outline-none active:scale-90"
+                className="absolute left-3 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground transition-colors outline-none active:scale-90"
               >
                 <ChevronLeft className="w-7 h-7" />
               </button>
 
               <button
                 onClick={() => navSlide(1)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-white/40 hover:text-white transition-colors outline-none active:scale-90"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-foreground transition-colors outline-none active:scale-90"
               >
                 <ChevronRight className="w-7 h-7" />
               </button>
             </div>
 
-            {/* FEED */}
+            {/* APPS */}
             <div className="flex flex-col items-center px-4 pt-6 pb-32 gap-4">
               <div
                 onClick={() => setTelaAtual('titan')}
-                className="w-full max-w-md rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
+                className="w-full max-w-md rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group shadow-sm"
               >
                 <img
                   src="/apps/titan-bg.webp"
@@ -137,7 +129,7 @@ export default function Feed() {
 
               <div
                 onClick={() => setTelaAtual('sexta')}
-                className="w-full max-w-md rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
+                className="w-full max-w-md rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group shadow-sm"
               >
                 <img
                   src="/apps/sexta-bg.webp"
@@ -150,7 +142,7 @@ export default function Feed() {
 
               <div
                 onClick={() => setTelaAtual('vivart')}
-                className="w-full max-w-md rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
+                className="w-full max-w-md rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group shadow-sm"
               >
                 <img
                   src="/apps/vivart-bg.webp"
