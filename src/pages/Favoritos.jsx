@@ -53,10 +53,7 @@ export default function Favoritos() {
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="mb-8 pt-4 md:pt-0"
       >
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#E5C07B]/20 to-[#C9A24F]/10 border border-[#C9A24F]/20 flex items-center justify-center shadow-[0_0_15px_rgba(201,162,79,0.1)]">
-            <Star className="w-5 h-5 text-[#C9A24F]" fill="currentColor" />
-          </div>
+        <div className="mb-2">
           <h1 className="text-3xl font-semibold tracking-tight text-white">
             Favoritos
           </h1>
@@ -73,7 +70,7 @@ export default function Favoritos() {
         transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
         className="mb-8 relative group"
       >
-        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+        <div className="absolute inset-y-0 left-4 z-10 flex items-center pointer-events-none">
           <Search className="w-5 h-5 text-white/40 group-focus-within:text-[#C9A24F] transition-colors duration-300" />
         </div>
         <input
