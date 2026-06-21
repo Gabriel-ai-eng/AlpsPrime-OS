@@ -96,7 +96,7 @@ export default function Welcome() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="mt-5 max-w-md text-base leading-relaxed text-white/60 sm:text-lg"
+              className="mt-3 max-w-md text-base leading-relaxed text-white/60 sm:text-lg"
             >
               Um login. Todo o ecossistema Alps. Garanta o seu acesso.
             </motion.p>
@@ -106,16 +106,16 @@ export default function Welcome() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="mt-8 w-full max-w-sm"
+              className="mt-5"
             >
               <a
                 href={CHECKOUT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hotmart-fb hotmart__button-checkout flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl text-base font-semibold text-background shadow-lg shadow-gold/20 transition-opacity hover:opacity-90"
+                className="hotmart-fb hotmart__button-checkout inline-flex h-12 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold text-background shadow-lg shadow-gold/20 transition-opacity hover:opacity-90"
                 style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
               >
-                <ShoppingBag className="h-5 w-5" />
+                <ShoppingBag className="h-4 w-4" />
                 Garantir acesso
               </a>
             </motion.div>
