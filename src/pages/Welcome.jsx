@@ -90,7 +90,7 @@ export default function Welcome() {
             className="relative z-10 text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl"
           >
             Tudo da Alps Prime.<br />
-            <span className="gold-gradient">Em um só lugar.</span>
+            em um só lugar.
           </motion.h1>
 
           <motion.p
