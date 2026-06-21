@@ -63,6 +63,18 @@ export default function Welcome() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+      {/* ---- Remove o estilo verde que o CSS do Hotmart aplica ao botão ---- */}
+      <style>{`
+        .hotmart__button-checkout,
+        .hotmart__button-checkout:hover,
+        .hotmart__button-checkout:focus,
+        .hotmart__button-checkout:active {
+          border: none !important;
+          outline: none !important;
+          -webkit-tap-highlight-color: transparent !important;
+        }
+      `}</style>
+
       {/* ---- Barra superior ---- */}
       <header className="relative z-20 mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-8">
         <div className="flex items-center gap-2.5">
@@ -80,7 +92,7 @@ export default function Welcome() {
       <main className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8">
         {/* ---- HERO ---- */}
         <section className="relative flex flex-col items-center justify-center pt-20 pb-16 text-center sm:pt-28 sm:pb-24">
-          {/* Efeito de brilho de fundo para dar profundidade (opcional, fica muito bom com tema dark) */}
+          {/* Brilho de fundo para dar profundidade */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-gold/10 blur-[100px] rounded-full pointer-events-none" />
 
           <motion.h1
@@ -102,21 +114,24 @@ export default function Welcome() {
             Um login. Todo o ecossistema Alps. Garanta o seu acesso.
           </motion.p>
 
-          {/* CTA */}
+          {/* CTA — botão menor, redondo, alinhado e sem borda verde */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="relative z-10 mt-10 w-full max-w-sm group"
+            className="relative z-10 mt-10 flex justify-center"
           >
-            {/* Brilho atrás do botão no hover */}
-            <div className="absolute -inset-1 bg-gold/30 rounded-full blur-lg opacity-40 group-hover:opacity-100 transition duration-500"></div>
             <a
               href={CHECKOUT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="hotmart-fb hotmart__button-checkout relative flex h-14 w-full items-center justify-center gap-2.5 rounded-full text-base font-semibold text-background shadow-lg shadow-gold/20 transition-transform hover:scale-[1.02]"
-              style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
+              className="hotmart-fb hotmart__button-checkout inline-flex h-12 items-center justify-center gap-2.5 rounded-full px-7 text-base font-semibold text-background shadow-lg shadow-gold/20 transition-transform hover:scale-[1.03] focus:outline-none focus-visible:outline-none"
+              style={{
+                background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)',
+                border: 'none',
+                outline: 'none',
+                WebkitTapHighlightColor: 'transparent',
+              }}
             >
               <ShoppingBag className="h-5 w-5" />
               Garantir acesso
