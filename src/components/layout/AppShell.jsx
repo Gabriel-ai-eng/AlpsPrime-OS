@@ -143,7 +143,7 @@ export default function AppShell() {
   return (
     <div className="flex h-screen w-full max-w-[100vw] overflow-hidden relative bg-black text-white selection:bg-white/30">
 
-      <AtmosphericOrbs />
+      {location.pathname !== '/suporte' && <AtmosphericOrbs />}
 
       <aside className="hidden lg:flex w-60 flex-shrink-0 relative z-10 border-r border-border">
         <Sidebar {...sidebarProps} />

@@ -55,16 +55,12 @@ export default function Suporte() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <h1
-            className="m-0 font-light gold-gradient"
-            style={{
-              fontSize: 'clamp(34px, 9vw, 56px)',
-              letterSpacing: '0.01em',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif',
-            }}
-          >
-            Suporte da Alps
-          </h1>
+          <img
+            src="/apps/support-title.webp"
+            alt="Suporte da Alps"
+            className="mx-auto w-[78%] max-w-[440px] h-auto select-none"
+            draggable="false"
+          />
           <p className="text-lg sm:text-xl font-light text-white/45 mt-1">
             Como podemos te ajudar?
           </p>
