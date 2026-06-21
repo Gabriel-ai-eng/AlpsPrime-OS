@@ -73,10 +73,10 @@ function Sidebar({ user, location, aiUnlocked, onNavigate, onAILocked }) {
           <Settings className="w-4 h-4" />
           <span>Configurações</span>
         </Link>
-        <a href="https://www.alpsprime.com.br/suporte" target="_blank" rel="noopener noreferrer" onClick={onNavigate} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+        <Link to="/suporte" onClick={onNavigate} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <HelpCircle className="w-4 h-4" />
           <span>Suporte</span>
-        </a>
+        </Link>
         <button onClick={() => signOut()} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <LogOut className="w-4 h-4" />
           <span>Sair</span>
@@ -218,12 +218,12 @@ export default function AppShell() {
                   </div>
                   <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Configurações</span>
                 </Link>
-                <a href="https://www.alpsprime.com.br/suporte" target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                <Link to="/suporte" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-white transition-colors">
                     <HelpCircle className="w-4 h-4" />
                   </div>
                   <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Suporte</span>
-                </a>
+                </Link>
                 <button onClick={() => { setMobileOpen(false); signOut(window.location.origin); }} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-500/10 transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-red-400 group-hover:border-red-400/20 transition-colors">
                     <LogOut className="w-4 h-4" />

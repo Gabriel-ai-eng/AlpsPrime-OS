@@ -20,6 +20,7 @@ import HotmartGate from '@/components/access/HotmartGate';
 import { LOGO_URL } from '@/lib/branding';
 import Todos from '@/pages/Todos';
 import Categorias from '@/pages/Categorias';
+import Suporte from '@/pages/Suporte';
 
 // Import da nova página de Favoritos
 import Favoritos from '@/pages/Favoritos';
@@ -67,6 +68,7 @@ const AuthenticatedApp = () => {
         <Route path="/search" element={<Search />} />
         <Route path="/verified" element={<Verified />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/suporte" element={<Suporte />} />
         <Route path="/notifications" element={<Notifications />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
