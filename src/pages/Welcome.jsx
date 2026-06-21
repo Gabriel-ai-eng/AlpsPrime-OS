@@ -39,20 +39,6 @@ export default function Welcome() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [showAuth, setShowAuth] = useState(false);
 
-  // Widget de checkout da Hotmart (abre em overlay — checkoutMode=2)
-  useEffect(() => {
-    if (document.getElementById('hotmart-checkout-widget')) return;
-    const script = document.createElement('script');
-    script.id = 'hotmart-checkout-widget';
-    script.src = 'https://static.hotmart.com/checkout/widget.min.js';
-    document.head.appendChild(script);
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.type = 'text/css';
-    link.href = 'https://static.hotmart.com/css/hotmart-fb.min.css';
-    document.head.appendChild(link);
-  }, []);
-
   useEffect(() => {
     base44.functions.invoke('getUsersCount', {})
       .then((r) => setTotalUsers(r?.data?.count || 0))
@@ -63,19 +49,6 @@ export default function Welcome() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden" style={{ fontFamily: "'Open Sans', sans-serif" }}>
-      {/* ---- Neutraliza o CSS do Hotmart no botão: tira a borda verde e força o formato de pílula ---- */}
-      <style>{`
-        a.hotmart-fb.hotmart__button-checkout,
-        a.hotmart-fb.hotmart__button-checkout:hover,
-        a.hotmart-fb.hotmart__button-checkout:focus,
-        a.hotmart-fb.hotmart__button-checkout:active {
-          border: none !important;
-          border-radius: 9999px !important;
-          outline: none !important;
-          -webkit-tap-highlight-color: transparent !important;
-        }
-      `}</style>
-
       {/* ---- Barra superior ---- */}
       <header className="relative z-20 mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-8">
         <div className="flex items-center gap-2.5">
@@ -126,15 +99,10 @@ export default function Welcome() {
               href={CHECKOUT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="hotmart-fb hotmart__button-checkout inline-flex h-12 items-center justify-center gap-2.5 rounded-full px-7 text-base font-semibold text-background shadow-lg shadow-gold/20 transition-transform hover:scale-[1.03] focus:outline-none focus-visible:outline-none"
-              style={{
-                background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)',
-                border: 'none',
-                outline: 'none',
-                WebkitTapHighlightColor: 'transparent',
-              }}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full border-0 px-8 text-sm font-semibold text-background shadow-lg shadow-gold/20 transition-transform hover:scale-[1.03] focus:outline-none"
+              style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
             >
-              <ShoppingBag className="h-5 w-5" />
+              <ShoppingBag className="h-4 w-4" />
               Garantir acesso
             </a>
           </motion.div>
