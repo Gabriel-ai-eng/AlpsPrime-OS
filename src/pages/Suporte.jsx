@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ArrowLeft } from 'lucide-react';
 
 // Dados de contato do suporte
 // Formato internacional para o link do WhatsApp: 55 (Brasil) + 14 (DDD) + número
@@ -46,9 +47,20 @@ function FaqItem({ q, a }) {
 }
 
 export default function Suporte() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-full">
-      <div className="max-w-3xl mx-auto px-5 sm:px-8 pt-12 pb-16">
+      <div className="max-w-3xl mx-auto px-5 sm:px-8 pt-6 pb-16">
+        {/* ---- Voltar ---- */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 mb-8 text-sm font-medium text-white/70 hover:text-white transition-colors outline-none"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Voltar</span>
+        </button>
+
         {/* ---- Título ---- */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}

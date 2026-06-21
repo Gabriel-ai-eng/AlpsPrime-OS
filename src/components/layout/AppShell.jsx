@@ -90,6 +90,9 @@ function Sidebar({ user, location, aiUnlocked, onNavigate, onAILocked }) {
 export default function AppShell() {
   const { user } = useAuth();
   const location = useLocation();
+  // Na tela de Suporte escondemos o cabeçalho e a barra inferior (a própria
+  // página oferece um botão "Voltar").
+  const isSuporte = location.pathname === '/suporte';
   const [mobileOpen, setMobileOpen] = useState(false);
   const [aiLockedOpen, setAiLockedOpen] = useState(false);
   const { aiUnlocked, showCelebration, dismissCelebration } = useAIUnlock();
@@ -237,6 +240,7 @@ export default function AppShell() {
       )}
 
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
+        {!isSuporte && (
         <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-[#0A0A0B]/95 border-b border-white/10">
           <div>
             <button
@@ -267,12 +271,15 @@ export default function AppShell() {
             </div>
           </div>
         </header>
+        )}
 
+        {!isSuporte && (
         <header className="hidden lg:flex items-center justify-end px-6 h-12 border-b border-border bg-background/60 backdrop-blur-xl sticky top-0 z-20">
           <NotificationsBell userEmail={user?.email} />
         </header>
+        )}
 
-        <main className="flex-1 w-full overflow-x-hidden overflow-y-auto scrollbar-thin pb-24 lg:pb-0 pt-14 lg:pt-0">
+        <main className={`flex-1 w-full overflow-x-hidden overflow-y-auto scrollbar-thin ${isSuporte ? '' : 'pb-24 lg:pb-0 pt-14 lg:pt-0'}`}>
           <motion.div
             key={location.pathname}
             initial={{ opacity: 0, y: 5 }}
@@ -285,7 +292,7 @@ export default function AppShell() {
         </main>
       </div>
 
-      <BottomNav />
+      {!isSuporte && <BottomNav />}
 
       <AILockedFullscreen open={aiLockedOpen} onClose={() => setAiLockedOpen(false)} />
       <AIUnlockedCelebration open={showCelebration} onClose={dismissCelebration} />
