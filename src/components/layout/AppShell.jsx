@@ -182,7 +182,8 @@ export default function AppShell() {
 
             <div className="relative px-5 pb-8 pt-6 space-y-7">
               <div className="space-y-1">
-                <Link to="/todos" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                {/* Corrigido aqui: redirecionamento alterado de /todos para /feed */}
+                <Link to="/feed" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
                     <Home className="w-4 h-4" />
                   </div>
