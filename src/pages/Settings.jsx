@@ -191,7 +191,7 @@ export default function Settings() {
   ];
 
   return (
-    <div className="min-h-full">
+    <div className="min-h-full bg-background text-foreground">
       <div className="px-6 lg:px-8 pt-6 pb-2 bg-transparent">
         <div className="max-w-2xl mx-auto">
           <button
