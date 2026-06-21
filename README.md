@@ -1,39 +1,28 @@
-**Welcome to your Base44 project** 
+# AlpsPrime-OS
 
-**About**
+Aplicativo web (React + Vite) com backend em **Supabase** e deploy na **Vercel**.
+Domínio de produção: `https://alpsprime.com.br`.
 
-View and Edit  your app on [Base44.com](http://Base44.com) 
+## Rodar localmente
 
-This project contains everything you need to run your app locally.
+**Pré-requisitos:**
 
-**Edit the code in your local development environment**
-
-Any change pushed to the repo will also be reflected in the Base44 Builder.
-
-**Prerequisites:** 
-
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
+1. Clonar o repositório
+2. Entrar na pasta do projeto
+3. Instalar dependências: `npm install`
+4. Criar um arquivo `.env.local` com as variáveis de ambiente
 
 ```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
-
-e.g.
-VITE_BASE44_APP_ID=69e44004c1822ff0840cc105
-VITE_BASE44_APP_BASE_URL=https://lush-nutriflow-daily-track.base44.app
+VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
+VITE_SUPABASE_ANON_KEY=sua_chave_anon_public
 ```
 
-Run the app: `npm run dev`
+Rodar o app: `npm run dev`
 
-**Publish your changes**
+## Publicar
 
-Open [Base44.com](http://Base44.com) and click on Publish.
+O deploy é feito pela **Vercel** a partir da branch `main`. Qualquer push para a
+`main` dispara um novo deploy automático em produção (`alpsprime.com.br`).
 
-**Docs & Support**
-
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
-
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+Antes de enviar para a `main`, rode `npm run build` para garantir que o build
+não está quebrado.

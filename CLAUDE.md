@@ -1,13 +1,14 @@
 # AlpsPrime-OS
 
-App Base44 (ID `69e44004c1822ff0840cc105`). Subdomínio publicado:
-`https://lush-nutriflow-daily-track.base44.app`.
+App web (React + Vite) com backend em **Supabase** e deploy na **Vercel**.
+Domínio de produção: `https://alpsprime.com.br`.
 
 ## Fluxo de trabalho com Git (preferência do dono do projeto)
 
 O dono **autorizou** que toda alteração vá **direto para a branch `main`**, sem
-Pull Request e sem ele precisar abrir o GitHub. O Base44 publica a partir da
-`main`, então ele acompanha o resultado pelo preview do Base44.
+Pull Request e sem ele precisar abrir o GitHub. A Vercel publica a partir da
+`main`, então ele acompanha o resultado pelo site em produção
+(`alpsprime.com.br`).
 
 Por isso, ao concluir qualquer mudança:
 
@@ -22,7 +23,7 @@ Por isso, ao concluir qualquer mudança:
 - Fluxo: tela `Welcome` (comprar) → pagar na Hotmart com o mesmo e-mail → login →
   `HotmartGate` verifica via `checkMyAccess` (entidade `AuthorizedAccess`).
 - Webhook da Hotmart aponta para a função `hotmartWebhook`.
-- Variáveis de ambiente necessárias no Base44:
+- Variáveis de ambiente necessárias (na Vercel):
   - `HOTMART_CHECKOUT_URL` — link do checkout (usado pelo botão "Comprar"; sem ela
     o botão fica desabilitado).
   - `HOTMART_HOTTOK` — Hottok do webhook da Hotmart (valida e libera o acesso).
