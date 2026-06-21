@@ -1,185 +1,118 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Home, LayoutGrid, Grip, Star, Bot, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { useLiquidRipple } from '@/lib/useLiquidRipple';
-import { useAuth } from '@/lib/AuthContext';
+import { Home, MessageSquare, Bot, Sparkles, User } from 'lucide-react';
 
-const ITEMS = [
-  { label: 'Início', path: '/feed', icon: Home },
-  { label: 'Categorias', path: '/categorias', icon: LayoutGrid },
-  { label: 'Perfil', path: '/profile', icon: User, isCenter: true },
-  { label: 'Favoritos', path: '/favoritos', icon: Star },
-  { label: 'IA', path: null, icon: Bot, isDead: true },
+// Frases aleatórias para o balão de fala
+const RANDOM_PHRASES = [
+  "Em breve...",
+  "Daqui a pouco te ajudo!",
+  "Estou ajustando meus circuitos...",
+  "Quase pronto para rodar!",
+  "Aguarde só mais um pouquinho..."
 ];
 
-function NavItem({ item, active }) {
-  const { ref, onPointerDown } = useLiquidRipple({ color: 'rgba(255,255,255,0.08)', duration: 400 });
-  const Icon = item.icon;
-
-  if (item.isDead) {
-    return (
-      <button
-        type="button"
-        className="flex-1 h-full flex items-center justify-center relative outline-none"
-        style={{ WebkitTapHighlightColor: 'transparent' }}
-      >
-        <div className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 relative overflow-hidden">
-          <Icon
-            className="w-6 h-6 transition-all duration-300 relative z-10 text-white/50"
-            fill="none"
-            strokeWidth={1.8}
-          />
-        </div>
-      </button>
-    );
-  }
-
-  return (
-    <Link
-      to={item.path}
-      className="flex-1 h-full flex items-center justify-center relative outline-none"
-      style={{ WebkitTapHighlightColor: 'transparent' }}
-    >
-      <motion.div
-        ref={ref}
-        onPointerDown={onPointerDown}
-        whileTap={{ scale: 0.85 }}
-        transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-        className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 relative overflow-hidden ripple-surface"
-      >
-        <div
-          className={cn(
-            'absolute inset-0 rounded-2xl bg-white/10 transition-opacity duration-300 ease-out',
-            active ? 'opacity-100' : 'opacity-0'
-          )}
-        />
-
-        <Icon
-          className={cn(
-            'w-6 h-6 transition-all duration-300 relative z-10',
-            active ? 'text-white' : 'text-white/50 hover:text-white/70'
-          )}
-          fill={active ? 'currentColor' : 'none'}
-          strokeWidth={active ? 2 : 1.8}
-          style={{ willChange: 'transform, color, fill' }}
-        />
-      </motion.div>
-    </Link>
-  );
-}
-
-function AppCenterpiece({ active, path }) {
-  const { ref, onPointerDown } = useLiquidRipple({ color: 'rgba(255,255,255,0.15)', duration: 400 });
-  const { user } = useAuth();
-
-  return (
-    <Link
-      to={path}
-      className="flex-1 h-full flex items-center justify-center relative z-50 outline-none"
-      style={{ WebkitTapHighlightColor: 'transparent' }}
-    >
-      <motion.div
-        ref={ref}
-        onPointerDown={onPointerDown}
-        whileTap={{ scale: 0.85 }}
-        transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-        className={cn(
-          'w-12 h-12 rounded-full flex items-center justify-center overflow-hidden relative ripple-surface transition-all duration-300',
-          active
-            ? 'bg-white/20 shadow-[0_0_20px_rgba(255,255,255,0.15)] ring-2 ring-white/40'
-            : 'bg-white/10 shadow-sm hover:bg-white/15 ring-1 ring-white/10'
-        )}
-      >
-        {user?.profile_picture_url ? (
-          <img
-            src={user.profile_picture_url}
-            alt="Perfil"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <User
-            className={cn(
-              'w-6 h-6 transition-all duration-300',
-              active ? 'text-white' : 'text-white/80'
-            )}
-          />
-        )}
-      </motion.div>
-    </Link>
-  );
-}
-
 export default function BottomNav() {
+  const navigate = useNavigate();
   const location = useLocation();
-  const [isVisible, setIsVisible] = useState(true);
-  const lastScrollY = useRef(0);
+  const [balloonText, setBalloonText] = useState("");
+  const [showBalloon, setShowBalloon] = useState(false);
 
+  // Função que gerencia o clique no ícone do robô
+  const handleBotClick = (e) => {
+    e.preventDefault();
+    
+    // Sorteia uma nova frase diferente da atual
+    const filteredPhrases = RANDOM_PHRASES.filter(p => p !== balloonText);
+    const randomIndex = Math.floor(Math.random() * filteredPhrases.length);
+    
+    setBalloonText(filteredPhrases[randomIndex]);
+    setShowBalloon(true);
+  };
+
+  // Fecha o balão automaticamente após alguns segundos
   useEffect(() => {
-    const handleScroll = (e) => {
-      const currentScrollY = e.target.scrollTop || window.scrollY || 0;
+    if (showBalloon) {
+      const timer = setTimeout(() => {
+        setShowBalloon(false);
+      }, 2200);
+      return () => clearTimeout(timer);
+    }
+  }, [showBalloon]);
 
-      if (currentScrollY <= 10) {
-        setIsVisible(true);
-        lastScrollY.current = currentScrollY;
-        return;
-      }
-
-      if (currentScrollY > lastScrollY.current + 8) {
-        setIsVisible(false);
-      } else if (currentScrollY < lastScrollY.current - 8) {
-        setIsVisible(true);
-      }
-
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
-
-    return () => window.removeEventListener('scroll', handleScroll, { capture: true });
-  }, []);
-
-  const hideOnRoutes = ['/settings'];
-  if (hideOnRoutes.includes(location.pathname)) return null;
-
-  const isActive = (path) =>
-    path !== null && (
-      location.pathname === path ||
-      (path !== '/feed' && location.pathname.startsWith(path))
-    );
+  // Itens da navegação inferior
+  const navItems = [
+    { icon: Home, label: 'Feed', path: '/feed' },
+    { icon: Sparkles, label: 'Vivart', path: '/vivart' },
+    { icon: Bot, label: 'Titan', path: '#', isBot: true }, // O ícone do robô interceptado
+    { icon: MessageSquare, label: 'Sexta', path: '/sexta' },
+    { icon: User, label: 'Perfil', path: '/profile' },
+  ];
 
   return (
-    <nav
-      className="lg:hidden fixed bottom-0 inset-x-0 z-50 px-4 pointer-events-none"
-      aria-label="Navegação"
-      style={{ paddingBottom: 'max(14px, env(safe-area-inset-bottom))' }}
-    >
-      <motion.div
-        initial={{ y: 120, opacity: 0 }}
-        animate={{
-          y: isVisible ? 0 : 120,
-          opacity: isVisible ? 1 : 0,
-        }}
-        transition={{ type: 'spring', stiffness: 350, damping: 28, mass: 0.8 }}
-        className={cn(
-          'mx-auto max-w-sm h-[64px] rounded-[2rem] relative overflow-hidden pointer-events-auto',
-          'bg-[#1C1C1E]/80 backdrop-blur-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]'
-        )}
-        style={{ willChange: 'transform, opacity' }}
-      >
-        <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full" />
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-black border-t border-white/10 px-4 py-2 sm:hidden">
+      <div className="relative flex items-center justify-around max-w-md mx-auto">
+        
+        {/* ---- Balão de Fala Animado (Estilo iOS/Apple Minimal) ---- */}
+        <AnimatePresence>
+          {showBalloon && (
+            <motion.div
+              initial={{ opacity: 0, y: 15, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              className="absolute bottom-16 bg-zinc-900 border border-white/10 text-white text-xs font-medium py-2.5 px-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.8)] whitespace-nowrap z-50 pointer-events-none"
+              style={{ left: '50%', transform: 'translateX(-50%)' }}
+            >
+              <span className="font-semibold tracking-wide text-white">
+                {balloonText}
+              </span>
+              {/* Pequena seta indicadora do balão */}
+              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-zinc-900 border-r border-b border-white/10 rotate-45" />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <div className="absolute inset-0 max-w-sm mx-auto h-full flex items-center justify-around px-2 z-10">
-          {ITEMS.map((item) => {
-            const active = isActive(item.path);
-            if (item.isCenter) {
-              return <AppCenterpiece key={item.path} active={active} path={item.path} />;
-            }
-            return <NavItem key={item.label} item={item} active={active} />;
-          })}
-        </div>
-      </motion.div>
-    </nav>
+        {/* ---- Renderização dos Botões da Barra ---- */}
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path;
+
+          return (
+            <button
+              key={item.label}
+              onClick={(e) => item.isBot ? handleBotClick(e) : navigate(item.path)}
+              className="relative flex flex-col items-center justify-center p-2 rounded-xl focus:outline-none group select-none"
+            >
+              {/* Container do Ícone com destaque verde para o Robô */}
+              <div 
+                className={`relative p-1.5 rounded-xl transition-all duration-200 active:scale-90
+                  ${item.isBot 
+                    ? 'text-emerald-400 border border-emerald-500/30 bg-emerald-500/5' 
+                    : isActive 
+                      ? 'text-white bg-white/5' 
+                      : 'text-white/40 group-hover:text-white/60'
+                  }`}
+              >
+                <Icon className="w-5 h-5" />
+              </div>
+              
+              {/* Texto descritivo abaixo do ícone */}
+              <span 
+                className={`text-[10px] mt-1 font-medium transition-colors duration-200
+                  ${item.isBot 
+                    ? 'text-emerald-400/80' 
+                    : isActive 
+                      ? 'text-white' 
+                      : 'text-white/40'
+                  }`}
+              >
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
