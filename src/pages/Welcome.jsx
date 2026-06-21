@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import AuthSection from '@/components/access/AuthSection';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Sparkles, Image as ImageIcon, MessageCircle, ChevronDown } from 'lucide-react';
+import { ShoppingBag, ChevronDown } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
 
 const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
 
 const FEATURES = [
-  { icon: MessageCircle, title: 'Converse com a Sexta-feira', desc: 'Uma IA que responde, ajuda e cria com você — em português, na hora.' },
-  { icon: ImageIcon, title: 'Crie imagens', desc: 'Descreva o que imagina e receba a arte pronta em segundos.' },
-  { icon: Sparkles, title: 'Feed da comunidade', desc: 'Acompanhe novidades, compartilhe e veja o que outros estão criando.' },
+  { icon: ShoppingBag, title: 'Converse com a Sexta-feira', desc: 'Uma IA que responde, ajuda e cria com você — em português, na hora.' },
+  { icon: ShoppingBag, title: 'Crie imagens', desc: 'Descreva o que imagina e receba a arte pronta em segundos.' },
+  { icon: ShoppingBag, title: 'Feed da comunidade', desc: 'Acompanhe novidades, compartilhe e veja o que outros estão criando.' },
 ];
 
 const FAQ = [
@@ -89,14 +89,14 @@ export default function Welcome() {
               className="text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl"
             >
               Tudo da Alps Prime.<br />
-              em um só lugar.
+              <span className="gold-gradient">Em um só lugar.</span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="mt-3 max-w-md text-base leading-relaxed text-white/60 sm:text-lg"
+              className="mt-5 max-w-md text-base leading-relaxed text-white/60 sm:text-lg"
             >
               Um login. Todo o ecossistema Alps. Garanta o seu acesso.
             </motion.p>
@@ -106,16 +106,16 @@ export default function Welcome() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="mt-5"
+              className="mt-8 w-full max-w-sm"
             >
               <a
                 href={CHECKOUT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hotmart-fb hotmart__button-checkout inline-flex h-12 items-center justify-center gap-2 rounded-full px-7 text-base font-semibold text-background shadow-lg shadow-gold/20 transition-opacity hover:opacity-90"
+                className="hotmart-fb hotmart__button-checkout flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl text-base font-semibold text-background shadow-lg shadow-gold/20 transition-opacity hover:opacity-90"
                 style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
               >
-                <ShoppingBag className="h-4 w-4" />
+                <ShoppingBag className="h-5 w-5" />
                 Garantir acesso
               </a>
             </motion.div>
