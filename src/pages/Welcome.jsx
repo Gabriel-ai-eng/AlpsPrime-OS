@@ -14,9 +14,9 @@ const FEATURES = [
 ];
 
 const FAQ = [
-  { q: 'O que é o Alps OS?', a: 'É a sua central de IA: converse com a Sexta-feira, gere imagens e explore o feed — tudo numa plataforma só, simples e poderosa.' },
+  { q: 'O que é o Alps OS?', a: 'É um ecossistema privado de serviços da Alps Prime, tudo em um só lugar' },
   { q: 'Como funciona o acesso?', a: 'É um pagamento único pela Hotmart, com acesso vitalício. Depois de comprar, entre com o mesmo e-mail da compra.' },
-  { q: 'Já comprei. Como entro?', a: 'Toque em "Entrar" e use o mesmo e-mail informado na compra da Hotmart.' },
+  { q: 'Já comprei. Como entro?', a: 'Toque em "Já comprei — entrar" e use o mesmo e-mail informado na compra da Hotmart.' },
 ];
 
 function FaqItem({ q, a }) {
@@ -38,6 +38,20 @@ function FaqItem({ q, a }) {
 export default function Welcome() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [showAuth, setShowAuth] = useState(false);
+
+  // Widget de checkout da Hotmart (abre em overlay — checkoutMode=2)
+  useEffect(() => {
+    if (document.getElementById('hotmart-checkout-widget')) return;
+    const script = document.createElement('script');
+    script.id = 'hotmart-checkout-widget';
+    script.src = 'https://static.hotmart.com/checkout/widget.min.js';
+    document.head.appendChild(script);
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = 'https://static.hotmart.com/css/hotmart-fb.min.css';
+    document.head.appendChild(link);
+  }, []);
 
   useEffect(() => {
     base44.functions.invoke('getUsersCount', {})
@@ -66,7 +80,6 @@ export default function Welcome() {
       <main className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8">
         {/* ---- HERO ---- */}
         <section className="relative flex flex-col items-center justify-center pt-20 pb-16 text-center sm:pt-28 sm:pb-24">
-          {/* Brilho de fundo para dar profundidade */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-gold/10 blur-[100px] rounded-full pointer-events-none" />
 
           <motion.h1
@@ -76,7 +89,7 @@ export default function Welcome() {
             className="relative z-10 text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl"
           >
             Tudo da Alps Prime.<br />
-            em um só lugar.
+            <span className="gold-gradient">Em um só lugar.</span>
           </motion.h1>
 
           <motion.p
@@ -88,21 +101,22 @@ export default function Welcome() {
             Um login. Todo o ecossistema Alps. Garanta o seu acesso.
           </motion.p>
 
-          {/* CTA — botão menor, redondo, alinhado e sem borda verde */}
+          {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="relative z-10 mt-10 flex justify-center"
+            className="relative z-10 mt-10 w-full max-w-sm group"
           >
+            <div className="absolute -inset-1 bg-gold/30 rounded-2xl blur-lg opacity-40 group-hover:opacity-100 transition duration-500"></div>
             <a
               href={CHECKOUT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-full border-0 px-8 text-sm font-semibold text-background shadow-lg shadow-gold/20 transition-transform hover:scale-[1.03] focus:outline-none"
+              className="hotmart-fb hotmart__button-checkout relative flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl text-base font-semibold text-background shadow-lg shadow-gold/20 transition-transform hover:scale-[1.02]"
               style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
             >
-              <ShoppingBag className="h-4 w-4" />
+              <ShoppingBag className="h-5 w-5" />
               Garantir acesso
             </a>
           </motion.div>
