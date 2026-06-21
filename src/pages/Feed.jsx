@@ -121,10 +121,10 @@ export default function Feed() {
             </div>
 
             {/* FEED */}
-            <div className="flex flex-col items-center px-6 pt-8 pb-32 gap-8">
+            <div className="flex flex-col items-center px-4 pt-6 pb-32 gap-4">
               <div
                 onClick={() => setTelaAtual('titan')}
-                className="w-full max-w-sm rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
+                className="w-full max-w-md rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
               >
                 <img
                   src="/apps/titan-bg.webp"
@@ -137,7 +137,7 @@ export default function Feed() {
 
               <div
                 onClick={() => setTelaAtual('sexta')}
-                className="w-full max-w-sm rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
+                className="w-full max-w-md rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
               >
                 <img
                   src="/apps/sexta-bg.webp"
@@ -150,7 +150,7 @@ export default function Feed() {
 
               <div
                 onClick={() => setTelaAtual('vivart')}
-                className="w-full max-w-sm rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
+                className="w-full max-w-md rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group"
               >
                 <img
                   src="/apps/vivart-bg.webp"
