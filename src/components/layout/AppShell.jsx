@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { signOut } from '@/lib/auth';
 import {
   User, LogOut, Menu, X, Search as SearchIcon,
-  Settings, HelpCircle, Grid, LayoutList, Star, Sparkles
+  Settings, HelpCircle, Home, LayoutList, Star, Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAIUnlock } from '@/lib/useAIUnlock';
@@ -184,9 +184,9 @@ export default function AppShell() {
               <div className="space-y-1">
                 <Link to="/todos" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
-                    <Grid className="w-4 h-4" />
+                    <Home className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-white/90">Todos</span>
+                  <span className="text-[15px] font-medium text-white/90">Home</span>
                 </Link>
                 <Link to="/categorias" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
