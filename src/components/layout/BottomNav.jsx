@@ -31,17 +31,25 @@ function NavItem({ item, active }) {
 
   if (item.isDead) {
     const [balloon, setBalloon] = useState(null);
+    const [anchor, setAnchor] = useState({ x: 0, bottom: 0 });
+    const btnRef = useRef(null);
     const timerRef = useRef(null);
 
     const handleClick = useCallback(() => {
       if (timerRef.current) clearTimeout(timerRef.current);
       const frase = FRASES_IA[Math.floor(Math.random() * FRASES_IA.length)];
+      if (btnRef.current) {
+        const r = btnRef.current.getBoundingClientRect();
+        // Centraliza o balão acima do próprio ícone do robô
+        setAnchor({ x: r.left + r.width / 2, bottom: window.innerHeight - r.top + 12 });
+      }
       setBalloon(frase);
       timerRef.current = setTimeout(() => setBalloon(null), 2500);
     }, []);
 
     return (
       <button
+        ref={btnRef}
         type="button"
         onClick={handleClick}
         className="flex-1 h-full flex items-center justify-center relative outline-none"
@@ -52,14 +60,15 @@ function NavItem({ item, active }) {
             {balloon && (
               <motion.div
                 key={balloon}
-                initial={{ opacity: 0, y: 8, scale: 0.92 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 4, scale: 0.92 }}
+                initial={{ opacity: 0, y: 8, scale: 0.92, x: '-50%' }}
+                animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+                exit={{ opacity: 0, y: 4, scale: 0.92, x: '-50%' }}
                 transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-                className="fixed left-4 bottom-[96px] whitespace-nowrap rounded-2xl bg-[#2C2C2E] border border-white/10 px-4 py-2 text-sm font-medium text-white shadow-xl pointer-events-none z-[9999]"
+                style={{ left: anchor.x, bottom: anchor.bottom }}
+                className="fixed whitespace-nowrap rounded-2xl bg-[#2C2C2E] border border-white/10 px-4 py-2 text-sm font-medium text-white shadow-xl pointer-events-none z-[9999]"
               >
                 {balloon}
-                <span className="absolute -bottom-[5px] left-5 w-2.5 h-2.5 bg-[#2C2C2E] border-b border-r border-white/10 rotate-45" />
+                <span className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[#2C2C2E] border-b border-r border-white/10 rotate-45" />
               </motion.div>
             )}
           </AnimatePresence>,

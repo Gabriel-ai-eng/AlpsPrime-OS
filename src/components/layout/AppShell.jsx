@@ -251,7 +251,7 @@ export default function AppShell() {
 
           {location.pathname === '/feed' ? (
             <span className="flex-1 text-center text-[#8E8E93] font-light tracking-[0.32em] text-[18px] select-none px-2 truncate">
-              Sexta-feira
+              Alps Prime
             </span>
           ) : (
             <div className="flex-1" />
