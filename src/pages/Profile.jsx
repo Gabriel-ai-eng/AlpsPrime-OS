@@ -82,18 +82,18 @@ export default function Profile() {
 
   if (loadingViewed) {
     return (
-      <div className="min-h-full flex items-center justify-center bg-black">
-        <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+      <div className="min-h-full flex items-center justify-center bg-background">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-full flex flex-col items-center justify-center p-8 text-center bg-black">
-        <User className="w-12 h-12 text-zinc-600 mb-4" />
-        <h2 className="text-2xl font-semibold mb-2 text-white" style={{ fontFamily: "'Open Sans', sans-serif" }}>Usuário não encontrado</h2>
-        <p className="text-sm text-zinc-400">Este perfil não existe ou foi removido.</p>
+      <div className="min-h-full flex flex-col items-center justify-center p-8 text-center bg-background">
+        <User className="w-12 h-12 text-muted-foreground mb-4" />
+        <h2 className="text-2xl font-semibold mb-2 text-foreground" style={{ fontFamily: "'Open Sans', sans-serif" }}>Usuário não encontrado</h2>
+        <p className="text-sm text-muted-foreground">Este perfil não existe ou foi removido.</p>
       </div>
     );
   }
@@ -166,21 +166,21 @@ export default function Profile() {
 
   return (
     <ProfileTranslationProvider profileEmail={user.email} isUnlimited={true}>
-    <div className="min-h-full overflow-x-hidden bg-black text-white pb-10">
+    <div className="min-h-full overflow-x-hidden bg-background text-foreground pb-10">
 
       {/* --- BANNER --- */}
-      <div className="relative h-40 lg:h-56 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black overflow-hidden border-b border-white/5">
+      <div className="relative h-40 lg:h-56 bg-gradient-to-br from-gold/20 via-muted to-background overflow-hidden border-b border-border">
         {user.profile_banner_url && (
           <img src={user.profile_banner_url} alt="Banner" className="w-full h-full object-cover" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-background/20 to-transparent" />
         {!readOnly && (
           <>
             <button
               onClick={() => bannerInputRef.current?.click()}
-              className="absolute top-4 right-4 flex items-center gap-1.5 text-xs bg-black/60 backdrop-blur-md border border-white/10 hover:border-white/30 text-zinc-300 hover:text-white px-3 py-2 rounded-xl transition-all shadow-sm"
+              className="absolute top-4 right-4 flex items-center gap-1.5 text-xs bg-card/70 backdrop-blur-md border border-border hover:border-gold/40 text-foreground/80 hover:text-foreground px-3 py-2 rounded-xl transition-all shadow-sm"
             >
-              {uploadingBanner ? <span className="w-3 h-3 border border-t-white rounded-full animate-spin" /> : <Camera className="w-4 h-4" />}
+              {uploadingBanner ? <span className="w-3 h-3 border border-t-foreground rounded-full animate-spin" /> : <Camera className="w-4 h-4" />}
               <span className="hidden sm:inline">Alterar capa</span>
             </button>
             <input ref={bannerInputRef} type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
@@ -199,15 +199,15 @@ export default function Profile() {
             <div 
               onClick={() => !readOnly && avatarInputRef.current?.click()}
               className={cn(
-                "w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-black flex items-center justify-center shadow-2xl relative overflow-hidden ring-[6px] ring-black z-10",
+                "w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-background flex items-center justify-center shadow-2xl relative overflow-hidden ring-[6px] ring-background z-10",
                 !readOnly && "cursor-pointer group"
               )}
             >
-              <div className="w-full h-full rounded-full bg-zinc-900 overflow-hidden relative">
+              <div className="w-full h-full rounded-full bg-muted overflow-hidden relative">
                 {user.profile_picture_url ? (
                   <img src={user.profile_picture_url} alt={primaryName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 ) : (
-                  <User className="w-12 h-12 text-zinc-600 absolute inset-0 m-auto" />
+                  <User className="w-12 h-12 text-muted-foreground absolute inset-0 m-auto" />
                 )}
                 
                 {/* Overlay da Câmera diretamente no avatar principal */}
@@ -227,26 +227,26 @@ export default function Profile() {
           <div className="flex-1 pb-2">
             {editing && !readOnly ? (
                <div className="mb-3 max-w-sm">
-                 <label className="text-xs text-zinc-400 mb-1.5 font-medium flex items-center gap-1.5">
+                 <label className="text-xs text-muted-foreground mb-1.5 font-medium flex items-center gap-1.5">
                    <PenLine className="w-3.5 h-3.5" /> Nome Principal
                  </label>
                  <Input
                    value={form.username}
                    onChange={(e) => setForm(f => ({ ...f, username: e.target.value }))}
                    placeholder="Seu nome"
-                   className="bg-zinc-900/50 border-white/10 focus-visible:ring-zinc-700 text-lg text-white rounded-xl h-12 px-4"
+                   className="bg-muted border-border focus-visible:ring-gold/40 text-lg text-foreground rounded-xl h-12 px-4"
                    style={{ fontFamily: "'Open Sans', sans-serif" }}
                  />
                </div>
             ) : (
-              <h1 className="text-3xl sm:text-4xl tracking-tight text-white font-bold" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+              <h1 className="text-3xl sm:text-4xl tracking-tight text-foreground font-bold" style={{ fontFamily: "'Open Sans', sans-serif" }}>
                 {primaryName}
               </h1>
             )}
 
             {!editing && (
-              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-zinc-400 font-medium">
-                <span className="text-zinc-300">@{user?.username || user?.full_name?.toLowerCase().replace(/\s/g, '') || 'usuario'}</span>
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground font-medium">
+                <span className="text-foreground/80">@{user?.username || user?.full_name?.toLowerCase().replace(/\s/g, '') || 'usuario'}</span>
                 <span className="flex items-center gap-1.5">
                   <span className="relative flex h-2.5 w-2.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-20"></span>
@@ -264,7 +264,7 @@ export default function Profile() {
         </motion.div>
 
         {/* --- ACTION BUTTONS --- */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-3 w-full border-b border-white/10 pb-5 mb-5">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-3 w-full border-b border-border pb-5 mb-5">
           
           <div className="flex-1 w-full">
             <ShareProfileButton profileEmail={user.email} displayName={primaryName} />
@@ -276,7 +276,7 @@ export default function Profile() {
                 const key = getConversationKey(authUser.email, user.email);
                 navigate(`/chat-dm?c=${encodeURIComponent(key)}`);
               }}
-              className="w-full sm:w-auto h-12 px-6 gap-2 bg-white hover:bg-zinc-200 text-black rounded-xl font-semibold text-[15px] transition-colors"
+              className="w-full sm:w-auto h-12 px-6 gap-2 bg-foreground hover:bg-foreground/90 text-background rounded-xl font-semibold text-[15px] transition-colors"
             >
               <MessageCircle className="w-4 h-4" /> Mensagem
             </Button>
@@ -285,16 +285,16 @@ export default function Profile() {
           {!readOnly && (
             editing ? (
               <div className="flex gap-3 w-full sm:w-auto">
-                <Button variant="outline" onClick={handleCancel} className="flex-1 sm:w-auto h-12 gap-2 border-white/10 bg-zinc-900 text-white hover:bg-zinc-800 rounded-xl font-medium">
+                <Button variant="outline" onClick={handleCancel} className="flex-1 sm:w-auto h-12 gap-2 border-border bg-muted text-foreground hover:bg-muted/70 rounded-xl font-medium">
                   <X className="w-4 h-4" /> Cancelar
                 </Button>
-                <Button onClick={handleSave} disabled={saving} className="flex-1 sm:w-auto h-12 gap-2 bg-white hover:bg-zinc-200 text-black rounded-xl font-semibold">
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} 
+                <Button onClick={handleSave} disabled={saving} className="flex-1 sm:w-auto h-12 gap-2 bg-foreground hover:bg-foreground/90 text-background rounded-xl font-semibold">
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                   {saving ? 'Salvando...' : 'Salvar'}
                 </Button>
               </div>
             ) : (
-              <Button variant="outline" onClick={() => setEditing(true)} className="w-full sm:w-auto h-12 px-6 gap-2 border-white/10 bg-zinc-900/50 hover:bg-zinc-800 text-white rounded-xl font-semibold text-[15px] transition-colors">
+              <Button variant="outline" onClick={() => setEditing(true)} className="w-full sm:w-auto h-12 px-6 gap-2 border-border bg-muted hover:bg-muted/70 text-foreground rounded-xl font-semibold text-[15px] transition-colors">
                 <Edit3 className="w-4 h-4" /> Editar Perfil
               </Button>
             )
@@ -303,8 +303,8 @@ export default function Profile() {
 
         {/* --- SECTION: BIO --- */}
         <motion.div variants={itemVariants} className="w-full">
-          <div className="bg-zinc-900/30 border border-white/5 rounded-3xl p-6 backdrop-blur-md">
-            <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <div className="bg-card border border-border rounded-3xl p-6 backdrop-blur-md">
+            <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
               Biografia
             </h2>
             {editing && !readOnly ? (
@@ -314,14 +314,14 @@ export default function Profile() {
                 placeholder="Conte um pouco sobre você..."
                 rows={4}
                 maxLength={200}
-                className="resize-none bg-black/50 border-white/10 focus-visible:ring-zinc-700 text-white rounded-xl p-4"
+                className="resize-none bg-muted border-border focus-visible:ring-gold/40 text-foreground rounded-xl p-4"
               />
             ) : user.bio ? (
-              <Translated id="bio" as="p" className="text-[15px] text-zinc-300 leading-relaxed">
+              <Translated id="bio" as="p" className="text-[15px] text-foreground/80 leading-relaxed">
                 {user.bio}
               </Translated>
             ) : (
-              <p className="text-[15px] text-zinc-600 leading-relaxed italic">Nenhuma biografia adicionada.</p>
+              <p className="text-[15px] text-muted-foreground leading-relaxed italic">Nenhuma biografia adicionada.</p>
             )}
           </div>
         </motion.div>

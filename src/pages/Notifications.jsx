@@ -104,25 +104,24 @@ export default function Notifications() {
   };
 
   return (
-    <div className="w-full h-[100dvh] bg-black text-white font-sans overflow-y-auto overflow-x-hidden scrollbar-none flex flex-col relative select-none">
-      
+    <div className="w-full h-[100dvh] bg-background text-foreground font-sans overflow-y-auto overflow-x-hidden scrollbar-none flex flex-col relative select-none">
+
       {/* Luz ambiente sutil no fundo (Estilo Apple Aurora) */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[300px] bg-white/[0.02] blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[300px] bg-gold/[0.04] blur-[120px] rounded-full pointer-events-none" />
 
       {/* =========================================
           CABEÇALHO FIXO
           ========================================= */}
-      <header className="w-full bg-black/80 backdrop-blur-3xl pt-14 pb-4 px-5 flex items-center justify-between z-20 sticky top-0 border-b border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.6)]">
-        
+      <header className="w-full bg-background/80 backdrop-blur-3xl pt-14 pb-4 px-5 flex items-center justify-between z-20 sticky top-0 border-b border-border shadow-sm">
+
         <button
           onClick={() => navigate(-1)}
-          className="p-2 -ml-2 text-white/40 hover:text-white transition-colors outline-none active:scale-90"
+          className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors outline-none active:scale-90"
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
 
-        <h1 className="text-[20px] font-semibold tracking-tight text-white select-none absolute left-1/2 -translate-x-1/2"
-            style={{ textShadow: '0 0 12px rgba(255,255,255,0.4)' }}>
+        <h1 className="text-[20px] font-semibold tracking-tight text-foreground select-none absolute left-1/2 -translate-x-1/2">
           Notificações
         </h1>
 
@@ -130,7 +129,7 @@ export default function Notifications() {
         {unreadCount > 0 ? (
           <button
             onClick={markAllRead}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 active:scale-95 border border-white/5 text-[12px] font-medium text-[#FFD700] transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/70 active:scale-95 border border-border text-[12px] font-medium text-gold transition-all"
           >
             <CheckCheck className="w-3.5 h-3.5" /> Lido
           </button>
@@ -147,7 +146,7 @@ export default function Notifications() {
         {isLoading ? (
           <div className="flex flex-col gap-3">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-[88px] rounded-[20px] bg-[#1C1C1E]/50 border border-white/5 animate-pulse" />
+              <div key={i} className="h-[88px] rounded-[20px] bg-muted/50 border border-border animate-pulse" />
             ))}
           </div>
         ) : notifications.length === 0 ? (
@@ -156,18 +155,18 @@ export default function Notifications() {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center justify-center text-center pt-32 px-4"
           >
-            <div className="w-20 h-20 rounded-full bg-white/5 border border-white/5 flex items-center justify-center mb-5">
-              <Bell className="w-8 h-8 text-white/20" />
+            <div className="w-20 h-20 rounded-full bg-muted border border-border flex items-center justify-center mb-5">
+              <Bell className="w-8 h-8 text-muted-foreground/50" />
             </div>
-            <h2 className="text-[20px] font-semibold text-white mb-2 tracking-tight">Tudo em silêncio</h2>
-            <p className="text-[14px] text-[#8E8E93]">Você ainda não tem novas notificações.</p>
+            <h2 className="text-[20px] font-semibold text-foreground mb-2 tracking-tight">Tudo em silêncio</h2>
+            <p className="text-[14px] text-muted-foreground">Você ainda não tem novas notificações.</p>
           </motion.div>
         ) : (
           <div className="flex flex-col gap-3">
             <AnimatePresence mode="popLayout">
               {notifications.map((n, index) => {
                 const Icon = ICON_BY_TYPE[n.type] || Bell;
-                const styleClass = STYLE_BY_TYPE[n.type] || 'text-white bg-white/20 border-white/30';
+                const styleClass = STYLE_BY_TYPE[n.type] || 'text-foreground bg-muted border-border';
                 const preview =
                   n.type === 'comment' ? n.comment_preview :
                   n.type === 'message' ? n.message_preview :
@@ -186,25 +185,25 @@ export default function Notifications() {
                     className={cn(
                       'w-full flex items-start gap-4 p-4 text-left rounded-[20px] transition-all duration-300 relative overflow-hidden group outline-none active:scale-[0.98]',
                       !n.read
-                        ? 'bg-white/[0.06] border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.02)]'
-                        : 'bg-[#1C1C1E]/40 border border-white/5 hover:bg-[#1C1C1E]/80'
+                        ? 'bg-gold/[0.06] border border-gold/20'
+                        : 'bg-card border border-border hover:bg-muted/60'
                     )}
                     style={{ WebkitTapHighlightColor: 'transparent' }}
                   >
                     {/* Brilho de fundo para não lidas */}
-                    {!n.read && <div className="absolute -left-12 -top-12 w-32 h-32 bg-white/10 blur-[40px] pointer-events-none opacity-50" />}
+                    {!n.read && <div className="absolute -left-12 -top-12 w-32 h-32 bg-gold/10 blur-[40px] pointer-events-none opacity-50" />}
 
                     {/* AVATAR E ÍCONE DO TIPO DE AÇÃO */}
                     <div className="relative shrink-0 mt-0.5">
-                      <div className="w-[46px] h-[46px] rounded-full bg-black/50 border border-white/10 overflow-hidden flex items-center justify-center">
+                      <div className="w-[46px] h-[46px] rounded-full bg-muted border border-border overflow-hidden flex items-center justify-center">
                         {(getAvatar(n.actor_email) || n.actor_avatar) ? (
                           <img src={getAvatar(n.actor_email) || n.actor_avatar} alt="" className="w-full h-full object-cover" />
                         ) : (
-                          <User className="w-5 h-5 text-white/30" />
+                          <User className="w-5 h-5 text-muted-foreground" />
                         )}
                       </div>
                       <div className={cn(
-                        'absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-black backdrop-blur-md',
+                        'absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-background backdrop-blur-md',
                         styleClass
                       )}>
                         <Icon className="w-3 h-3" strokeWidth={2.5} />
@@ -213,23 +212,23 @@ export default function Notifications() {
 
                     {/* TEXTO DA NOTIFICAÇÃO */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-[14px] leading-snug text-white/80">
-                        <span className="font-semibold text-white tracking-tight">{n.actor_name}</span>{' '}
+                      <p className="text-[14px] leading-snug text-muted-foreground">
+                        <span className="font-semibold text-foreground tracking-tight">{n.actor_name}</span>{' '}
                         {buildMessage(n)}
                       </p>
                       {preview && (
-                        <p className="text-[13px] text-white/40 truncate mt-1 italic font-light">
+                        <p className="text-[13px] text-muted-foreground truncate mt-1 italic font-light">
                           "{preview}"
                         </p>
                       )}
-                      <p className="text-[10px] text-[#8E8E93] mt-2 font-medium uppercase tracking-[0.05em]">
+                      <p className="text-[10px] text-muted-foreground mt-2 font-medium uppercase tracking-[0.05em]">
                         {formatDistanceToNow(parseServerDate(n.created_date), { addSuffix: true, locale: ptBR })}
                       </p>
                     </div>
 
                     {/* PONTO INDICADOR DE NÃO LIDA */}
                     {!n.read && (
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#FFD700] mt-2 shrink-0 shadow-[0_0_10px_rgba(255,215,0,0.6)]" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-gold mt-2 shrink-0 shadow-[0_0_10px_rgba(201,162,79,0.6)]" />
                     )}
                   </motion.button>
                 );
