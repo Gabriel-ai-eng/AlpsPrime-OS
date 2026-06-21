@@ -50,15 +50,14 @@ function NavItem({ item, active }) {
           {balloon && (
             <motion.div
               key={balloon}
-              initial={{ opacity: 0, y: 6, scale: 0.9 }}
+              initial={{ opacity: 0, y: 8, scale: 0.92 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 4, scale: 0.9 }}
+              exit={{ opacity: 0, y: 4, scale: 0.92 }}
               transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-              className="absolute bottom-[56px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-2xl bg-[#2C2C2E] border border-white/10 px-3 py-1.5 text-xs font-medium text-white shadow-lg pointer-events-none z-50"
+              className="fixed left-4 bottom-[88px] whitespace-nowrap rounded-2xl bg-[#2C2C2E] border border-white/10 px-4 py-2 text-sm font-medium text-white shadow-xl pointer-events-none z-[999]"
             >
               {balloon}
-              {/* pequena setinha */}
-              <span className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[#2C2C2E] border-b border-r border-white/10 rotate-45" />
+              <span className="absolute -bottom-[5px] left-5 w-2.5 h-2.5 bg-[#2C2C2E] border-b border-r border-white/10 rotate-45" />
             </motion.div>
           )}
         </AnimatePresence>
