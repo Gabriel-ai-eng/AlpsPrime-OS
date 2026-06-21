@@ -1,10 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, LayoutGrid, Grip, Star, Bot, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useLiquidRipple } from '@/lib/useLiquidRipple';
 import { useAuth } from '@/lib/AuthContext';
+
+const FRASES_IA = [
+  'Em breve... 🚀',
+  'Daqui a pouco te ajudo!',
+  'Estou chegando... ⚡',
+  'Novidades em breve!',
+  'Me aguarda, tô quase lá 😄',
+  'Em construção... 🔧',
+  'Falta pouco!',
+];
 
 const ITEMS = [
   { label: 'Início', path: '/feed', icon: Home },
@@ -19,12 +29,39 @@ function NavItem({ item, active }) {
   const Icon = item.icon;
 
   if (item.isDead) {
+    const [balloon, setBalloon] = useState(null);
+    const timerRef = useRef(null);
+
+    const handleClick = useCallback(() => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      const frase = FRASES_IA[Math.floor(Math.random() * FRASES_IA.length)];
+      setBalloon(frase);
+      timerRef.current = setTimeout(() => setBalloon(null), 2500);
+    }, []);
+
     return (
       <button
         type="button"
+        onClick={handleClick}
         className="flex-1 h-full flex items-center justify-center relative outline-none"
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
+        <AnimatePresence>
+          {balloon && (
+            <motion.div
+              key={balloon}
+              initial={{ opacity: 0, y: 6, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 4, scale: 0.9 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+              className="absolute bottom-[56px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-2xl bg-[#2C2C2E] border border-white/10 px-3 py-1.5 text-xs font-medium text-white shadow-lg pointer-events-none z-50"
+            >
+              {balloon}
+              {/* pequena setinha */}
+              <span className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[#2C2C2E] border-b border-r border-white/10 rotate-45" />
+            </motion.div>
+          )}
+        </AnimatePresence>
         <div className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 relative overflow-hidden">
           <Icon
             className="w-6 h-6 transition-all duration-300 relative z-10 text-white/50"
