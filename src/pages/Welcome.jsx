@@ -110,12 +110,12 @@ export default function Welcome() {
             className="relative z-10 mt-10 w-full max-w-sm group"
           >
             {/* Brilho atrás do botão no hover */}
-            <div className="absolute -inset-1 bg-gold/30 rounded-2xl blur-lg opacity-40 group-hover:opacity-100 transition duration-500"></div>
+            <div className="absolute -inset-1 bg-gold/30 rounded-full blur-lg opacity-40 group-hover:opacity-100 transition duration-500"></div>
             <a
               href={CHECKOUT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="hotmart-fb hotmart__button-checkout relative flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl text-base font-semibold text-background shadow-lg shadow-gold/20 transition-transform hover:scale-[1.02]"
+              className="hotmart-fb hotmart__button-checkout relative flex h-14 w-full items-center justify-center gap-2.5 rounded-full text-base font-semibold text-background shadow-lg shadow-gold/20 transition-transform hover:scale-[1.02]"
               style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
             >
               <ShoppingBag className="h-5 w-5" />
