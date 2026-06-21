@@ -51,9 +51,9 @@ module.exports = {
         input:  'hsl(var(--input))',
         ring:   'hsl(var(--ring))',
         gold: {
-          light:   '#E8C77A',
-          DEFAULT: '#C9A24F',
-          dark:    '#A8852E',
+          light:   'rgb(var(--gold-light) / <alpha-value>)',
+          DEFAULT: 'rgb(var(--gold) / <alpha-value>)',
+          dark:    'rgb(var(--gold-dark) / <alpha-value>)',
         },
         lavender: {
           light:   '#D0DCFF',

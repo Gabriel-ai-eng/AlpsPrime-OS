@@ -1,89 +1,151 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import {
-  Lock, Shield, Bell, Heart, MessageCircle,
-  UserPlus, Mail, Globe2, KeyRound, Loader2, 
-  ChevronRight, Download, Trophy, Sun, Moon, Trash2, AlertTriangle
+  ChevronLeft, ChevronDown, Sun, Moon, Monitor, Palette,
+  ShieldCheck, Trash2, AlertTriangle, Clock, BarChart3, Coffee,
+  Bell, Mail, FlaskConical, Info, Eraser, Download, Loader2, Check,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-
-import GhostModeToggle from '@/components/profile/GhostModeToggle';
-import ProfileAnalytics from '@/components/profile/ProfileAnalytics';
-
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { signOut } from '@/lib/auth';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import SettingsSection from '@/components/settings/SettingsSection';
-import ToggleRow from '@/components/settings/ToggleRow';
+import { useLiquidGlass } from '@/lib/useLiquidGlass';
+import {
+  applyTheme, getThemePref, resolveTheme,
+  applyAccent, getAccent, ACCENTS,
+} from '@/lib/theme';
+import {
+  getPrefs, setPref, getWeeklyUsage, formatDuration,
+} from '@/lib/appPrefs';
 import InstallShortcutCard from '@/components/settings/InstallShortcutCard';
 import AdminBroadcastSection from '@/components/settings/AdminBroadcastSection';
+
+const APP_VERSION = '1.0.0 · Beta';
+
+const SUB_APPS = [
+  { id: 'sexta',  nome: 'Sexta-feira',   prefKey: 'notif_sexta',  dados: ['Conversas e mensagens com a IA', 'Suas preferências de uso'] },
+  { id: 'armor',  nome: 'Projeto Armor', prefKey: 'notif_armor',  dados: ['Progresso e pontuação no jogo'] },
+  { id: 'vivart', nome: 'Vivart',        prefKey: 'notif_vivart', dados: ['Imagens e criações que você salva'] },
+];
+
+const CHANGELOG = [
+  {
+    versao: 'Beta',
+    itens: [
+      'Nova Central de Configurações no estilo das grandes plataformas',
+      'Tema Claro / Escuro / Automático e escolha da cor de destaque',
+      'Bem-estar digital: tempo de uso e lembretes de pausa',
+      'Controle de notificações por sub-app, Não Perturbe e resumo agendado',
+    ],
+  },
+];
+
+/* ── Blocos reutilizáveis ── */
+
+function Group({ label, children }) {
+  return (
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2 ml-1">{label}</p>
+      <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">{children}</div>
+    </div>
+  );
+}
+
+function Row({ icon: Icon, label, sub, children, danger }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted/40 transition-colors"
+      >
+        <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0', danger ? 'bg-destructive/10' : 'bg-gold/10')}>
+          <Icon className={cn('w-4 h-4', danger ? 'text-destructive' : 'text-gold')} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={cn('text-sm font-medium', danger ? 'text-destructive' : 'text-foreground')}>{label}</p>
+          {sub && <p className="text-xs text-muted-foreground mt-0.5 truncate">{sub}</p>}
+        </div>
+        <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform flex-shrink-0', open && 'rotate-180')} />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 pt-0">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function Switch({ checked, onChange }) {
+  return (
+    <button
+      onClick={() => onChange(!checked)}
+      className={cn('w-11 h-6 rounded-full relative flex-shrink-0 transition-colors', checked ? 'bg-gold' : 'bg-muted')}
+      aria-pressed={checked}
+    >
+      <span className={cn('absolute top-0.5 w-5 h-5 rounded-full bg-background shadow transition-all', checked ? 'left-[22px]' : 'left-0.5')} />
+    </button>
+  );
+}
+
+function ToggleLine({ label, sub, checked, onChange }) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-2.5">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
+      </div>
+      <Switch checked={checked} onChange={onChange} />
+    </div>
+  );
+}
+
+/* ── Página ── */
 
 export default function Settings() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const { setMode } = useLiquidGlass();
 
-  // ----- LÓGICA DO MODO ESCURO -----
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [themePref, setThemePref] = useState(getThemePref());
+  const [accent, setAccent] = useState(getAccent());
+  const [prefs, setPrefs] = useState(getPrefs());
 
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains('dark') || localStorage.getItem('sf_theme_preference') === 'dark';
-    setIsDarkMode(isDark);
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
-  }, []);
-
-  const toggleTheme = (setDark) => {
-    setIsDarkMode(setDark);
-    if (setDark) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('sf_theme_preference', 'dark');
-      base44.auth.updateMe({ liquid_glass_mode: 'dark' }).catch(()=>null);
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('sf_theme_preference', 'light');
-      base44.auth.updateMe({ liquid_glass_mode: 'light' }).catch(()=>null);
-    }
-  };
-
-  useEffect(() => {
-    if (location.hash === '#install') {
-      setTimeout(() => {
-        document.getElementById('install')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 200);
-    }
-  }, [location.hash]);
-
-  const [showInRanking, setShowInRanking] = useState(user?.show_in_ranking !== false);
-  const [rankingDisplayName, setRankingDisplayName] = useState(user?.ranking_display_name || '');
-  const [savingRanking, setSavingRanking] = useState(false);
-
-  // Estados para exclusão de conta
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [clearing, setClearing] = useState(false);
 
-  const handleSaveRanking = async () => {
-    setSavingRanking(true);
-    try {
-      await base44.auth.updateMe({
-        show_in_ranking: showInRanking,
-        ranking_display_name: rankingDisplayName,
-      });
-      toast.success('Configurações de ranking salvas!');
-    } catch (e) {
-      toast.error('Erro ao salvar.');
-    } finally {
-      setSavingRanking(false);
-    }
+  const week = getWeeklyUsage();
+  const totalSemana = week.reduce((s, d) => s + d.seconds, 0);
+  const maxDia = Math.max(60, ...week.map((d) => d.seconds));
+
+  const onTheme = (id) => {
+    setThemePref(id);
+    const resolved = applyTheme(id);
+    if (setMode) setMode(resolved);
+    if (id !== 'auto') base44.auth.updateMe({ liquid_glass_mode: id }).catch(() => null);
+  };
+
+  const onAccent = (id) => {
+    setAccent(id);
+    applyAccent(id);
+  };
+
+  const updatePref = (key, value) => {
+    setPrefs(setPref(key, value));
   };
 
   const handleDeleteAccount = async () => {
@@ -92,19 +154,27 @@ export default function Settings() {
       await base44.functions.invoke('deleteMyAccount', {});
       toast.success('Conta excluída. Até breve.');
       setTimeout(() => signOut(), 1200);
-    } catch (e) {
+    } catch {
       toast.error('Erro ao excluir conta. Tente novamente.');
       setDeletingAccount(false);
     }
   };
 
-  const [privateAccount, setPrivateAccount] = useState(user?.private_account === true);
-  const [notifLikes, setNotifLikes] = useState(user?.notify_likes !== false);
-  const [notifComments, setNotifComments] = useState(user?.notify_comments !== false);
-  const [notifFollows, setNotifFollows] = useState(user?.notify_follows !== false);
-  const [notifMessages, setNotifMessages] = useState(user?.notify_messages !== false);
-  const [notifPush, setNotifPush] = useState(user?.notify_push !== false);
-  const [notifEmail, setNotifEmail] = useState(user?.notify_email === true);
+  const handleClearCache = async () => {
+    setClearing(true);
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+      sessionStorage.clear();
+      toast.success('Cache limpo. Recarregando…');
+      setTimeout(() => window.location.reload(), 800);
+    } catch {
+      toast.error('Não foi possível limpar o cache.');
+      setClearing(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -114,327 +184,352 @@ export default function Settings() {
     );
   }
 
-  const persist = async (patch) => {
-    await base44.auth.updateMe(patch);
-  };
-
-  const updateField = async (key, value, setter) => {
-    setter(value);
-    try {
-      await persist({ [key]: value });
-    } catch (e) {
-      toast.error('Não foi possível salvar.');
-      setter(!value);
-    }
-  };
-
-  const handlePasswordChange = () => {
-    toast.info('Sua senha é gerenciada pela sua conta de login. Para alterá-la, acesse o provedor de e-mail vinculado.');
-  };
+  const THEMES = [
+    { id: 'light', label: 'Claro', icon: Sun },
+    { id: 'dark', label: 'Escuro', icon: Moon },
+    { id: 'auto', label: 'Automático', icon: Monitor },
+  ];
 
   return (
     <div className="min-h-full">
-      <div className="px-6 lg:px-8 pt-6 pb-2 bg-transparent transition-colors duration-300">
-        <div className="max-w-3xl mx-auto">
+      <div className="px-6 lg:px-8 pt-6 pb-2 bg-transparent">
+        <div className="max-w-2xl mx-auto">
           <button
             onClick={() => navigate('/profile')}
-            className="flex items-center gap-2 mb-9 text-sm font-normal text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif' }}
+            className="flex items-center gap-2 mb-7 text-sm font-normal text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
-            </svg>
+            <ChevronLeft className="w-5 h-5" />
             <span>Voltar ao perfil</span>
           </button>
-          <div className="flex items-center gap-4">
-            <h1 className="m-0 font-light text-foreground uppercase" style={{
-              fontSize: 'clamp(16px, 4vw, 36px)',
-              letterSpacing: 'clamp(2px, 1.5vw, 8px)',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif'
-            }}>
-              Configurações
-            </h1>
-          </div>
+          <h1 className="m-0 font-light text-foreground uppercase" style={{
+            fontSize: 'clamp(16px, 4vw, 36px)',
+            letterSpacing: 'clamp(2px, 1.5vw, 8px)',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif',
+          }}>
+            Configurações
+          </h1>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 lg:px-6 py-6 space-y-5 pb-12">
-        {/* ADMIN — comunicados para todos os usuários (somente admin) */}
-        {user?.role === 'admin' && <AdminBroadcastSection />}
+      <div className="max-w-2xl mx-auto px-4 lg:px-6 py-6 space-y-7 pb-16">
 
-        {/* APPEARANCE */}
-        <SettingsSection
-          icon={Sun}
-          title="Aparência"
-          description="Personalize as cores do seu aplicativo."
-          delay={0.03}
-        >
-          <div className="p-5 rounded-2xl border border-border bg-background flex flex-col gap-5">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold text-foreground text-base">
-                  {isDarkMode ? 'Modo Escuro ativado' : 'Modo Claro ativado'}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
-                  {isDarkMode
-                    ? 'Interface em tons de grafite, perfeita para a leitura.'
-                    : 'Interface clara com visual moderno e vibrante.'}
+        {/* APARÊNCIA */}
+        <Group label="Aparência & personalização">
+          <Row icon={Palette} label="Tema" sub={THEMES.find((t) => t.id === themePref)?.label}>
+            <div className="grid grid-cols-3 gap-2">
+              {THEMES.map((t) => {
+                const ativo = themePref === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => onTheme(t.id)}
+                    className={cn(
+                      'flex flex-col items-center gap-1.5 py-3 rounded-xl border text-xs font-medium transition-all',
+                      ativo ? 'border-gold/50 bg-gold/10 text-gold' : 'border-border bg-background text-muted-foreground hover:bg-muted'
+                    )}
+                  >
+                    <t.icon className="w-5 h-5" />
+                    {t.label}
+                  </button>
+                );
+              })}
+            </div>
+            {themePref === 'auto' && (
+              <p className="text-xs text-muted-foreground mt-3">
+                Seguindo o sistema — agora em modo {resolveTheme('auto') === 'dark' ? 'escuro' : 'claro'}.
+              </p>
+            )}
+          </Row>
+
+          <Row icon={Palette} label="Cor de destaque" sub={ACCENTS[accent]?.label}>
+            <div className="flex flex-wrap gap-3 pt-1">
+              {Object.entries(ACCENTS).map(([id, a]) => (
+                <button
+                  key={id}
+                  onClick={() => onAccent(id)}
+                  className={cn(
+                    'w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-105 ring-2 ring-offset-2 ring-offset-card',
+                    accent === id ? 'ring-foreground/40' : 'ring-transparent'
+                  )}
+                  style={{ backgroundColor: a.swatch }}
+                  aria-label={a.label}
+                >
+                  {accent === id && <Check className="w-5 h-5 text-white drop-shadow" />}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              A cor escolhida vale para todo o ecossistema Alps OS.
+            </p>
+          </Row>
+        </Group>
+
+        {/* PRIVACIDADE & DADOS */}
+        <Group label="Privacidade & dados">
+          <Row icon={ShieldCheck} label="O que cada sub-app acessa" sub="Transparência de dados por serviço">
+            <div className="space-y-3 pt-1">
+              {SUB_APPS.map((app) => (
+                <div key={app.id} className="rounded-xl border border-border bg-background p-3.5">
+                  <p className="text-sm font-medium text-foreground mb-1.5">{app.nome}</p>
+                  <ul className="space-y-1">
+                    {app.dados.map((d) => (
+                      <li key={d} className="flex items-start gap-2 text-xs text-muted-foreground">
+                        <span className="mt-1.5 w-1 h-1 rounded-full bg-gold flex-shrink-0" />
+                        {d}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Seus dados ficam dentro do ecossistema privado da Alps e não são vendidos a terceiros.
+              </p>
+            </div>
+          </Row>
+
+          <Row icon={Trash2} label="Apagar minha conta" sub="Exclusão permanente dos seus dados" danger>
+            <div className="pt-1">
+              <div className="flex items-start gap-2.5 text-xs text-muted-foreground bg-background border border-border rounded-xl p-3 mb-3">
+                <Info className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                <p className="leading-relaxed">
+                  Apagar a conta remove seu perfil e dados do Alps OS. Isso <strong>não cancela</strong> sua
+                  compra na Hotmart — com o mesmo e-mail você poderá entrar novamente no futuro.
                 </p>
               </div>
-              <div className={cn(
-                "w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg transition-all duration-700 flex-shrink-0",
-                isDarkMode 
-                  ? "bg-zinc-800 shadow-zinc-900/50 rotate-0" 
-                  : "bg-gradient-to-tr from-amber-100 to-amber-300 shadow-amber-500/30 rotate-[360deg]"
-              )}>
-                {isDarkMode ? '🌙' : '☀️'}
-              </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-3 mt-1">
-              <Button
-                onClick={() => toggleTheme(false)}
-                variant={!isDarkMode ? "default" : "outline"}
-                className={cn(
-                  "h-12 rounded-xl font-medium transition-all text-sm",
-                  !isDarkMode
-                    ? "bg-gold/10 text-gold border border-gold/40 shadow-none hover:bg-gold/20"
-                    : "text-muted-foreground border-border hover:bg-muted"
-                )}
-              >
-                <Sun className="w-4 h-4 mr-2" /> Claro
-              </Button>
-
-              <Button
-                onClick={() => toggleTheme(true)}
-                variant={isDarkMode ? "default" : "outline"}
-                className={cn(
-                  "h-12 rounded-xl font-medium transition-all text-sm",
-                  isDarkMode
-                    ? "bg-zinc-800 text-white border border-zinc-600 shadow-none hover:bg-zinc-700"
-                    : "text-muted-foreground border-border hover:bg-muted"
-                )}
-              >
-                <Moon className="w-4 h-4 mr-2" /> Escuro
-              </Button>
-            </div>
-          </div>
-        </SettingsSection>
-
-        {/* GHOST MODE */}
-        <GhostModeToggle user={user} />
-
-        {/* ANALYTICS */}
-        <ProfileAnalytics user={user} />
-
-        <SettingsSection
-          icon={Lock}
-          title="Privacidade e Segurança"
-          description="Controle quem pode ver seu conteúdo e cuide da sua conta."
-          delay={0.05}
-        >
-          <ToggleRow
-            icon={Shield}
-            label="Conta privada"
-            description="Quando ativada, apenas seguidores aprovados por você poderão ver suas publicações."
-            checked={privateAccount}
-            onChange={(v) => updateField('private_account', v, setPrivateAccount)}
-          />
-          <button
-            onClick={handlePasswordChange}
-            className="w-full flex items-center justify-between p-4 rounded-xl border border-border bg-background hover:border-gold/40 hover:bg-gold/5 transition-colors text-left"
-          >
-            <div className="flex items-center gap-3">
-              <KeyRound className="w-4 h-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium text-foreground">Alterar senha</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Gerenciada pelo seu provedor de login.</p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          </button>
-          <div className="flex items-start gap-3 p-4 rounded-xl border border-border bg-background">
-            <Mail className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-foreground">E-mail da conta</p>
-              <p className="text-xs text-muted-foreground mt-0.5 truncate">{user.email}</p>
-            </div>
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground bg-muted border border-border rounded-full px-2 py-0.5 flex-shrink-0">
-              Verificado
-            </span>
-          </div>
-        </SettingsSection>
-
-        <SettingsSection
-          icon={Bell}
-          title="Notificações"
-          description="Escolha o que quer receber."
-          delay={0.1}
-        >
-          <ToggleRow
-            icon={Heart}
-            label="Curtidas"
-            description="Quando alguém curtir suas publicações."
-            checked={notifLikes}
-            onChange={(v) => updateField('notify_likes', v, setNotifLikes)}
-          />
-          <ToggleRow
-            icon={MessageCircle}
-            label="Comentários"
-            description="Quando alguém comentar nas suas publicações."
-            checked={notifComments}
-            onChange={(v) => updateField('notify_comments', v, setNotifComments)}
-          />
-          <ToggleRow
-            icon={UserPlus}
-            label="Novos seguidores"
-            description="Quando alguém começar a te seguir."
-            checked={notifFollows}
-            onChange={(v) => updateField('notify_follows', v, setNotifFollows)}
-          />
-          <ToggleRow
-            icon={Mail}
-            label="Mensagens diretas"
-            description="Quando você receber uma DM."
-            checked={notifMessages}
-            onChange={(v) => updateField('notify_messages', v, setNotifMessages)}
-          />
-          <div className="h-px bg-border my-2" />
-          <ToggleRow
-            icon={Globe2}
-            label="Notificações push do navegador"
-            description="Receba alertas em tempo real mesmo com a aba fechada."
-            checked={notifPush}
-            onChange={(v) => updateField('notify_push', v, setNotifPush)}
-          />
-          <ToggleRow
-            icon={Mail}
-            label="Resumo semanal por e-mail"
-            description="Receba os destaques da semana no seu e-mail."
-            checked={notifEmail}
-            onChange={(v) => updateField('notify_email', v, setNotifEmail)}
-          />
-        </SettingsSection>
-
-        <div id="install" className="scroll-mt-24">
-          <SettingsSection
-            icon={Download}
-            title="Instalar como app (PWA)"
-            description="Tenha a Sexta-feira como um app na sua tela inicial."
-            delay={0.13}
-          >
-            <InstallShortcutCard />
-          </SettingsSection>
-        </div>
-
-        <SettingsSection
-          icon={Trophy}
-          title="Ranking & Privacidade"
-          description="Controle como você aparece no ranking público."
-          delay={0.14}
-        >
-          <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-background">
-            <div>
-              <p className="text-sm font-medium text-foreground">Aparecer no ranking público</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Sua pontuação ficará visível para todos os usuários</p>
-            </div>
-            <button
-              onClick={() => setShowInRanking(v => !v)}
-              className={cn("w-10 h-6 rounded-full transition-colors relative flex-shrink-0", showInRanking ? "bg-gold" : "bg-muted")}
-            >
-              <span className={cn("absolute top-0.5 w-5 h-5 rounded-full bg-background shadow transition-all", showInRanking ? "left-[18px]" : "left-0.5")} />
-            </button>
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground mb-1.5 block">Nome exibido no ranking</label>
-            <Input
-              value={rankingDisplayName}
-              onChange={(e) => setRankingDisplayName(e.target.value)}
-              placeholder={user.full_name || 'Deixe em branco para usar seu nome'}
-              className="bg-background text-foreground border-border focus-visible:ring-gold/50"
-            />
-            <p className="text-xs text-muted-foreground mt-1">Você pode usar um apelido para aparecer no ranking sem revelar seu nome real.</p>
-          </div>
-          <Button
-            onClick={handleSaveRanking}
-            disabled={savingRanking}
-            className="w-full h-10 bg-gold hover:bg-gold-dark text-background font-semibold"
-          >
-            {savingRanking ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar configurações de ranking'}
-          </Button>
-        </SettingsSection>
-
-        {/* ZONA DE PERIGO - EXCLUSÃO DE CONTA */}
-        <SettingsSection
-          icon={AlertTriangle}
-          title="Zona de Perigo"
-          description="Ações irreversíveis para a sua conta."
-          delay={0.16}
-        >
-          <AnimatePresence mode="wait">
-            {!showDeleteConfirm ? (
-              <motion.div
-                key="delete-btn"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
-                <Button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  variant="outline"
-                  className="w-full justify-start h-12 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4 mr-3" />
-                  Excluir conta permanentemente
-                </Button>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="delete-confirm"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 space-y-4 overflow-hidden"
-              >
-                <div className="flex items-start gap-3 text-destructive">
-                  <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
-                  <div className="text-sm">
-                    <p className="font-semibold mb-1">Cuidado! Ação irreversível.</p>
-                    <p className="opacity-90 leading-relaxed">
-                      Ao confirmar, todos os seus dados, publicações, conexões e Cápsulas do Tempo serão apagados para sempre. 
-                      Digite <strong>EXCLUIR</strong> na caixa abaixo para confirmar.
-                    </p>
-                  </div>
-                </div>
-                
-                <Input
-                  value={deleteConfirmText}
-                  onChange={(e) => setDeleteConfirmText(e.target.value)}
-                  placeholder="Digite EXCLUIR"
-                  className="bg-background border-destructive/30 focus-visible:ring-destructive/50 placeholder:text-destructive/40 font-mono text-center"
-                />
-                
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1 border-border hover:bg-muted" 
-                    onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }}
-                  >
-                    Cancelar
-                  </Button>
+              <AnimatePresence mode="wait">
+                {!showDeleteConfirm ? (
                   <Button
-                    variant="destructive"
-                    className="flex-1 font-semibold"
-                    disabled={deleteConfirmText !== 'EXCLUIR' || deletingAccount}
-                    onClick={handleDeleteAccount}
+                    key="del-btn"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    variant="outline"
+                    className="w-full justify-start h-11 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
                   >
-                    {deletingAccount ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirmar Exclusão'}
+                    <Trash2 className="w-4 h-4 mr-3" /> Excluir conta permanentemente
                   </Button>
+                ) : (
+                  <motion.div
+                    key="del-confirm"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 space-y-3"
+                  >
+                    <div className="flex items-start gap-3 text-destructive text-sm">
+                      <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+                      <p className="leading-relaxed">
+                        Ação irreversível. Digite <strong>EXCLUIR</strong> para confirmar.
+                      </p>
+                    </div>
+                    <Input
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      placeholder="Digite EXCLUIR"
+                      className="bg-background border-destructive/30 focus-visible:ring-destructive/50 text-center font-mono"
+                    />
+                    <div className="flex gap-2">
+                      <Button variant="outline" className="flex-1" onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }}>
+                        Cancelar
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        className="flex-1 font-semibold"
+                        disabled={deleteConfirmText !== 'EXCLUIR' || deletingAccount}
+                        onClick={handleDeleteAccount}
+                      >
+                        {deletingAccount ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirmar'}
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </Row>
+        </Group>
+
+        {/* BEM-ESTAR DIGITAL */}
+        <Group label="Bem-estar digital">
+          <Row icon={BarChart3} label="Tempo de uso" sub={totalSemana ? `${formatDuration(totalSemana)} nos últimos 7 dias` : 'Coletando dados…'}>
+            <div className="pt-1">
+              {totalSemana > 0 ? (
+                <>
+                  <div className="flex items-end justify-between gap-2 h-32">
+                    {week.map((d, i) => (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+                        <div
+                          className="w-full rounded-md bg-gold/80"
+                          style={{ height: `${Math.max(4, (d.seconds / maxDia) * 100)}%` }}
+                          title={formatDuration(d.seconds)}
+                        />
+                        <span className="text-[10px] text-muted-foreground">{d.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Total na semana: <strong className="text-foreground">{formatDuration(totalSemana)}</strong>
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Continue usando o Alps OS que seu tempo de uso aparecerá aqui em um gráfico semanal.
+                </p>
+              )}
+            </div>
+          </Row>
+
+          <Row icon={Coffee} label="Lembretes de pausa" sub={prefs.pause_enabled ? `A cada ${prefs.pause_minutes} min` : 'Desativado'}>
+            <div className="pt-1">
+              <ToggleLine
+                label="Ativar lembretes de pausa"
+                sub="Avisamos quando você passar muito tempo seguido no app."
+                checked={prefs.pause_enabled}
+                onChange={(v) => updatePref('pause_enabled', v)}
+              />
+              {prefs.pause_enabled && (
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {[30, 60, 90, 120].map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => updatePref('pause_minutes', m)}
+                      className={cn(
+                        'py-2 rounded-lg text-xs font-medium border transition-all',
+                        prefs.pause_minutes === m ? 'border-gold/50 bg-gold/10 text-gold' : 'border-border bg-background text-muted-foreground hover:bg-muted'
+                      )}
+                    >
+                      {m}min
+                    </button>
+                  ))}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </SettingsSection>
+              )}
+            </div>
+          </Row>
+        </Group>
+
+        {/* NOTIFICAÇÕES */}
+        <Group label="Notificações">
+          <Row icon={Bell} label="Por sub-app" sub="Escolha de quais serviços receber">
+            <div className="pt-1 divide-y divide-border">
+              {SUB_APPS.map((app) => (
+                <ToggleLine
+                  key={app.id}
+                  label={app.nome}
+                  checked={prefs[app.prefKey]}
+                  onChange={(v) => updatePref(app.prefKey, v)}
+                />
+              ))}
+            </div>
+          </Row>
+
+          <Row icon={Moon} label="Não perturbe" sub={prefs.dnd_enabled ? `${prefs.dnd_from} – ${prefs.dnd_to}` : 'Desativado'}>
+            <div className="pt-1">
+              <ToggleLine
+                label="Silenciar num horário"
+                sub="Nenhuma notificação durante o período escolhido."
+                checked={prefs.dnd_enabled}
+                onChange={(v) => updatePref('dnd_enabled', v)}
+              />
+              {prefs.dnd_enabled && (
+                <div className="flex items-center gap-3 mt-2">
+                  <label className="text-xs text-muted-foreground">Das</label>
+                  <Input type="time" value={prefs.dnd_from} onChange={(e) => updatePref('dnd_from', e.target.value)} className="bg-background w-32" />
+                  <label className="text-xs text-muted-foreground">às</label>
+                  <Input type="time" value={prefs.dnd_to} onChange={(e) => updatePref('dnd_to', e.target.value)} className="bg-background w-32" />
+                </div>
+              )}
+            </div>
+          </Row>
+
+          <Row icon={Mail} label="Resumo agendado" sub={prefs.digest_enabled ? `Todo dia às ${prefs.digest_at}` : 'Desativado'}>
+            <div className="pt-1">
+              <ToggleLine
+                label="Juntar notificações"
+                sub="Em vez de avisos a todo momento, entregamos um resumo no horário definido."
+                checked={prefs.digest_enabled}
+                onChange={(v) => updatePref('digest_enabled', v)}
+              />
+              {prefs.digest_enabled && (
+                <div className="flex items-center gap-3 mt-2">
+                  <label className="text-xs text-muted-foreground">Entregar às</label>
+                  <Input type="time" value={prefs.digest_at} onChange={(e) => updatePref('digest_at', e.target.value)} className="bg-background w-32" />
+                </div>
+              )}
+            </div>
+          </Row>
+        </Group>
+
+        {/* SISTEMA & SOBRE */}
+        <Group label="Sistema & sobre">
+          <Row icon={FlaskConical} label="Recursos beta" sub={prefs.beta_features ? 'Ativados' : 'Desativados'}>
+            <div className="pt-1">
+              <ToggleLine
+                label="Ativar funcionalidades experimentais"
+                sub="Receba recursos novos antes de todo mundo. Podem conter instabilidades."
+                checked={prefs.beta_features}
+                onChange={(v) => updatePref('beta_features', v)}
+              />
+            </div>
+          </Row>
+
+          <div id="install" className="scroll-mt-24">
+            <Row icon={Download} label="Instalar como app" sub="Adicione o Alps OS à sua tela inicial">
+              <div className="pt-1">
+                <InstallShortcutCard />
+              </div>
+            </Row>
+          </div>
+
+          <Row icon={Info} label="Sobre & novidades" sub={`Versão ${APP_VERSION}`}>
+            <div className="pt-1 space-y-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">O que há de novo</p>
+                {CHANGELOG.map((c) => (
+                  <div key={c.versao} className="rounded-xl border border-border bg-background p-3.5">
+                    <p className="text-sm font-medium text-foreground mb-2">{c.versao}</p>
+                    <ul className="space-y-1.5">
+                      {c.itens.map((it) => (
+                        <li key={it} className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <span className="mt-1.5 w-1 h-1 rounded-full bg-gold flex-shrink-0" />
+                          {it}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                <a href="https://alpsprime.com.br/termos-de-uso" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">Termos de Uso</a>
+                <a href="https://alpsprime.com.br/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">Política de Privacidade</a>
+              </div>
+              <p className="text-[11px] text-muted-foreground">© {new Date().getFullYear()} Alps OS</p>
+            </div>
+          </Row>
+
+          <Row icon={Eraser} label="Limpar cache" sub="Libera espaço local do app">
+            <div className="pt-1">
+              <p className="text-xs text-muted-foreground mb-3">
+                Remove arquivos temporários guardados no dispositivo. Suas preferências e sua conta não são afetadas.
+              </p>
+              <Button
+                onClick={handleClearCache}
+                disabled={clearing}
+                variant="outline"
+                className="w-full h-11 justify-start"
+              >
+                {clearing ? <Loader2 className="w-4 h-4 mr-3 animate-spin" /> : <Eraser className="w-4 h-4 mr-3" />}
+                Limpar cache agora
+              </Button>
+            </div>
+          </Row>
+        </Group>
+
+        {/* ADMIN (somente administradores) */}
+        {user?.role === 'admin' && (
+          <Group label="Administração">
+            <div className="p-4">
+              <AdminBroadcastSection />
+            </div>
+          </Group>
+        )}
+
       </div>
     </div>
   );

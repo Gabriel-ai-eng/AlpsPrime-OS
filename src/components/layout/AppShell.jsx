@@ -16,6 +16,9 @@ import AIUnlockedCelebration from '@/components/feed/AIUnlockedCelebration';
 import NotificationsBell from '@/components/notifications/NotificationsBell';
 import BottomNav from '@/components/layout/BottomNav';
 import { useLiquidGlass } from '@/lib/useLiquidGlass';
+import { initAppearance, applyTheme, getThemePref } from '@/lib/theme';
+import { addUsage, getPrefs } from '@/lib/appPrefs';
+import { toast } from 'sonner';
 
 const NAV_ITEMS = [];
 
@@ -104,32 +107,46 @@ export default function AppShell() {
   usePushNotifications(user?.email);
 
   useEffect(() => {
-    const localTheme = localStorage.getItem('sf_theme_preference');
-
-    if (localTheme) {
-      if (localTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-        document.documentElement.setAttribute('data-theme', 'dark');
-        if (setMode) setMode('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.removeAttribute('data-theme');
-        if (setMode) setMode('light');
-      }
-    } else if (user?.liquid_glass_mode) {
-      if (user.liquid_glass_mode === 'dark') {
-        document.documentElement.classList.add('dark');
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('sf_theme_preference', 'dark');
-        if (setMode) setMode('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.removeAttribute('data-theme');
-        localStorage.setItem('sf_theme_preference', 'light');
-        if (setMode) setMode('light');
-      }
+    // Sem preferência local ainda? Usa a do perfil (liquid_glass_mode) como semente.
+    if (!localStorage.getItem('sf_theme_preference') && user?.liquid_glass_mode) {
+      applyTheme(user.liquid_glass_mode === 'dark' ? 'dark' : 'light');
     }
+    const resolved = initAppearance();
+    if (setMode) setMode(resolved);
+
+    // No modo "automático", acompanha a mudança do sistema em tempo real.
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => {
+      if (getThemePref() === 'auto') {
+        const r = applyTheme('auto');
+        if (setMode) setMode(r);
+      }
+    };
+    mq.addEventListener?.('change', onChange);
+    return () => mq.removeEventListener?.('change', onChange);
   }, [user?.liquid_glass_mode, setMode]);
+
+  // Rastreia tempo de uso (aba visível) e dispara lembretes de pausa.
+  useEffect(() => {
+    const STEP = 30;
+    let activeSeconds = 0;
+    let lastReminder = 0;
+    const id = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      addUsage(STEP);
+
+      const prefs = getPrefs();
+      if (prefs.pause_enabled) {
+        activeSeconds += STEP;
+        const limit = (prefs.pause_minutes || 60) * 60;
+        if (activeSeconds - lastReminder >= limit) {
+          lastReminder = activeSeconds;
+          toast(`Você está há ${Math.round(activeSeconds / 60)} min no Alps OS. Que tal uma pausa?`);
+        }
+      }
+    }, STEP * 1000);
+    return () => clearInterval(id);
+  }, []);
 
   const prevPathRef = useRef('');
   useEffect(() => {
