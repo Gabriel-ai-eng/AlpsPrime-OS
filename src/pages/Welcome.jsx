@@ -2,21 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import AuthSection from '@/components/access/AuthSection';
 import { motion } from 'framer-motion';
-import { ShoppingBag, ChevronDown } from 'lucide-react';
+import { ShoppingBag, ChevronDown, MessageSquare, Sparkles, Users } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
 
 const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
 
 const FEATURES = [
-  { icon: ShoppingBag, title: 'Converse com a Sexta-feira', desc: 'Uma IA que responde, ajuda e cria com você — em português, na hora.' },
-  { icon: ShoppingBag, title: 'Crie imagens', desc: 'Descreva o que imagina e receba a arte pronta em segundos.' },
-  { icon: ShoppingBag, title: 'Feed da comunidade', desc: 'Acompanhe novidades, compartilhe e veja o que outros estão criando.' },
+  { icon: MessageSquare, title: 'Converse com a Sexta-feira', desc: 'Uma IA que responde, ajuda e cria com você — em português, na hora.' },
+  { icon: Sparkles, title: 'Crie imagens', desc: 'Descreva o que imagina e receba a arte pronta em segundos.' },
+  { icon: Users, title: 'Feed da comunidade', desc: 'Acompanhe novidades, compartilhe e veja o que outros estão criando.' },
 ];
 
 const FAQ = [
   { q: 'O que é o Alps OS?', a: 'É a sua central de IA: converse com a Sexta-feira, gere imagens e explore o feed — tudo numa plataforma só, simples e poderosa.' },
   { q: 'Como funciona o acesso?', a: 'É um pagamento único pela Hotmart, com acesso vitalício. Depois de comprar, entre com o mesmo e-mail da compra.' },
-  { q: 'Já comprei. Como entro?', a: 'Toque em "Já comprei — entrar" e use o mesmo e-mail informado na compra da Hotmart.' },
+  { q: 'Já comprei. Como entro?', a: 'Toque em "Entrar" e use o mesmo e-mail informado na compra da Hotmart.' },
 ];
 
 function FaqItem({ q, a }) {
@@ -64,7 +64,7 @@ export default function Welcome() {
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden" style={{ fontFamily: "'Open Sans', sans-serif" }}>
       {/* ---- Barra superior ---- */}
-      <header className="relative z-10 mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-8">
+      <header className="relative z-20 mx-auto flex max-w-5xl items-center justify-between px-5 py-4 sm:px-8">
         <div className="flex items-center gap-2.5">
           <img src={LOGO_URL} alt="Alps OS" className="h-8 w-8 rounded-lg object-cover" />
           <span className="text-lg font-bold gold-gradient">Alps OS</span>
@@ -79,47 +79,49 @@ export default function Welcome() {
 
       <main className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8">
         {/* ---- HERO ---- */}
-        <section className="flex flex-col pt-10 pb-16 sm:pt-16 sm:pb-24 lg:flex-row lg:items-center lg:gap-12">
-          {/* Texto + CTA */}
-          <div className="flex flex-col items-center text-center lg:flex-1 lg:items-start lg:text-left">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl"
-            >
-              Tudo da Alps Prime.<br />
-              <span className="gold-gradient">Em um só lugar.</span>
-            </motion.h1>
+        <section className="relative flex flex-col items-center justify-center pt-20 pb-16 text-center sm:pt-28 sm:pb-24">
+          {/* Efeito de brilho de fundo para dar profundidade (opcional, fica muito bom com tema dark) */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-gold/10 blur-[100px] rounded-full pointer-events-none" />
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mt-5 max-w-md text-base leading-relaxed text-white/60 sm:text-lg"
-            >
-              Um login. Todo o ecossistema Alps. Garanta o seu acesso.
-            </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="relative z-10 text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl"
+          >
+            Tudo da Alps Prime.<br />
+            <span className="gold-gradient">Em um só lugar.</span>
+          </motion.h1>
 
-            {/* CTA */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mt-8 w-full max-w-sm"
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="relative z-10 mt-6 max-w-md text-base leading-relaxed text-white/60 sm:text-lg"
+          >
+            Um login. Todo o ecossistema Alps. Garanta o seu acesso.
+          </motion.p>
+
+          {/* CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="relative z-10 mt-10 w-full max-w-sm group"
+          >
+            {/* Brilho atrás do botão no hover */}
+            <div className="absolute -inset-1 bg-gold/30 rounded-2xl blur-lg opacity-40 group-hover:opacity-100 transition duration-500"></div>
+            <a
+              href={CHECKOUT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hotmart-fb hotmart__button-checkout relative flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl text-base font-semibold text-background shadow-lg shadow-gold/20 transition-transform hover:scale-[1.02]"
+              style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
             >
-              <a
-                href={CHECKOUT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hotmart-fb hotmart__button-checkout flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl text-base font-semibold text-background shadow-lg shadow-gold/20 transition-opacity hover:opacity-90"
-                style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
-              >
-                <ShoppingBag className="h-5 w-5" />
-                Garantir acesso
-              </a>
-            </motion.div>
-          </div>
+              <ShoppingBag className="h-5 w-5" />
+              Garantir acesso
+            </a>
+          </motion.div>
         </section>
 
         {/* ---- RECURSOS ---- */}
