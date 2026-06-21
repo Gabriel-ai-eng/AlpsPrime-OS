@@ -63,13 +63,14 @@ export default function Welcome() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden" style={{ fontFamily: "'Open Sans', sans-serif" }}>
-      {/* ---- Remove o estilo verde que o CSS do Hotmart aplica ao botão ---- */}
+      {/* ---- Neutraliza o CSS do Hotmart no botão: tira a borda verde e força o formato de pílula ---- */}
       <style>{`
-        .hotmart__button-checkout,
-        .hotmart__button-checkout:hover,
-        .hotmart__button-checkout:focus,
-        .hotmart__button-checkout:active {
+        a.hotmart-fb.hotmart__button-checkout,
+        a.hotmart-fb.hotmart__button-checkout:hover,
+        a.hotmart-fb.hotmart__button-checkout:focus,
+        a.hotmart-fb.hotmart__button-checkout:active {
           border: none !important;
+          border-radius: 9999px !important;
           outline: none !important;
           -webkit-tap-highlight-color: transparent !important;
         }
