@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import {
-  ChevronLeft, ChevronDown, Sun, Moon, Monitor, Palette,
-  ShieldCheck, Trash2, AlertTriangle, Clock, BarChart3, Coffee,
+  ChevronLeft, ChevronDown, ChevronRight, Sun, Moon, Monitor, Palette,
+  ShieldCheck, Trash2, AlertTriangle, BarChart3, Coffee,
   Bell, Mail, FlaskConical, Info, Eraser, Download, Loader2, Check,
+  LifeBuoy, LogOut,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -109,6 +110,24 @@ function ToggleLine({ label, sub, checked, onChange }) {
       </div>
       <Switch checked={checked} onChange={onChange} />
     </div>
+  );
+}
+
+function ActionRow({ icon: Icon, label, sub, onClick, danger }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted/40 transition-colors"
+    >
+      <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0', danger ? 'bg-destructive/10' : 'bg-gold/10')}>
+        <Icon className={cn('w-4 h-4', danger ? 'text-destructive' : 'text-gold')} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className={cn('text-sm font-medium', danger ? 'text-destructive' : 'text-foreground')}>{label}</p>
+        {sub && <p className="text-xs text-muted-foreground mt-0.5 truncate">{sub}</p>}
+      </div>
+      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+    </button>
   );
 }
 
@@ -519,6 +538,23 @@ export default function Settings() {
               </Button>
             </div>
           </Row>
+        </Group>
+
+        {/* CONTA */}
+        <Group label="Conta">
+          <ActionRow
+            icon={LifeBuoy}
+            label="Suporte"
+            sub="Fale com a nossa equipe"
+            onClick={() => navigate('/suporte')}
+          />
+          <ActionRow
+            icon={LogOut}
+            label="Sair"
+            sub="Encerrar a sessão neste dispositivo"
+            danger
+            onClick={() => signOut(window.location.origin)}
+          />
         </Group>
 
         {/* ADMIN (somente administradores) */}

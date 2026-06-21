@@ -163,7 +163,7 @@ export default function AppShell() {
   };
 
   return (
-    <div className="flex h-screen w-full max-w-[100vw] overflow-hidden relative bg-black text-white selection:bg-white/30">
+    <div className="flex h-screen w-full max-w-[100vw] overflow-hidden relative bg-background text-foreground selection:bg-foreground/20">
 
       {location.pathname !== '/suporte' && <AtmosphericOrbs />}
 
@@ -259,25 +259,25 @@ export default function AppShell() {
 
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
         {!hideHeader && (
-        <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-[#0A0A0B]/95 border-b border-white/10">
+        <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-background/95 backdrop-blur-xl border-b border-border">
           <div>
             <button
               onClick={() => setMobileOpen(true)}
-              className="p-2 -ml-2 hover:bg-white/10 rounded-xl transition-colors outline-none"
+              className="p-2 -ml-2 hover:bg-muted rounded-xl transition-colors outline-none"
               aria-label="Menu"
               style={{ touchAction: 'manipulation' }}
             >
-              <Menu className="w-5 h-5 text-white" />
+              <Menu className="w-5 h-5 text-foreground" />
             </button>
           </div>
 
-          <span className="flex-1 text-center text-[#8E8E93] font-light tracking-[0.32em] text-[18px] select-none px-2 truncate">
+          <span className="flex-1 text-center text-muted-foreground font-light tracking-[0.32em] text-[18px] select-none px-2 truncate">
             Alps Prime
           </span>
 
           <div className="flex items-center gap-1">
-            <Link to="/search" className="p-2 rounded-full hover:bg-white/10 transition-colors outline-none" aria-label="Buscar">
-              <SearchIcon className="w-5 h-5 text-white/80 hover:text-white" />
+            <Link to="/search" className="p-2 rounded-full hover:bg-muted transition-colors outline-none" aria-label="Buscar">
+              <SearchIcon className="w-5 h-5 text-foreground/80 hover:text-foreground" />
             </Link>
 
             <div>

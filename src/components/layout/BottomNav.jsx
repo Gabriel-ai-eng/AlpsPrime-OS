@@ -65,10 +65,10 @@ function NavItem({ item, active }) {
                 exit={{ opacity: 0, y: 4, scale: 0.92, x: '-50%' }}
                 transition={{ type: 'spring', stiffness: 400, damping: 22 }}
                 style={{ left: anchor.x, bottom: anchor.bottom }}
-                className="fixed whitespace-nowrap rounded-2xl bg-[#2C2C2E] border border-white/10 px-4 py-2 text-sm font-medium text-white shadow-xl pointer-events-none z-[9999]"
+                className="fixed whitespace-nowrap rounded-2xl bg-popover border border-border px-4 py-2 text-sm font-medium text-popover-foreground shadow-xl pointer-events-none z-[9999]"
               >
                 {balloon}
-                <span className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-[#2C2C2E] border-b border-r border-white/10 rotate-45" />
+                <span className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-popover border-b border-r border-border rotate-45" />
               </motion.div>
             )}
           </AnimatePresence>,
@@ -76,7 +76,7 @@ function NavItem({ item, active }) {
         )}
         <div className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 relative overflow-hidden">
           <Icon
-            className="w-6 h-6 transition-all duration-300 relative z-10 text-white/50"
+            className="w-6 h-6 transition-all duration-300 relative z-10 text-muted-foreground"
             fill="none"
             strokeWidth={1.8}
           />
@@ -100,7 +100,7 @@ function NavItem({ item, active }) {
       >
         <div
           className={cn(
-            'absolute inset-0 rounded-2xl bg-white/10 transition-opacity duration-300 ease-out',
+            'absolute inset-0 rounded-2xl bg-foreground/10 transition-opacity duration-300 ease-out',
             active ? 'opacity-100' : 'opacity-0'
           )}
         />
@@ -108,7 +108,7 @@ function NavItem({ item, active }) {
         <Icon
           className={cn(
             'w-6 h-6 transition-all duration-300 relative z-10',
-            active ? 'text-white' : 'text-white/50 hover:text-white/70'
+            active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/70'
           )}
           fill={active ? 'currentColor' : 'none'}
           strokeWidth={active ? 2 : 1.8}
@@ -137,8 +137,8 @@ function AppCenterpiece({ active, path }) {
         className={cn(
           'w-12 h-12 rounded-full flex items-center justify-center overflow-hidden relative ripple-surface transition-all duration-300',
           active
-            ? 'bg-white/20 shadow-[0_0_20px_rgba(255,255,255,0.15)] ring-2 ring-white/40'
-            : 'bg-white/10 shadow-sm hover:bg-white/15 ring-1 ring-white/10'
+            ? 'bg-foreground/15 shadow-sm ring-2 ring-foreground/30'
+            : 'bg-foreground/10 shadow-sm hover:bg-foreground/15 ring-1 ring-foreground/10'
         )}
       >
         {user?.profile_picture_url ? (
@@ -151,7 +151,7 @@ function AppCenterpiece({ active, path }) {
           <User
             className={cn(
               'w-6 h-6 transition-all duration-300',
-              active ? 'text-white' : 'text-white/80'
+              active ? 'text-foreground' : 'text-muted-foreground'
             )}
           />
         )}
@@ -217,11 +217,11 @@ export default function BottomNav() {
         transition={{ type: 'spring', stiffness: 350, damping: 28, mass: 0.8 }}
         className={cn(
           'mx-auto max-w-sm h-[64px] rounded-[2rem] relative overflow-hidden pointer-events-auto',
-          'bg-[#1C1C1E]/80 backdrop-blur-3xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]'
+          'bg-card/80 backdrop-blur-3xl border border-border shadow-[0_20px_60px_rgba(0,0,0,0.25)]'
         )}
         style={{ willChange: 'transform, opacity' }}
       >
-        <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full" />
+        <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent rounded-full" />
 
         <div className="absolute inset-0 max-w-sm mx-auto h-full flex items-center justify-around px-2 z-10">
           {ITEMS.map((item) => {
