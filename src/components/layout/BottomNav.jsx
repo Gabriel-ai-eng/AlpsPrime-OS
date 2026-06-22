@@ -1,12 +1,45 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, LayoutGrid, Grip, Star, Bot, User } from 'lucide-react';
+import { LayoutGrid, Grip, Star, Bot, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useLiquidRipple } from '@/lib/useLiquidRipple';
 import { useAuth } from '@/lib/AuthContext';
 import CachedImage from '@/components/CachedImage';
+
+// Ícone de casinha no padrão do Facebook: mesma silhueta nos dois estados,
+// alternando apenas preenchimento + cor. A porta é sempre espaço negativo —
+// contorno (arco aberto) quando inativo, recorte (knockout) quando ativo.
+const CASA = 'M12 3 L20.5 10 L20.5 20 L3.5 20 L3.5 10 Z';
+const PORTA_ABERTA = 'M9.5 20 L9.5 15 A2.5 2.5 0 0 1 14.5 15 L14.5 20';
+const PORTA_FECHADA = 'M9.5 20 L9.5 15 A2.5 2.5 0 0 1 14.5 15 L14.5 20 Z';
+
+function HomeIcon({ className, fill = 'none', strokeWidth = 2.4, style }) {
+  const preenchido = fill && fill !== 'none';
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      style={style}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinejoin="round"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      {preenchido ? (
+        <path d={`${CASA} ${PORTA_FECHADA}`} fill="currentColor" fillRule="evenodd" />
+      ) : (
+        <>
+          <path d={CASA} />
+          <path d={PORTA_ABERTA} />
+        </>
+      )}
+    </svg>
+  );
+}
 
 const FRASES_IA = [
   'Em breve... 🚀',
@@ -19,7 +52,7 @@ const FRASES_IA = [
 ];
 
 const ITEMS = [
-  { label: 'Início', path: '/home', icon: Home },
+  { label: 'Início', path: '/home', icon: HomeIcon },
   { label: 'Categorias', path: '/categorias', icon: LayoutGrid },
   { label: 'Perfil', path: '/profile', icon: User, isCenter: true },
   { label: 'Favoritos', path: '/favoritos', icon: Star },
