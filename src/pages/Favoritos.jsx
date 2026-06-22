@@ -1,18 +1,14 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Search, Trash2, ArrowRight, Sparkles, Image as ImageIcon, Shield, Gamepad2, Database, LayoutGrid } from 'lucide-react';
+import { Star, Search, Trash2, ArrowRight, Sparkles, Image as ImageIcon, Gamepad2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
-// Lista global de apps disponíveis no seu sistema
+// Serviços realmente disponíveis no Alps OS (mesmos do hub /home e das Configurações).
 const ALL_APPS = [
   { id: 'sexta', title: 'Sexta-feira', subtitle: 'Sua assistente de inteligência artificial', category: 'IA', icon: Sparkles, path: '/home' },
+  { id: 'armor', title: 'Projeto Armor', subtitle: 'Jogo de ação e sobrevivência com gravidade', category: 'Jogos', icon: Gamepad2, path: '/home' },
   { id: 'vivart', title: 'Vivart', subtitle: 'Estúdio de criação de imagens com IA', category: 'Criatividade', icon: ImageIcon, path: '/image' },
-  { id: 'titan', title: 'Projeto Titan', subtitle: 'Gestão e automação avançada', category: 'Produtividade', icon: Shield, path: '/titan' },
-  { id: 'arena', title: 'Cyber Arena', subtitle: 'Plataforma de jogos e desafios', category: 'Jogos', icon: Gamepad2, path: '/arena' },
-  { id: 'armor', title: 'Projeto Armor', subtitle: 'Segurança e monitoramento do ecossistema', category: 'Segurança', icon: Shield, path: '/armor' },
-  { id: 'files', title: 'Alps Files', subtitle: 'Gerenciador de arquivos em nuvem', category: 'Utilitários', icon: Database, path: '/files' },
-  { id: 'categorias', title: 'Categorias', subtitle: 'Explore todas as categorias de apps', category: 'Navegação', icon: LayoutGrid, path: '/categorias' },
 ];
 
 export default function Favoritos() {
@@ -25,12 +21,11 @@ export default function Favoritos() {
   // Detecta se o usuário está pesquisando ou não
   const isSearching = searchQuery.trim().length > 0;
 
-  // Se estiver pesquisando, busca na lista global de apps. Se não, exibe apenas os favoritos.
+  // Ao pesquisar, mostra apenas os serviços disponíveis cujo nome COMEÇA exatamente
+  // com o que está sendo digitado (ex.: "sex" → "Sexta-feira"). Sem pesquisa, exibe os favoritos.
   const displayList = isSearching
     ? ALL_APPS.filter(app =>
-        app.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.subtitle.toLowerCase().includes(searchQuery.toLowerCase())
+        app.title.toLowerCase().startsWith(searchQuery.trim().toLowerCase())
       )
     : favorites;
 
