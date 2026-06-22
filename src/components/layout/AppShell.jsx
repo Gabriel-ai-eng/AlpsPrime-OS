@@ -254,7 +254,7 @@ export default function AppShell() {
               aria-label="Configurações"
               style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
             >
-              <Menu className="w-5 h-5 text-foreground" />
+              <Menu className="w-5 h-5 text-foreground" strokeWidth={2.6} />
             </Link>
           </div>
 
@@ -266,7 +266,7 @@ export default function AppShell() {
 
           <div className="flex items-center gap-1">
             <Link to="/search" className="p-2 rounded-full hover:bg-muted transition-colors outline-none" aria-label="Buscar">
-              <SearchIcon className="w-5 h-5 text-foreground/80 hover:text-foreground" />
+              <SearchIcon className="w-5 h-5 text-foreground hover:text-foreground" strokeWidth={2.6} />
             </Link>
 
             <div>

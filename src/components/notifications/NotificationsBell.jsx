@@ -24,7 +24,7 @@ export default function NotificationsBell({ userEmail }) {
       className="relative p-2 rounded-lg hover:bg-muted transition-colors inline-flex items-center justify-center"
       aria-label="Notificações"
     >
-      <Bell className="w-5 h-5 text-muted-foreground" />
+      <Bell className="w-5 h-5 text-foreground" strokeWidth={2.6} />
       {unreadCount > 0 && (
         <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-gold text-background text-[9px] font-bold flex items-center justify-center border border-background">
           {unreadCount > 9 ? '9+' : unreadCount}
