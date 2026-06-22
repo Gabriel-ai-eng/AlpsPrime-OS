@@ -77,9 +77,9 @@ function NavItem({ item, active }) {
         )}
         <div className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 relative overflow-hidden">
           <Icon
-            className="w-6 h-6 transition-all duration-300 relative z-10 text-muted-foreground"
+            className="w-6 h-6 transition-all duration-300 relative z-10 text-foreground/70"
             fill="none"
-            strokeWidth={1.8}
+            strokeWidth={2.4}
           />
         </div>
       </button>
@@ -101,7 +101,7 @@ function NavItem({ item, active }) {
       >
         <div
           className={cn(
-            'absolute inset-0 rounded-2xl bg-foreground/10 transition-opacity duration-300 ease-out',
+            'absolute inset-0 rounded-2xl bg-gold/15 transition-opacity duration-300 ease-out',
             active ? 'opacity-100' : 'opacity-0'
           )}
         />
@@ -109,10 +109,10 @@ function NavItem({ item, active }) {
         <Icon
           className={cn(
             'w-6 h-6 transition-all duration-300 relative z-10',
-            active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/70'
+            active ? 'text-gold' : 'text-foreground/70 hover:text-foreground'
           )}
           fill={active ? 'currentColor' : 'none'}
-          strokeWidth={active ? 2 : 1.8}
+          strokeWidth={active ? 2.6 : 2.4}
           style={{ willChange: 'transform, color, fill' }}
         />
       </motion.div>
@@ -138,7 +138,7 @@ function AppCenterpiece({ active, path }) {
         className={cn(
           'w-12 h-12 rounded-full flex items-center justify-center overflow-hidden relative ripple-surface transition-all duration-300',
           active
-            ? 'bg-foreground/15 shadow-sm ring-2 ring-foreground/30'
+            ? 'bg-gold/15 shadow-sm ring-2 ring-gold/60'
             : 'bg-foreground/10 shadow-sm hover:bg-foreground/15 ring-1 ring-foreground/10'
         )}
       >
@@ -153,8 +153,10 @@ function AppCenterpiece({ active, path }) {
           <User
             className={cn(
               'w-6 h-6 transition-all duration-300',
-              active ? 'text-foreground' : 'text-muted-foreground'
+              active ? 'text-gold' : 'text-foreground/70'
             )}
+            fill={active ? 'currentColor' : 'none'}
+            strokeWidth={active ? 2.6 : 2.4}
           />
         )}
       </motion.div>
