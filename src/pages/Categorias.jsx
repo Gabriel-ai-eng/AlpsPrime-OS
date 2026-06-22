@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Sparkles, Gamepad2, Palette } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // Filtros de categoria — "Todos" mostra tudo; os demais filtram por tipo.
@@ -12,9 +11,9 @@ const FILTROS = [
 
 // Serviços disponíveis, cada um marcado com a sua categoria.
 const APPS = [
-  { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', cat: 'ia', icon: Sparkles, corIcone: 'text-[#C9A24F]', bgIcone: 'bg-[#C9A24F]/10' },
-  { id: 'titan', nome: 'Titan', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', icon: Gamepad2, corIcone: 'text-blue-400', bgIcone: 'bg-blue-500/10' },
-  { id: 'vivart', nome: 'Vivart', desc: 'Estúdio de criação e galeria visual.', cat: 'design', icon: Palette, corIcone: 'text-purple-400', bgIcone: 'bg-purple-500/10' },
+  { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', logo: '/apps/armor-logo.png' },
+  { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', cat: 'ia', logo: '/apps/sexta-logo.png' },
+  { id: 'vivart', nome: 'Vivart', desc: 'Estúdio de criação e galeria visual.', cat: 'design', logo: '/apps/vivart-logo.png' },
 ];
 
 export default function Categorias() {
@@ -55,15 +54,14 @@ export default function Categorias() {
       {/* LISTA DE SERVIÇOS */}
       <div className="flex-1 px-6 pt-6 pb-32 space-y-3">
         {appsVisiveis.map((app) => {
-          const Icon = app.icon;
           return (
             <div
               key={app.id}
               onClick={() => navigate('/home')}
               className="flex items-center gap-4 p-4 rounded-3xl bg-card border border-border active:scale-[0.98] transition-all cursor-pointer"
             >
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${app.bgIcone}`}>
-                <Icon className={`w-7 h-7 ${app.corIcone}`} />
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white overflow-hidden">
+                <img src={app.logo} alt={app.nome} className="w-full h-full object-contain" loading="lazy" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-[17px] font-semibold text-foreground mb-0.5">{app.nome}</h3>
