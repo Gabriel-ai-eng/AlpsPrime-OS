@@ -59,7 +59,7 @@ export default function Home() {
     <div className="w-full h-[100dvh] bg-background text-foreground relative overflow-hidden flex flex-col">
       {telaAtual === 'hub' && (
         <>
-          <div className="flex-1 w-full bg-background overflow-y-auto scrollbar-none">
+          <div className="flex-1 w-full bg-background overflow-y-auto scrollbar-none flex flex-col">
 
             {/* SLIDER */}
             <div
@@ -112,20 +112,18 @@ export default function Home() {
               </button>
             </div>
 
-            {/* APPS */}
-            <div className="flex flex-col items-center px-4 pt-6 pb-32 gap-4">
-              <div
-                onClick={() => setTelaAtual('titan')}
-                className="w-full max-w-md rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group shadow-sm"
-              >
-                <img
-                  src="/apps/titan-bg.webp"
-                  alt="Projeto Armor"
-                  decoding="async"
-                  fetchpriority="high"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
-                />
-              </div>
+            {/* APP — Projeto Armor (bloco único, ocupa toda a largura e o resto da tela) */}
+            <div
+              onClick={() => setTelaAtual('titan')}
+              className="flex-1 w-full min-h-[55vh] overflow-hidden cursor-pointer active:scale-[0.99] transition-transform duration-300 group"
+            >
+              <img
+                src="/apps/titan-bg.webp"
+                alt="Projeto Armor"
+                decoding="async"
+                fetchpriority="high"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
+              />
             </div>
           </div>
         </>
