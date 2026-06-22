@@ -247,14 +247,14 @@ export default function AppShell() {
         {!hideHeader && (
         <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-background/95 backdrop-blur-xl border-b border-border">
           <div>
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="p-2 -ml-2 hover:bg-muted rounded-xl transition-colors outline-none"
-              aria-label="Menu"
+            <Link
+              to="/settings"
+              className="p-2 -ml-2 hover:bg-muted rounded-xl transition-colors outline-none inline-flex items-center justify-center"
+              aria-label="Configurações"
               style={{ touchAction: 'manipulation' }}
             >
               <Menu className="w-5 h-5 text-foreground" />
-            </button>
+            </Link>
           </div>
 
           <span className="flex-1 text-center text-muted-foreground font-light tracking-[0.32em] text-[18px] select-none px-2 truncate">
