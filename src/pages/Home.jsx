@@ -112,10 +112,10 @@ export default function Home() {
               </button>
             </div>
 
-            {/* APP — Projeto Armor (bloco único, ocupa toda a largura e o resto da tela) */}
+            {/* APP — Projeto Armor (bloco quadrado, largura total, sem cantos arredondados) */}
             <div
               onClick={() => setTelaAtual('titan')}
-              className="flex-1 w-full min-h-[55vh] overflow-hidden cursor-pointer active:scale-[0.99] transition-transform duration-300 group"
+              className="w-full aspect-square overflow-hidden cursor-pointer active:scale-[0.99] transition-transform duration-300 group"
             >
               <img
                 src="/apps/titan-bg.webp"
