@@ -24,9 +24,15 @@ const SLIDES = [
 
 const TOTAL = SLIDES.length;
 
+// Clones nas pontas para um carrossel infinito sem "pulo" visual:
+// [último, ...slides, primeiro]
+const EXT = [SLIDES[TOTAL - 1], ...SLIDES, SLIDES[0]];
+const EXT_LEN = EXT.length; // TOTAL + 2
+
 export default function Home() {
   const [telaAtual, setTelaAtual] = useState('hub');
-  const [slideAtual, setSlideAtual] = useState(0);
+  const [pos, setPos] = useState(1); // 1 = primeiro slide real (índice 0 é o clone)
+  const [anim, setAnim] = useState(true);
   const timerRef = useRef(null);
   const location = useLocation();
 
@@ -39,10 +45,7 @@ export default function Home() {
 
   const resetTimer = () => {
     clearInterval(timerRef.current);
-    timerRef.current = setInterval(
-      () => setSlideAtual(prev => (prev + 1) % TOTAL),
-      5000
-    );
+    timerRef.current = setInterval(() => setPos(p => p + 1), 5000);
   };
 
   useEffect(() => {
@@ -51,9 +54,29 @@ export default function Home() {
   }, []);
 
   const navSlide = (dir) => {
-    setSlideAtual(prev => ((prev + dir + TOTAL) % TOTAL));
+    setPos(p => p + dir);
     resetTimer();
   };
+
+  // Ao chegar num clone, salta sem animação para o slide real equivalente.
+  const handleEnd = () => {
+    if (pos === 0) {
+      setAnim(false);
+      setPos(TOTAL);
+    } else if (pos === EXT_LEN - 1) {
+      setAnim(false);
+      setPos(1);
+    }
+  };
+
+  // Reabilita a transição depois que o salto instantâneo é pintado.
+  useEffect(() => {
+    if (anim) return;
+    const id = requestAnimationFrame(() =>
+      requestAnimationFrame(() => setAnim(true))
+    );
+    return () => cancelAnimationFrame(id);
+  }, [anim]);
 
   return (
     <div className="w-full h-full bg-background text-foreground relative overflow-hidden flex flex-col">
@@ -67,18 +90,20 @@ export default function Home() {
               style={{ height: '28vh' }}
             >
               <div
-                className="flex h-full transition-transform duration-500 ease-out"
+                className="flex h-full"
                 style={{
-                  width: `${TOTAL * 100}%`,
-                  transform: `translateX(-${(slideAtual * 100) / TOTAL}%)`,
+                  width: `${EXT_LEN * 100}%`,
+                  transform: `translateX(-${(pos * 100) / EXT_LEN}%)`,
+                  transition: anim ? 'transform 500ms ease-out' : 'none',
                 }}
+                onTransitionEnd={handleEnd}
               >
-                {SLIDES.map((slide) => (
+                {EXT.map((slide, i) => (
                   <div
-                    key={slide.id}
+                    key={i}
                     className="h-full flex items-center justify-center"
                     style={{
-                      width: `${100 / TOTAL}%`,
+                      width: `${100 / EXT_LEN}%`,
                       backgroundColor: slide.bg ?? 'transparent',
                     }}
                   >
