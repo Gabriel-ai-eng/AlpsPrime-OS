@@ -120,33 +120,7 @@ export default function Home() {
               >
                 <img
                   src="/apps/titan-bg.webp"
-                  alt="Titan App"
-                  decoding="async"
-                  fetchpriority="high"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
-                />
-              </div>
-
-              <div
-                onClick={() => setTelaAtual('sexta')}
-                className="w-full max-w-md rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group shadow-sm"
-              >
-                <img
-                  src="/apps/sexta-bg.webp"
-                  alt="Sexta App"
-                  decoding="async"
-                  fetchpriority="high"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
-                />
-              </div>
-
-              <div
-                onClick={() => setTelaAtual('vivart')}
-                className="w-full max-w-md rounded-[32px] overflow-hidden aspect-[4/3] cursor-pointer active:scale-95 transition-transform duration-300 group shadow-sm"
-              >
-                <img
-                  src="/apps/vivart-bg.webp"
-                  alt="Vivart App"
+                  alt="Projeto Armor"
                   decoding="async"
                   fetchpriority="high"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
