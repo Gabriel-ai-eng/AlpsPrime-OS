@@ -83,15 +83,13 @@ export default function Home() {
                     }}
                   >
                     {slide.titulo && (
-                      <div className="text-center px-6">
-                        <h1 className="text-[46px] font-semibold tracking-tight gold-gradient mb-2 select-none">
-                          Alps OS
-                        </h1>
-
-                        <p className="text-muted-foreground text-[14px] font-light tracking-wide">
-                          Um mundo de possibilidades.
-                        </p>
-                      </div>
+                      <img
+                        src="/apps/alps-os-bg.jpg"
+                        alt="Alps OS"
+                        decoding="async"
+                        fetchpriority="high"
+                        className="w-full h-full object-cover select-none"
+                      />
                     )}
                   </div>
                 ))}
