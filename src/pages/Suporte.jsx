@@ -35,13 +35,13 @@ function FaqItem({ q, a }) {
   return (
     <button
       onClick={() => setOpen((o) => !o)}
-      className="w-full text-left rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 transition-colors hover:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
+      className="w-full text-left rounded-2xl border border-border bg-card px-5 py-4 transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
     >
       <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium text-white">{q}</span>
+        <span className="text-sm font-medium text-foreground">{q}</span>
         <ChevronDown className={`w-4 h-4 text-gold flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
       </div>
-      {open && <p className="mt-3 text-sm leading-relaxed text-white/60">{a}</p>}
+      {open && <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{a}</p>}
     </button>
   );
 }
@@ -50,12 +50,12 @@ export default function Suporte() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-full">
+    <div className="min-h-full bg-muted text-foreground">
       <div className="max-w-3xl mx-auto px-5 sm:px-8 pt-6 pb-16">
         {/* ---- Voltar ---- */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 mb-8 text-sm font-medium text-white/70 hover:text-white transition-colors outline-none"
+          className="flex items-center gap-2 mb-8 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors outline-none"
         >
           <ArrowLeft className="w-5 h-5" />
           <span>Voltar</span>
@@ -73,7 +73,7 @@ export default function Suporte() {
             className="mx-auto w-[78%] max-w-[440px] h-auto select-none"
             draggable="false"
           />
-          <p className="text-lg sm:text-xl font-light text-white/45 mt-1">
+          <p className="text-lg sm:text-xl font-light text-muted-foreground mt-1">
             Como podemos te ajudar?
           </p>
         </motion.div>
@@ -103,7 +103,7 @@ export default function Suporte() {
 
         {/* ---- Perguntas frequentes ---- */}
         <section className="mt-16">
-          <h2 className="mb-8 text-center text-2xl font-bold text-white sm:text-3xl">
+          <h2 className="mb-8 text-center text-2xl font-bold text-foreground sm:text-3xl">
             Perguntas frequentes
           </h2>
           <div className="space-y-3 max-w-2xl mx-auto">
