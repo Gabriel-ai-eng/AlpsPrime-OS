@@ -56,10 +56,10 @@ export default function Home() {
   };
 
   return (
-    <div className="w-full h-[100dvh] bg-background text-foreground relative overflow-hidden flex flex-col">
+    <div className="w-full h-full bg-background text-foreground relative overflow-hidden flex flex-col">
       {telaAtual === 'hub' && (
         <>
-          <div className="flex-1 w-full bg-background overflow-y-auto scrollbar-none flex flex-col">
+          <div className="flex-1 w-full bg-background overflow-hidden flex flex-col min-h-0">
 
             {/* SLIDER */}
             <div
@@ -112,10 +112,10 @@ export default function Home() {
               </button>
             </div>
 
-            {/* APP — Projeto Armor (bloco quadrado, largura total, sem cantos arredondados) */}
+            {/* APP — Projeto Armor (preenche todo o espaço restante, largura total, sem cantos arredondados) */}
             <div
               onClick={() => setTelaAtual('titan')}
-              className="w-full aspect-square overflow-hidden cursor-pointer active:scale-[0.99] transition-transform duration-300 group"
+              className="flex-1 min-h-0 w-full overflow-hidden cursor-pointer active:scale-[0.99] transition-transform duration-300 group"
             >
               <img
                 src="/apps/armor-bg.webp"
