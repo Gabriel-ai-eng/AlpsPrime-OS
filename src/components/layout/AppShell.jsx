@@ -19,6 +19,7 @@ import { useLiquidGlass } from '@/lib/useLiquidGlass';
 import { initAppearance, applyTheme, getThemePref } from '@/lib/theme';
 import { addUsage, getPrefs } from '@/lib/appPrefs';
 import { toast } from 'sonner';
+import CachedImage from '@/components/CachedImage';
 
 const NAV_ITEMS = [];
 
@@ -58,7 +59,7 @@ function Sidebar({ user, location, aiUnlocked, onNavigate, onAILocked }) {
         <Link to="/profile" onClick={onNavigate} className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-muted transition-colors group">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 ring-gold/20 group-hover:ring-gold/50 transition-all">
             {user?.profile_picture_url ? (
-              <img src={user.profile_picture_url} alt={user.full_name} className="w-full h-full object-cover" />
+              <CachedImage src={user.profile_picture_url} cacheKey={`avatar_${user.email}`} alt={user.full_name} className="w-full h-full object-cover" />
             ) : (
               <User className="w-4 h-4 text-white" />
             )}
@@ -249,9 +250,9 @@ export default function AppShell() {
           <div>
             <Link
               to="/settings"
-              className="p-2 -ml-2 hover:bg-muted rounded-xl transition-colors outline-none inline-flex items-center justify-center"
+              className="p-3 -ml-2 min-w-[48px] min-h-[48px] hover:bg-muted rounded-xl transition-colors outline-none inline-flex items-center justify-center"
               aria-label="Configurações"
-              style={{ touchAction: 'manipulation' }}
+              style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
             >
               <Menu className="w-5 h-5 text-foreground" />
             </Link>

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useLiquidRipple } from '@/lib/useLiquidRipple';
 import { useAuth } from '@/lib/AuthContext';
+import CachedImage from '@/components/CachedImage';
 
 const FRASES_IA = [
   'Em breve... 🚀',
@@ -142,8 +143,9 @@ function AppCenterpiece({ active, path }) {
         )}
       >
         {user?.profile_picture_url ? (
-          <img
+          <CachedImage
             src={user.profile_picture_url}
+            cacheKey={`avatar_${user.email}`}
             alt="Perfil"
             className="w-full h-full object-cover"
           />

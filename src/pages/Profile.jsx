@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { ProfileTranslationProvider, Translated } from '@/components/profile/ProfileTranslator';
 import ShareProfileButton from '@/components/profile/ShareProfileButton';
 import { useProfileVisitTracker } from '@/lib/useProfileVisitTracker';
+import CachedImage from '@/components/CachedImage';
 
 export default function Profile() {
   const { user: authUser, refetchUser } = useAuth();
@@ -171,7 +172,7 @@ export default function Profile() {
       {/* --- BANNER --- */}
       <div className="relative h-40 lg:h-56 bg-gradient-to-br from-gold/20 via-muted to-background overflow-hidden border-b border-border">
         {user.profile_banner_url && (
-          <img src={user.profile_banner_url} alt="Banner" className="w-full h-full object-cover" />
+          <CachedImage src={user.profile_banner_url} cacheKey={`banner_${user.email}`} alt="Banner" className="w-full h-full object-cover" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-background/20 to-transparent" />
         {!readOnly && (
@@ -205,7 +206,7 @@ export default function Profile() {
             >
               <div className="w-full h-full rounded-full bg-muted overflow-hidden relative">
                 {user.profile_picture_url ? (
-                  <img src={user.profile_picture_url} alt={primaryName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <CachedImage src={user.profile_picture_url} cacheKey={`avatar_${user.email}`} alt={primaryName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 ) : (
                   <User className="w-12 h-12 text-muted-foreground absolute inset-0 m-auto" />
                 )}
