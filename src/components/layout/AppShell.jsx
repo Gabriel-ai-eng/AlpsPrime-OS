@@ -176,80 +176,66 @@ export default function AppShell() {
           <div className="absolute inset-0" onClick={() => setMobileOpen(false)} />
 
           <div
-            className="relative z-10 w-full max-w-md rounded-[44px] flex flex-col overflow-hidden animate-menu-panel-in"
-            style={{
-              background: 'linear-gradient(160deg, rgba(38,38,42,0.92) 0%, rgba(18,18,22,0.90) 100%)',
-              backdropFilter: 'blur(20px) saturate(160%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(160%)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              boxShadow: '0 30px 90px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.18)',
-            }}
+            className="relative z-10 w-full max-w-md rounded-[44px] flex flex-col overflow-hidden animate-menu-panel-in bg-popover/95 backdrop-blur-xl border border-border shadow-2xl"
           >
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/10 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-foreground/5 to-transparent" />
 
             <button
               onClick={() => setMobileOpen(false)}
               aria-label="Fechar"
-              className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-90 outline-none"
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                backdropFilter: 'blur(16px) saturate(160%)',
-                WebkitBackdropFilter: 'blur(16px) saturate(160%)',
-                border: '1px solid rgba(255,255,255,0.14)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18)',
-              }}
+              className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-90 outline-none bg-muted border border-border"
             >
-              <X className="w-4 h-4 text-white/70" />
+              <X className="w-4 h-4 text-muted-foreground" />
             </button>
 
             <div className="relative px-5 pb-8 pt-6 space-y-7">
               <div className="space-y-1">
-                <Link to="/home" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                <Link to="/home" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-muted transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
                     <Home className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-white/90">Home</span>
+                  <span className="text-[15px] font-medium text-foreground">Home</span>
                 </Link>
-                <Link to="/categorias" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                <Link to="/categorias" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-muted transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                     <LayoutList className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-white/90">Categorias</span>
+                  <span className="text-[15px] font-medium text-foreground">Categorias</span>
                 </Link>
-                <Link to="/favoritos" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
+                <Link to="/favoritos" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-muted transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-xl bg-yellow-500/20 flex items-center justify-center text-yellow-400 group-hover:scale-110 transition-transform">
                     <Star className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-white/90">Favoritos</span>
+                  <span className="text-[15px] font-medium text-foreground">Favoritos</span>
                 </Link>
-                <button onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none cursor-not-allowed opacity-50">
-                  <div className="w-8 h-8 rounded-xl bg-[#C9A24F]/20 flex items-center justify-center text-[#C9A24F] group-hover:scale-110 transition-transform">
+                <button onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-muted transition-colors group outline-none cursor-not-allowed opacity-50">
+                  <div className="w-8 h-8 rounded-xl bg-gold/20 flex items-center justify-center text-gold group-hover:scale-110 transition-transform">
                     <Sparkles className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-white/90">Em breve</span>
+                  <span className="text-[15px] font-medium text-foreground">Em breve</span>
                 </button>
               </div>
 
-              <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-border to-transparent" />
 
               <div className="space-y-1">
-                <Link to="/settings" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
-                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-white transition-colors">
+                <Link to="/settings" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-muted transition-colors group outline-none">
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground border border-border group-hover:text-foreground transition-colors">
                     <Settings className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Configurações</span>
+                  <span className="text-[15px] font-medium text-foreground/80 group-hover:text-foreground transition-colors">Configurações</span>
                 </Link>
-                <Link to="/suporte" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white/10 transition-colors group outline-none">
-                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-white transition-colors">
+                <Link to="/suporte" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-muted transition-colors group outline-none">
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground border border-border group-hover:text-foreground transition-colors">
                     <HelpCircle className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">Suporte</span>
+                  <span className="text-[15px] font-medium text-foreground/80 group-hover:text-foreground transition-colors">Suporte</span>
                 </Link>
                 <button onClick={() => { setMobileOpen(false); signOut(window.location.origin); }} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-500/10 transition-colors group outline-none">
-                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/60 border border-white/5 group-hover:text-red-400 group-hover:border-red-400/20 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground border border-border group-hover:text-red-500 group-hover:border-red-400/20 transition-colors">
                     <LogOut className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-white/80 group-hover:text-red-400 transition-colors">Sair</span>
+                  <span className="text-[15px] font-medium text-foreground/80 group-hover:text-red-500 transition-colors">Sair</span>
                 </button>
               </div>
             </div>
