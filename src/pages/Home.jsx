@@ -118,7 +118,7 @@ export default function Home() {
               className="w-full aspect-square overflow-hidden cursor-pointer active:scale-[0.99] transition-transform duration-300 group"
             >
               <img
-                src="/apps/titan-bg.webp"
+                src="/apps/armor-bg.webp"
                 alt="Projeto Armor"
                 decoding="async"
                 fetchpriority="high"
