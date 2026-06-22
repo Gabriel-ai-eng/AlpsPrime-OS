@@ -257,8 +257,10 @@ export default function AppShell() {
             </Link>
           </div>
 
-          <span className="flex-1 text-center text-muted-foreground font-light tracking-[0.32em] text-[18px] select-none px-2 truncate">
-            Alps Prime
+          <span className="flex-1 flex items-center justify-center px-2 select-none">
+            {/* Tema claro: logo preto · Tema escuro: logo branco */}
+            <img src="/brand/alps-prime-black.png" alt="Alps Prime" className="h-5 w-auto object-contain dark:hidden" />
+            <img src="/brand/alps-prime-white.png" alt="Alps Prime" className="h-5 w-auto object-contain hidden dark:block" />
           </span>
 
           <div className="flex items-center gap-1">
