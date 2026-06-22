@@ -34,7 +34,7 @@ export default function InstallShortcutCard() {
               Instalação como app
             </p>
             <h3 className="font-display text-lg leading-tight mb-1">
-              Instale a <span className="gold-gradient italic">Sexta-feira</span> no seu dispositivo
+              Instale o <span className="gold-gradient italic">app oficial</span> no seu dispositivo
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
               Abra como um app, sem barra do navegador, direto da sua tela inicial.
