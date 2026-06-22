@@ -1,41 +1,18 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Search, Trash2, ArrowRight, Sparkles, Image as ImageIcon, Gamepad2 } from 'lucide-react';
+import { Star, Trash2, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
-// Serviços realmente disponíveis no Alps OS (mesmos do hub /home e das Configurações).
-const ALL_APPS = [
-  { id: 'sexta', title: 'Sexta-feira', subtitle: 'Sua assistente de inteligência artificial', category: 'IA', icon: Sparkles, path: '/home' },
-  { id: 'armor', title: 'Projeto Armor', subtitle: 'Jogo de ação e sobrevivência com gravidade', category: 'Jogos', icon: Gamepad2, path: '/home' },
-  { id: 'vivart', title: 'Vivart', subtitle: 'Estúdio de criação de imagens com IA', category: 'Criatividade', icon: ImageIcon, path: '/image' },
-];
-
 export default function Favoritos() {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
 
-  // Estado inicial de favoritos. (Começa vazio)
+  // Lista de favoritos. (Começa vazia)
   const [favorites, setFavorites] = useState([]);
 
-  // Detecta se o usuário está pesquisando ou não
-  const isSearching = searchQuery.trim().length > 0;
-
-  // Ao pesquisar, mostra apenas os serviços disponíveis cujo nome COMEÇA exatamente
-  // com o que está sendo digitado (ex.: "sex" → "Sexta-feira"). Sem pesquisa, exibe os favoritos.
-  const displayList = isSearching
-    ? ALL_APPS.filter(app =>
-        app.title.toLowerCase().startsWith(searchQuery.trim().toLowerCase())
-      )
-    : favorites;
-
-  // Adiciona ou remove da lista de favoritos
-  const toggleFavorite = (app) => {
-    if (favorites.some(f => f.id === app.id)) {
-      setFavorites(prev => prev.filter(f => f.id !== app.id));
-    } else {
-      setFavorites(prev => [...prev, app]);
-    }
+  // Remove um app da lista de favoritos
+  const removeFavorite = (app) => {
+    setFavorites(prev => prev.filter(f => f.id !== app.id));
   };
 
   return (
@@ -58,41 +35,13 @@ export default function Favoritos() {
         </p>
       </motion.div>
 
-      {/* Barra de Pesquisa */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-        className="mb-8 relative group"
-      >
-        <div className="absolute inset-y-0 left-4 z-10 flex items-center pointer-events-none">
-          <Search className="w-5 h-5 text-muted-foreground group-focus-within:text-gold transition-colors duration-300" />
-        </div>
-        <input
-          type="text"
-          placeholder="Buscar ou adicionar apps..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full h-14 pl-12 pr-4 bg-muted/50 hover:bg-muted focus:bg-muted border border-border focus:border-gold/50 rounded-[24px] text-foreground placeholder:text-muted-foreground outline-none transition-all duration-300 backdrop-blur-xl"
-        />
-      </motion.div>
-
       {/* Lista */}
       <div className="flex-1">
         <AnimatePresence mode="popLayout">
-          {displayList.length > 0 ? (
+          {favorites.length > 0 ? (
             <div className="flex flex-col gap-3">
-              {isSearching && (
-                <motion.h3
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1 px-2"
-                >
-                  Resultados da busca
-                </motion.h3>
-              )}
-              {displayList.map((app, index) => {
+              {favorites.map((app, index) => {
                 const Icon = app.icon;
-                const isFavorited = favorites.some(f => f.id === app.id);
 
                 return (
                   <motion.div
@@ -109,7 +58,7 @@ export default function Favoritos() {
 
                     <div className="flex items-center gap-4 relative z-10 min-w-0">
                       <div className="w-12 h-12 rounded-[20px] bg-muted border border-border flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-500 group-hover:border-gold/30 group-hover:shadow-[0_0_20px_rgba(201,162,79,0.15)]">
-                        <Icon className="w-5 h-5 text-muted-foreground group-hover:text-gold transition-colors duration-300" />
+                        {Icon && <Icon className="w-5 h-5 text-muted-foreground group-hover:text-gold transition-colors duration-300" />}
                       </div>
 
                       <div className="flex flex-col min-w-0">
@@ -128,27 +77,16 @@ export default function Favoritos() {
                     </div>
 
                     <div className="flex items-center gap-2 relative z-10 pl-4">
-                      {/* Botão de Favoritar/Remover */}
+                      {/* Botão de Remover */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation(); // Impede que o clique no botão abra o app acidentalmente
-                          toggleFavorite(app);
+                          removeFavorite(app);
                         }}
-                        className={cn(
-                          "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 outline-none",
-                          !isSearching
-                            ? "text-muted-foreground hover:text-red-500 hover:bg-red-500/10" // Visualização de favoritos: ícone de excluir
-                            : isFavorited
-                              ? "text-gold bg-gold/10 hover:bg-muted hover:text-foreground" // Já é favorito: dourado
-                              : "text-muted-foreground hover:text-gold hover:bg-gold/10" // Não é favorito
-                        )}
-                        title={isFavorited ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                        className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 outline-none text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
+                        title="Remover dos favoritos"
                       >
-                        {!isSearching ? (
-                          <Trash2 className="w-4 h-4" />
-                        ) : (
-                          <Star className="w-4 h-4" fill={isFavorited ? "currentColor" : "none"} />
-                        )}
+                        <Trash2 className="w-4 h-4" />
                       </button>
 
                       {/* Botão de Abrir App */}
@@ -171,15 +109,13 @@ export default function Favoritos() {
               className="flex flex-col items-center justify-center h-64 text-center px-4"
             >
               <div className="w-16 h-16 rounded-2xl bg-muted border border-border flex items-center justify-center mb-4 shadow-sm">
-                {isSearching ? <Search className="w-7 h-7 text-muted-foreground" /> : <Star className="w-7 h-7 text-muted-foreground" />}
+                <Star className="w-7 h-7 text-muted-foreground" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-1" style={{ fontFamily: "'Open Sans', sans-serif" }}>
-                {isSearching ? 'Nenhum app encontrado' : 'Nenhum favorito'}
+                Nenhum favorito
               </h3>
               <p className="text-sm text-muted-foreground max-w-[260px] font-medium">
-                {isSearching
-                  ? 'Não encontramos nenhum aplicativo com esse nome.'
-                  : 'Explore a plataforma ou use a busca acima para adicionar apps aos seus favoritos.'}
+                Explore a plataforma para adicionar apps aos seus favoritos.
               </p>
             </motion.div>
           )}

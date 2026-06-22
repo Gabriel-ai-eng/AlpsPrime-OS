@@ -214,11 +214,11 @@ export default function Settings() {
       <div className="px-6 lg:px-8 pt-6 pb-2 bg-transparent">
         <div className="max-w-2xl mx-auto">
           <button
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/home')}
             className="flex items-center gap-2 mb-7 text-sm font-normal text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5" />
-            <span>Voltar ao perfil</span>
+            <span>Voltar ao início</span>
           </button>
           <h1 className="m-0 font-light text-foreground uppercase" style={{
             fontSize: 'clamp(16px, 4vw, 36px)',
