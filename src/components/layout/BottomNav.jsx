@@ -8,44 +8,53 @@ import { useLiquidRipple } from '@/lib/useLiquidRipple';
 import { useAuth } from '@/lib/AuthContext';
 import CachedImage from '@/components/CachedImage';
 
-// Ícone de casinha com chaminé e porta em arco, recriado em SVG nos dois
-// estados: contorno (inativo) e preenchido (ativo), mantendo a mesma silhueta.
-function HomeIcon({ className, fill = 'none', style }) {
+// Casinha simétrica com chaminé e porta em arco — mesma silhueta nos dois
+// estados, no mesmo viewBox 24 dos demais ícones. Inativo: contorno (traço
+// igual aos vizinhos). Ativo: preenchido com a porta vazada (evenodd).
+const CASA_SILHUETA =
+  'M12 3.2 L20.8 11.2 L18 11.2 L18 20 L6 20 L6 11.2 L3.2 11.2 Z';
+const PORTA_FECHADA =
+  'M9.7 20 L9.7 15.4 A2.3 2.3 0 0 1 14.3 15.4 L14.3 20 Z';
+const CHAMINE_CHEIA = 'M15.8 5 L17.1 5 L17.1 7.84 L15.8 6.65 Z';
+
+const TELHADO = 'M3.2 11.2 L12 3.2 L20.8 11.2';
+const CORPO_PORTA =
+  'M6 9 L6 20 L9.7 20 L9.7 15.4 A2.3 2.3 0 0 1 14.3 15.4 L14.3 20 L18 20 L18 9';
+const CHAMINE = 'M17.1 7.84 L17.1 5 L15.8 5 L15.8 6.65';
+
+function HomeIcon({ className, fill = 'none', strokeWidth = 2.4, style }) {
   const preenchido = fill && fill !== 'none';
 
   if (preenchido) {
     return (
       <svg
-        viewBox="0 0 512 512"
+        viewBox="0 0 24 24"
         className={className}
         style={style}
         fill="currentColor"
         aria-hidden="true"
       >
-        <path d="M261.56 101.28a8 8 0 00-11.06 0L66.4 277.15a8 8 0 00-2.47 5.79L63.9 448a32 32 0 0032 32H192a16 16 0 0016-16V328a8 8 0 018-8h80a8 8 0 018 8v136a16 16 0 0016 16h96.06a32 32 0 0032-32V282.94a8 8 0 00-2.48-5.79z" />
-        <path d="M490.91 244.15l-74.8-71.56V64a16 16 0 00-16-16h-48a16 16 0 00-16 16v32l-57.92-55.38C272.77 35.14 264.71 32 256 32c-8.68 0-16.72 3.14-23 8.63l-202 193.5c-10.74 10.49-13.06 27.4-4.51 39.65a26.79 26.79 0 0038.4 5l9.59-9.18v.78L256 96l225.49 215.69a26.27 26.27 0 0018.39 7.42 26.5 26.5 0 0018.49-44.96z" />
+        <path d={`${CASA_SILHUETA} ${PORTA_FECHADA}`} fillRule="evenodd" />
+        <path d={CHAMINE_CHEIA} />
       </svg>
     );
   }
 
   return (
     <svg
-      viewBox="0 0 512 512"
+      viewBox="0 0 24 24"
       className={className}
       style={style}
       fill="none"
       stroke="currentColor"
-      strokeWidth={34}
+      strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      {/* corpo + porta em arco */}
-      <path d="M80 212v236a16 16 0 0016 16h96V328a24 24 0 0124-24h80a24 24 0 0124 24v136h96a16 16 0 0016-16V212" />
-      {/* telhado */}
-      <path d="M480 256L266.89 52c-5-5.28-16.69-5.34-21.78 0L32 256" />
-      {/* chaminé */}
-      <path d="M400 179V64h-48v69" />
+      <path d={TELHADO} />
+      <path d={CORPO_PORTA} />
+      <path d={CHAMINE} />
     </svg>
   );
 }
