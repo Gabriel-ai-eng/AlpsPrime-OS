@@ -3,33 +3,49 @@ import { useNavigate } from 'react-router-dom';
 import { Search as SearchIcon, X, Command } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// id = chave usada na navegação (openApp → telaAtual no Home). `status: 'soon'`
+// marca os apps ainda não lançados. Projeto Armor (id 'titan') vem primeiro.
 const SUB_APPS = [
   {
-    id: 'sexta',
-    name: 'Sexta AI',
-    image: '/apps/sexta-bg.webp',
+    id: 'titan',
+    name: 'Projeto Armor',
+    image: '/apps/armor-bg.webp',
+    status: 'live',
   },
   {
-    id: 'titan',
-    name: 'Titan',
-    image: '/apps/titan-bg.webp',
+    id: 'sexta',
+    name: 'Sexta-feira',
+    image: '/apps/sexta-bg.webp',
+    status: 'soon',
   },
   {
     id: 'vivart',
     name: 'Vivart',
     image: '/apps/vivart-bg.webp',
+    status: 'soon',
   }
 ];
+
+// minúsculas + sem acentos, para a busca casar "Projeto" com "projeto" etc.
+const normalize = (s) =>
+  s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 export default function Search() {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
   const filteredApps = useMemo(() => {
-    if (!query.trim()) return SUB_APPS;
-    return SUB_APPS.filter(app => 
-      app.name.toLowerCase().includes(query.toLowerCase())
-    );
+    const q = normalize(query.trim());
+    if (!q) return SUB_APPS;
+    return SUB_APPS
+      .filter((app) => normalize(app.name).includes(q))
+      .sort((a, b) => {
+        // Quem começa com o texto digitado aparece primeiro (ex.: "Pro" → Projeto Armor).
+        const aStarts = normalize(a.name).startsWith(q);
+        const bStarts = normalize(b.name).startsWith(q);
+        if (aStarts !== bStarts) return aStarts ? -1 : 1;
+        return 0;
+      });
   }, [query]);
 
   return (
@@ -90,11 +106,19 @@ export default function Search() {
                   className="w-full rounded-[32px] overflow-hidden relative aspect-[4/3] group cursor-pointer active:scale-95 transition-all outline-none"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
-                  <img 
-                    src={app.image} 
+                  <img
+                    src={app.image}
                     alt={app.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
                   />
+
+                  {/* Selo minimalista para apps ainda não lançados */}
+                  {app.status === 'soon' && (
+                    <div className="absolute top-3.5 right-3.5 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur-md border border-white/15">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-white/90">Em breve</span>
+                    </div>
+                  )}
                 </motion.div>
               ))
             ) : (
