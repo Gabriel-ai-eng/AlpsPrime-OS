@@ -7,55 +7,51 @@ import { cn } from '@/lib/utils';
 import { useLiquidRipple } from '@/lib/useLiquidRipple';
 import { useAuth } from '@/lib/AuthContext';
 import CachedImage from '@/components/CachedImage';
+import homeFilledUrl from '@/assets/icons/home-filled.png';
+import homeOutlineUrl from '@/assets/icons/home-outline.png';
 
-// Casinha simétrica com chaminé e porta em arco — mesma silhueta nos dois
-// estados, no mesmo viewBox 24 dos demais ícones. Inativo: contorno (traço
-// igual aos vizinhos). Ativo: preenchido com a porta vazada (evenodd).
-const CASA_SILHUETA =
-  'M12 3.2 L20.8 11.2 L18 11.2 L18 20 L6 20 L6 11.2 L3.2 11.2 Z';
-const PORTA_FECHADA =
-  'M9.7 20 L9.7 15.4 A2.3 2.3 0 0 1 14.3 15.4 L14.3 20 Z';
-const CHAMINE_CHEIA = 'M15.8 5 L17.1 5 L17.1 7.84 L15.8 6.65 Z';
+// Ícone da casinha = as artes oficiais (PNG) renderizadas como máscara CSS.
+// Assim a silhueta é exatamente a das imagens, mas a cor vem de `currentColor`
+// (ativo = dourado, inativo = foreground) e acompanha o tema claro/escuro.
+// As duas artes ficam empilhadas e fazem cross-fade entre contorno e preenchido.
+const MASK_BASE = {
+  backgroundColor: 'currentColor',
+  WebkitMaskRepeat: 'no-repeat',
+  maskRepeat: 'no-repeat',
+  WebkitMaskPosition: 'center',
+  maskPosition: 'center',
+  WebkitMaskSize: 'contain',
+  maskSize: 'contain',
+};
 
-const TELHADO = 'M3.2 11.2 L12 3.2 L20.8 11.2';
-const CORPO_PORTA =
-  'M6 9 L6 20 L9.7 20 L9.7 15.4 A2.3 2.3 0 0 1 14.3 15.4 L14.3 20 L18 20 L18 9';
-const CHAMINE = 'M17.1 7.84 L17.1 5 L15.8 5 L15.8 6.65';
+function CasaLayer({ url, visible }) {
+  return (
+    <span
+      className="absolute inset-0 transition-opacity duration-300 ease-out"
+      style={{
+        ...MASK_BASE,
+        WebkitMaskImage: `url(${url})`,
+        maskImage: `url(${url})`,
+        opacity: visible ? 1 : 0,
+      }}
+    />
+  );
+}
 
-function HomeIcon({ className, fill = 'none', strokeWidth = 2.4, style }) {
+// Mantém a mesma interface dos ícones lucide (deriva o estado pelo prop `fill`),
+// então os pontos de uso continuam idênticos.
+function HomeIcon({ className, fill = 'none', style }) {
   const preenchido = fill && fill !== 'none';
 
-  if (preenchido) {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        className={className}
-        style={style}
-        fill="currentColor"
-        aria-hidden="true"
-      >
-        <path d={`${CASA_SILHUETA} ${PORTA_FECHADA}`} fillRule="evenodd" />
-        <path d={CHAMINE_CHEIA} />
-      </svg>
-    );
-  }
-
   return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
+    <span
+      className={cn('relative inline-block', className)}
       style={style}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={strokeWidth}
-      strokeLinecap="round"
-      strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d={TELHADO} />
-      <path d={CORPO_PORTA} />
-      <path d={CHAMINE} />
-    </svg>
+      <CasaLayer url={homeOutlineUrl} visible={!preenchido} />
+      <CasaLayer url={homeFilledUrl} visible={preenchido} />
+    </span>
   );
 }
 
