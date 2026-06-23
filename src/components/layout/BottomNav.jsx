@@ -8,35 +8,44 @@ import { useLiquidRipple } from '@/lib/useLiquidRipple';
 import { useAuth } from '@/lib/AuthContext';
 import CachedImage from '@/components/CachedImage';
 
-// Ícone de casinha no padrão do Facebook: mesma silhueta nos dois estados,
-// alternando apenas preenchimento + cor. A porta é sempre espaço negativo —
-// contorno (arco aberto) quando inativo, recorte (knockout) quando ativo.
-const CASA = 'M12 3 L20.5 10 L20.5 20 L3.5 20 L3.5 10 Z';
-const PORTA_ABERTA = 'M9.5 20 L9.5 15 A2.5 2.5 0 0 1 14.5 15 L14.5 20';
-const PORTA_FECHADA = 'M9.5 20 L9.5 15 A2.5 2.5 0 0 1 14.5 15 L14.5 20 Z';
-
-function HomeIcon({ className, fill = 'none', strokeWidth = 2.4, style }) {
+// Ícone de casinha com chaminé e porta em arco, recriado em SVG nos dois
+// estados: contorno (inativo) e preenchido (ativo), mantendo a mesma silhueta.
+function HomeIcon({ className, fill = 'none', style }) {
   const preenchido = fill && fill !== 'none';
+
+  if (preenchido) {
+    return (
+      <svg
+        viewBox="0 0 512 512"
+        className={className}
+        style={style}
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M261.56 101.28a8 8 0 00-11.06 0L66.4 277.15a8 8 0 00-2.47 5.79L63.9 448a32 32 0 0032 32H192a16 16 0 0016-16V328a8 8 0 018-8h80a8 8 0 018 8v136a16 16 0 0016 16h96.06a32 32 0 0032-32V282.94a8 8 0 00-2.48-5.79z" />
+        <path d="M490.91 244.15l-74.8-71.56V64a16 16 0 00-16-16h-48a16 16 0 00-16 16v32l-57.92-55.38C272.77 35.14 264.71 32 256 32c-8.68 0-16.72 3.14-23 8.63l-202 193.5c-10.74 10.49-13.06 27.4-4.51 39.65a26.79 26.79 0 0038.4 5l9.59-9.18v.78L256 96l225.49 215.69a26.27 26.27 0 0018.39 7.42 26.5 26.5 0 0018.49-44.96z" />
+      </svg>
+    );
+  }
+
   return (
     <svg
-      viewBox="0 0 24 24"
+      viewBox="0 0 512 512"
       className={className}
       style={style}
       fill="none"
       stroke="currentColor"
-      strokeWidth={strokeWidth}
-      strokeLinejoin="round"
+      strokeWidth={34}
       strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden="true"
     >
-      {preenchido ? (
-        <path d={`${CASA} ${PORTA_FECHADA}`} fill="currentColor" fillRule="evenodd" />
-      ) : (
-        <>
-          <path d={CASA} />
-          <path d={PORTA_ABERTA} />
-        </>
-      )}
+      {/* corpo + porta em arco */}
+      <path d="M80 212v236a16 16 0 0016 16h96V328a24 24 0 0124-24h80a24 24 0 0124 24v136h96a16 16 0 0016-16V212" />
+      {/* telhado */}
+      <path d="M480 256L266.89 52c-5-5.28-16.69-5.34-21.78 0L32 256" />
+      {/* chaminé */}
+      <path d="M400 179V64h-48v69" />
     </svg>
   );
 }
