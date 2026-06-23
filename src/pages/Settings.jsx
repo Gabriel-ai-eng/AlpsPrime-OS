@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import {
   ChevronLeft, ChevronDown, ChevronRight, Sun, Moon, Monitor, Palette,
   ShieldCheck, Trash2, AlertTriangle, BarChart3, Coffee,
-  Bell, Mail, FlaskConical, Info, Eraser, Download, Loader2, Check,
+  Bell, Mail, FlaskConical, Info, Eraser, Download, Loader2,
   LifeBuoy, LogOut,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,6 @@ import { signOut } from '@/lib/auth';
 import { useLiquidGlass } from '@/lib/useLiquidGlass';
 import {
   applyTheme, getThemePref, resolveTheme,
-  applyAccent, getAccent, ACCENTS,
 } from '@/lib/theme';
 import {
   getPrefs, setPref, getWeeklyUsage, formatDuration,
@@ -38,7 +37,7 @@ const CHANGELOG = [
     versao: 'Beta',
     itens: [
       'Nova Central de Configurações no estilo das grandes plataformas',
-      'Tema Claro / Escuro / Automático e escolha da cor de destaque',
+      'Tema Claro / Escuro / Automático',
       'Bem-estar digital: tempo de uso e lembretes de pausa',
       'Controle de notificações por sub-app, Não Perturbe e resumo agendado',
     ],
@@ -139,7 +138,6 @@ export default function Settings() {
   const { setMode } = useLiquidGlass();
 
   const [themePref, setThemePref] = useState(getThemePref());
-  const [accent, setAccent] = useState(getAccent());
   const [prefs, setPrefs] = useState(getPrefs());
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -156,11 +154,6 @@ export default function Settings() {
     const resolved = applyTheme(id);
     if (setMode) setMode(resolved);
     if (id !== 'auto') base44.auth.updateMe({ liquid_glass_mode: id }).catch(() => null);
-  };
-
-  const onAccent = (id) => {
-    setAccent(id);
-    applyAccent(id);
   };
 
   const updatePref = (key, value) => {
@@ -260,27 +253,6 @@ export default function Settings() {
             )}
           </Row>
 
-          <Row icon={Palette} label="Cor de destaque" sub={ACCENTS[accent]?.label}>
-            <div className="flex flex-wrap gap-3 pt-1">
-              {Object.entries(ACCENTS).map(([id, a]) => (
-                <button
-                  key={id}
-                  onClick={() => onAccent(id)}
-                  className={cn(
-                    'w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-105 ring-2 ring-offset-2 ring-offset-card',
-                    accent === id ? 'ring-foreground/40' : 'ring-transparent'
-                  )}
-                  style={{ backgroundColor: a.swatch }}
-                  aria-label={a.label}
-                >
-                  {accent === id && <Check className="w-5 h-5 text-white drop-shadow" />}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-3">
-              A cor escolhida vale para todo o ecossistema Alps OS.
-            </p>
-          </Row>
         </Group>
 
         {/* PRIVACIDADE & DADOS */}
