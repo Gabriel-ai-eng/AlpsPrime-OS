@@ -22,6 +22,8 @@ export const DEFAULT_PREFS = {
   pause_minutes: 60,
   // Sistema
   beta_features: false,
+  // Aparência — estilo da barra de navegação inferior ('floating' | 'fixed')
+  navbar_style: 'floating',
 };
 
 export function getPrefs() {
@@ -36,6 +38,10 @@ export function setPref(key, value) {
   const p = getPrefs();
   p[key] = value;
   localStorage.setItem(PREFS_KEY, JSON.stringify(p));
+  // Notifica componentes vivos (ex.: BottomNav) para refletirem a mudança na hora.
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('alps:prefchange', { detail: { key, value } }));
+  }
   return p;
 }
 

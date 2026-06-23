@@ -6,7 +6,7 @@ import {
   ChevronLeft, ChevronDown, ChevronRight, Sun, Moon, Monitor, Palette,
   ShieldCheck, Trash2, AlertTriangle, BarChart3, Coffee,
   Bell, Mail, FlaskConical, Info, Eraser, Download, Loader2,
-  LifeBuoy, LogOut,
+  LifeBuoy, LogOut, PanelBottom, RectangleHorizontal,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -38,6 +38,7 @@ const CHANGELOG = [
     itens: [
       'Nova Central de Configurações no estilo das grandes plataformas',
       'Tema Claro / Escuro / Automático',
+      'Barra de navegação flutuante ou fixa, à sua escolha',
       'Bem-estar digital: tempo de uso e lembretes de pausa',
       'Controle de notificações por sub-app, Não Perturbe e resumo agendado',
     ],
@@ -202,6 +203,12 @@ export default function Settings() {
     { id: 'auto', label: 'Automático', icon: Monitor },
   ];
 
+  const NAV_STYLES = [
+    { id: 'floating', label: 'Flutuante', icon: RectangleHorizontal },
+    { id: 'fixed', label: 'Fixa', icon: PanelBottom },
+  ];
+  const navStyle = prefs.navbar_style || 'floating';
+
   return (
     <div className="min-h-full bg-background text-foreground">
       <div className="px-6 lg:px-8 pt-6 pb-2 bg-transparent">
@@ -251,6 +258,32 @@ export default function Settings() {
                 Seguindo o sistema — agora em modo {resolveTheme('auto') === 'dark' ? 'escuro' : 'claro'}.
               </p>
             )}
+          </Row>
+
+          <Row icon={PanelBottom} label="Barra de navegação" sub={NAV_STYLES.find((n) => n.id === navStyle)?.label}>
+            <div className="grid grid-cols-2 gap-2">
+              {NAV_STYLES.map((n) => {
+                const ativo = navStyle === n.id;
+                return (
+                  <button
+                    key={n.id}
+                    onClick={() => updatePref('navbar_style', n.id)}
+                    className={cn(
+                      'flex flex-col items-center gap-1.5 py-3 rounded-xl border text-xs font-medium transition-all',
+                      ativo ? 'border-gold/50 bg-gold/10 text-gold' : 'border-border bg-background text-muted-foreground hover:bg-muted'
+                    )}
+                  >
+                    <n.icon className="w-5 h-5" />
+                    {n.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              {navStyle === 'fixed'
+                ? 'A barra fica acoplada à base da tela. Ao rolar para baixo, ela desce e some — como a flutuante.'
+                : 'A barra flutua acima do conteúdo e some ao rolar a tela para baixo.'}
+            </p>
           </Row>
 
         </Group>

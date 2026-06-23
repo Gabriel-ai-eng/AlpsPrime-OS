@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useLiquidRipple } from '@/lib/useLiquidRipple';
 import { useAuth } from '@/lib/AuthContext';
+import { getPrefs } from '@/lib/appPrefs';
 import CachedImage from '@/components/CachedImage';
 import homeFilledUrl from '@/assets/icons/home-filled.png';
 import homeOutlineUrl from '@/assets/icons/home-outline.png';
@@ -214,13 +215,8 @@ function AppCenterpiece({ active, path }) {
 export default function BottomNav() {
   const location = useLocation();
 
-  const hideOnRoutes = ['/settings'];
-
-  if (hideOnRoutes.includes(location.pathname)) {
-    return null;
-  }
-
   const [isVisible, setIsVisible] = useState(true);
+  const [navStyle, setNavStyle] = useState(() => getPrefs().navbar_style || 'floating');
   const lastScrollY = useRef(0);
 
   useEffect(() => {
@@ -247,17 +243,42 @@ export default function BottomNav() {
     return () => window.removeEventListener('scroll', handleScroll, { capture: true });
   }, []);
 
+  // Reflete na hora a escolha "flutuante / fixa" feita nas Configurações.
+  useEffect(() => {
+    const onPrefChange = (e) => {
+      if (e.detail?.key === 'navbar_style') {
+        setNavStyle(e.detail.value || 'floating');
+      }
+    };
+    window.addEventListener('alps:prefchange', onPrefChange);
+    return () => window.removeEventListener('alps:prefchange', onPrefChange);
+  }, []);
+
+  const hideOnRoutes = ['/settings'];
+
+  if (hideOnRoutes.includes(location.pathname)) {
+    return null;
+  }
+
   const isActive = (path) =>
     path !== null && (
       location.pathname === path ||
       (path !== '/home' && location.pathname.startsWith(path))
     );
 
+  // Barra fixa: acoplada à base, largura total e borda no topo. Barra flutuante:
+  // "pílula" centralizada com margem. Em ambos os casos a barra desliza para
+  // baixo e some ao rolar a tela para baixo (mesma lógica de y/opacity).
+  const isFixedBar = navStyle === 'fixed';
+
   return (
     <nav
-      className="lg:hidden fixed bottom-0 inset-x-0 z-50 px-4 pointer-events-none"
+      className={cn(
+        'lg:hidden fixed bottom-0 inset-x-0 z-50 pointer-events-none',
+        !isFixedBar && 'px-4'
+      )}
       aria-label="Navegação"
-      style={{ paddingBottom: 'max(14px, env(safe-area-inset-bottom))' }}
+      style={isFixedBar ? undefined : { paddingBottom: 'max(14px, env(safe-area-inset-bottom))' }}
     >
       <motion.div
         initial={{ y: 120, opacity: 0 }}
@@ -267,14 +288,20 @@ export default function BottomNav() {
         }}
         transition={{ type: 'spring', stiffness: 350, damping: 28, mass: 0.8 }}
         className={cn(
-          'mx-auto max-w-sm h-[64px] rounded-[2rem] relative overflow-hidden pointer-events-auto',
-          'bg-card/80 backdrop-blur-3xl border border-border shadow-[0_20px_60px_rgba(0,0,0,0.25)]'
+          'relative overflow-hidden pointer-events-auto bg-card/80 backdrop-blur-3xl shadow-[0_20px_60px_rgba(0,0,0,0.25)]',
+          isFixedBar
+            ? 'w-full border-t border-border'
+            : 'mx-auto max-w-sm h-[64px] rounded-[2rem] border border-border'
         )}
-        style={{ willChange: 'transform, opacity' }}
+        style={
+          isFixedBar
+            ? { willChange: 'transform, opacity', paddingBottom: 'env(safe-area-inset-bottom)' }
+            : { willChange: 'transform, opacity' }
+        }
       >
         <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-foreground/15 to-transparent rounded-full" />
 
-        <div className="absolute inset-0 max-w-sm mx-auto h-full flex items-center justify-around px-2 z-10">
+        <div className="relative max-w-sm mx-auto h-[64px] flex items-center justify-around px-2 z-10">
           {ITEMS.map((item) => {
             const active = isActive(item.path);
             if (item.isCenter) {
