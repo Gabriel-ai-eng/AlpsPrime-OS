@@ -1,26 +1,32 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// Filtros de categoria — "Todos" mostra tudo; os demais filtram por tipo.
+// Filtros de categoria — "Todos" mostra tudo; "Em breve" mostra os ainda não
+// lançados; os demais filtram por tipo.
 const FILTROS = [
   { id: 'todos', label: 'Todos' },
   { id: 'ia', label: 'IA' },
   { id: 'jogos', label: 'Jogos' },
   { id: 'design', label: 'Design' },
+  { id: 'embreve', label: 'Em breve' },
 ];
 
-// Serviços disponíveis, cada um marcado com a sua categoria.
+// Serviços disponíveis, cada um marcado com a sua categoria. `status: 'soon'`
+// marca os que ainda não foram lançados.
 const APPS = [
-  { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', logo: '/apps/armor-logo.webp' },
-  { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', cat: 'ia', logo: '/apps/sexta-logo.webp' },
-  { id: 'vivart', nome: 'Vivart', desc: 'Estúdio de criação e galeria visual.', cat: 'design', logo: '/apps/vivart-logo.webp' },
+  { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', logo: '/apps/armor-logo.webp', status: 'live' },
+  { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', cat: 'ia', logo: '/apps/sexta-logo.webp', status: 'soon' },
+  { id: 'vivart', nome: 'Vivart', desc: 'Estúdio de criação e galeria visual.', cat: 'design', logo: '/apps/vivart-logo.webp', status: 'soon' },
 ];
 
 export default function Categorias() {
   const navigate = useNavigate();
   const [filtro, setFiltro] = useState('todos');
 
-  const appsVisiveis = filtro === 'todos' ? APPS : APPS.filter((a) => a.cat === filtro);
+  const appsVisiveis =
+    filtro === 'todos' ? APPS
+    : filtro === 'embreve' ? APPS.filter((a) => a.status === 'soon')
+    : APPS.filter((a) => a.cat === filtro);
 
   return (
     <div className="w-full min-h-screen bg-background text-foreground font-sans overflow-x-hidden flex flex-col">
@@ -64,7 +70,14 @@ export default function Categorias() {
                 <img src={app.logo} alt={app.nome} className="w-full h-full object-contain" decoding="async" fetchpriority="high" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-[17px] font-semibold text-foreground mb-0.5">{app.nome}</h3>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h3 className="text-[17px] font-semibold text-foreground">{app.nome}</h3>
+                  {app.status === 'soon' && (
+                    <span className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wider text-gold bg-gold/10 border border-gold/20 px-2 py-0.5 rounded-full">
+                      Em breve
+                    </span>
+                  )}
+                </div>
                 <p className="text-muted-foreground text-[13px] leading-snug pr-2">{app.desc}</p>
               </div>
             </div>
