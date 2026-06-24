@@ -119,8 +119,7 @@
 <!-- Controles -->
 <div id="pad">
   <div id="zoom">
-    <button id="zoomOut">🔭 Longe</button>
-    <button id="zoomIn">🔍 Perto</button>
+    <button id="camToggle">🔍 Perto</button>
   </div>
   <div id="stick"><div id="knob"></div></div>
   <div id="kick">⚽</div>
@@ -217,10 +216,10 @@ const ball   = { u:0.5, v:0.60, vu:0, vv:0 };
 const keeper = { u:0.5 };
 const GOAL = { uMin:0.42, uMax:0.58 };   // boca do gol no fundo (v≈0)
 
-// Câmera: zoom=1 mostra o estádio inteiro (longe); valores maiores aproximam
-// a câmera do personagem (perto). 'target' é o nível desejado; 'zoom' segue suave.
-const ZOOM_MIN=1, ZOOM_MAX=2.4, ZOOM_STEP=0.35;
-const cam = { zoom:1, target:1 };
+// Câmera: zoom=1 mostra o estádio inteiro (longe); NEAR_ZOOM aproxima do
+// personagem (perto). 'target' é o nível desejado; 'zoom' segue suave.
+const NEAR_ZOOM = 2.6;
+const cam = { zoom:1, target:1, near:false };
 
 // Voltar para a seção Home do app (sai do jogo estático e volta para o React).
 document.getElementById('backBtn').onclick=()=>{ window.location.href='/home'; };
@@ -280,16 +279,17 @@ function movePointer(e){
 }
 kickBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); kick(); });
 
-// Botões de zoom da câmera (Longe / Perto)
-const zoomInBtn=document.getElementById('zoomIn'), zoomOutBtn=document.getElementById('zoomOut');
-function setZoom(z){
-  cam.target=Math.max(ZOOM_MIN,Math.min(ZOOM_MAX,z));
-  zoomOutBtn.disabled = cam.target<=ZOOM_MIN+0.001;
-  zoomInBtn.disabled  = cam.target>=ZOOM_MAX-0.001;
-}
-zoomInBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); setZoom(cam.target+ZOOM_STEP); });
-zoomOutBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); setZoom(cam.target-ZOOM_STEP); });
-setZoom(1);
+// Botão único de câmera: alterna entre Longe e Perto.
+// Longe → texto "Perto" (vai aproximar); Perto → texto "Longe" (vai afastar).
+const camToggleBtn=document.getElementById('camToggle');
+function updateCamBtn(){ camToggleBtn.textContent = cam.near ? '🔭 Longe' : '🔍 Perto'; }
+camToggleBtn.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  cam.near=!cam.near;
+  cam.target = cam.near ? NEAR_ZOOM : 1;
+  updateCamBtn();
+});
+updateCamBtn();
 
 // =========================================================================
 //  LÓGICA
@@ -441,7 +441,7 @@ function drawPlayer(){
   // quadro de animação
   let f = player.moving ? (Math.floor(player.anim)%sheet.frames) : 0;
   const col=f%sheet.cols, row=Math.floor(f/sheet.cols);
-  ctx.imageSmoothingEnabled=true;
+  ctx.imageSmoothingEnabled=false;   // Filter Mode: Point/Nearest → sprite nítido (sem borrão)
   ctx.save();
   ctx.translate(p.x, p.y);
   if(player.face<0) ctx.scale(-1,1);          // espelha p/ esquerda
@@ -454,7 +454,7 @@ function drawKeeper(){
   const h=depthScale(0.05), w=h*(SH.FW/SH.FH);
   shadow(p.x,p.y,w*0.42);
   // goleiro: usa o mesmo sprite, tom mais claro (filtro)
-  ctx.imageSmoothingEnabled=true;
+  ctx.imageSmoothingEnabled=false;   // Filter Mode: Point/Nearest → sprite nítido
   ctx.save(); ctx.translate(p.x,p.y);
   ctx.globalAlpha=0.95;
   ctx.drawImage(A.player, 0,0,SH.FW,SH.FH, -w/2,-h, w,h);
