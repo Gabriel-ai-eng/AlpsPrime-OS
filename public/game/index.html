@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Free Kick World ⚽</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent;
+      user-select:none; -webkit-user-select:none; touch-action:none; }
+  html,body { width:100%; height:100%; background:#05080f; overflow:hidden;
+    font-family:'Courier New', ui-monospace, monospace; color:#e2e8f0; }
+  #cv { position:fixed; inset:0; width:100%; height:100%; display:block; background:#05080f; }
+
+  /* ---------- Telas (menus) ---------- */
+  .screen { position:fixed; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:18px; padding:24px;
+    background:rgba(5,8,15,.86); text-align:center; z-index:20; }
+  .hidden { display:none !important; }
+  h1 { font-size:clamp(30px,7vw,66px); letter-spacing:3px; color:#7dd3fc;
+    text-shadow:3px 3px 0 #0a3d62, 6px 6px 0 rgba(0,0,0,.5); }
+  h2 { font-size:clamp(18px,4vw,30px); color:#fcd34d; letter-spacing:2px; }
+  p.sub { color:#cbd5e1; max-width:560px; line-height:1.55; font-size:15px; }
+  .btn { font-family:inherit; cursor:pointer; border:none; padding:14px 26px;
+    font-size:clamp(15px,3.5vw,20px); letter-spacing:2px; color:#06251c;
+    background:#34d399; border-bottom:5px solid #059669; border-radius:10px;
+    text-transform:uppercase; transition:transform .06s; }
+  .btn:active { transform:translateY(3px); border-bottom-width:2px; }
+  .btn.alt  { background:#7dd3fc; border-bottom-color:#0284c7; }
+  .btn.ghost{ background:#1e293b; color:#cbd5e1; border-bottom-color:#0f172a; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; align-items:center; }
+  small.hint { color:#64748b; font-size:12px; max-width:520px; }
+
+  #facePreview { width:120px; height:120px; image-rendering:pixelated;
+    border:4px solid #334155; border-radius:12px; background:#0f172a; }
+  #webcam { width:180px; max-width:55vw; border-radius:10px; border:3px solid #334155;
+    transform:scaleX(-1); }
+
+  /* ---------- HUD ---------- */
+  #hud { position:fixed; top:10px; left:0; right:0; z-index:8; display:none;
+    justify-content:space-between; padding:0 14px; pointer-events:none;
+    font-size:clamp(15px,3.6vw,22px); letter-spacing:1px; }
+  #hud.on { display:flex; }
+  #hud .chip { background:rgba(5,8,15,.6); padding:6px 12px; border-radius:8px; color:#fcd34d; }
+  #hud .chip.time { color:#7dd3fc; }
+  #msg { position:fixed; top:30%; left:0; right:0; text-align:center; z-index:9;
+    font-size:clamp(34px,10vw,80px); color:#fcd34d; letter-spacing:5px;
+    text-shadow:3px 3px 0 #7c2d12; pointer-events:none; opacity:0; transition:opacity .18s; }
+
+  /* ---------- Controles na tela ---------- */
+  #pad { position:fixed; inset:0; z-index:7; display:none; pointer-events:none; }
+  #pad.on { display:block; }
+  #stick { position:absolute; bottom:30px; left:30px; width:150px; height:150px;
+    border-radius:50%; background:rgba(148,163,184,.16); border:3px solid rgba(148,163,184,.45);
+    pointer-events:auto; }
+  #knob { position:absolute; width:66px; height:66px; border-radius:50%; left:42px; top:42px;
+    background:rgba(125,211,252,.55); border:3px solid rgba(125,211,252,.9); }
+  #kick { position:absolute; bottom:44px; right:34px; width:118px; height:118px;
+    border-radius:50%; background:rgba(52,211,153,.5); border:4px solid #059669;
+    display:flex; align-items:center; justify-content:center; font-size:42px; color:#06251c;
+    pointer-events:auto; }
+  #kick:active { transform:scale(.93); }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="chip">⚽ GOLS: <span id="score">0</span></div>
+  <div class="chip time">⏱ <span id="time">60</span></div>
+</div>
+<div id="msg"></div>
+
+<!-- Controles -->
+<div id="pad">
+  <div id="stick"><div id="knob"></div></div>
+  <div id="kick">⚽</div>
+</div>
+
+<!-- TÍTULO -->
+<div id="scrTitle" class="screen">
+  <h1>FREE KICK WORLD</h1>
+  <p class="sub">Entre em campo no estádio em pixel art! Use o <b>joystick</b> para andar,
+     dribla e chuta no gol. Você pode até jogar com o <b>seu próprio rosto</b>. ⚽</p>
+  <button class="btn" id="goCustom">JOGAR</button>
+  <small class="hint">No PC: WASD / setas para andar • ESPAÇO para chutar (ou use os controles na tela)</small>
+</div>
+
+<!-- PERSONALIZAR -->
+<div id="scrCustom" class="screen hidden">
+  <h2>SEU JOGADOR</h2>
+  <div class="row">
+    <canvas id="facePreview" width="16" height="16"></canvas>
+    <video id="webcam" autoplay playsinline class="hidden"></video>
+  </div>
+  <div class="row">
+    <label class="btn alt" style="display:inline-block">📁 FOTO
+      <input id="fileInput" type="file" accept="image/*" capture="user" style="display:none" />
+    </label>
+    <button class="btn alt" id="camBtn">📷 WEBCAM</button>
+    <button class="btn" id="snapBtn" style="display:none">CAPTURAR</button>
+    <button class="btn ghost" id="clearFace">SEM ROSTO</button>
+  </div>
+  <small class="hint">Opcional: coloque sua foto e ela vira pixel art na cabeça do craque.
+     A webcam precisa de HTTPS (use o link do GitHub Pages).</small>
+  <div class="row">
+    <button class="btn ghost" id="backTitle">VOLTAR</button>
+    <button class="btn" id="startGame">ENTRAR EM CAMPO ⚽</button>
+  </div>
+</div>
+
+<!-- FIM -->
+<div id="scrEnd" class="screen hidden">
+  <h1 style="color:#fcd34d">FIM DE JOGO</h1>
+  <h2 id="endScore">Você marcou 0 gols!</h2>
+  <div class="row">
+    <button class="btn ghost" id="endCustom">TROCAR ROSTO</button>
+    <button class="btn" id="playAgain">JOGAR DE NOVO</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   FREE KICK WORLD — Canvas 2D, sem dependências.
+   Estádio em foto pixel art + personagem (sprite sheet) com perspectiva.
+   Joystick à esquerda, botão de chute à direita, rosto personalizável.
+   ========================================================================= */
+
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+let CW=0, CH=0;
+function resize(){
+  CW = cv.width  = Math.floor(window.innerWidth);
+  CH = cv.height = Math.floor(window.innerHeight);
+}
+window.addEventListener('resize', resize); resize();
+
+// ---------- Assets ----------
+const A = { stadium:new Image(), player:new Image(), loaded:0, need:2 };
+A.stadium.src = 'assets/stadium.jpg';
+A.player.src  = 'assets/player.png';
+A.stadium.onload = A.player.onload = ()=> A.loaded++;
+
+// Sprite sheet: 5 colunas x 12 linhas = 60 quadros (caminhada, perfil p/ direita)
+const SH = { FW:62, FH:114, cols:5, rows:12, frames:60 };
+
+// ---------- Pitch (trapézio em perspectiva, normalizado na imagem) ----------
+const PITCH = {
+  TL:{x:0.205,y:0.355}, TR:{x:0.795,y:0.355},
+  BR:{x:0.975,y:0.905}, BL:{x:0.025,y:0.905},
+};
+let img = {dx:0,dy:0,dw:0,dh:0};   // retângulo onde o estádio é desenhado (contain)
+function layoutStadium(){
+  const s = Math.min(CW/A.stadium.width, CH/A.stadium.height) || 1;
+  img.dw = A.stadium.width*s; img.dh = A.stadium.height*s;
+  img.dx = (CW-img.dw)/2;     img.dy = (CH-img.dh)/2;
+}
+const lerp=(a,b,t)=>a+(b-a)*t;
+// (u,v) no campo: u=0 esquerda→1 direita; v=0 fundo(longe)→1 frente(perto)
+function uvToScreen(u,v){
+  const tx=lerp(PITCH.TL.x,PITCH.TR.x,u), ty=lerp(PITCH.TL.y,PITCH.TR.y,u);
+  const bx=lerp(PITCH.BL.x,PITCH.BR.x,u), by=lerp(PITCH.BL.y,PITCH.BR.y,u);
+  const nx=lerp(tx,bx,v), ny=lerp(ty,by,v);
+  return { x: img.dx + nx*img.dw, y: img.dy + ny*img.dh };
+}
+// escala do personagem conforme a profundidade (perto = maior)
+function depthScale(v){ return lerp(0.035, 0.135, v) * img.dh; } // altura do sprite em px
+
+// ---------- Estado ----------
+const state = { scene:'title', score:0, time:60, running:false, faceCanvas:null };
+const player = { u:0.5, v:0.72, face:1, anim:0, moving:false };  // face: 1 dir / -1 esq
+const ball   = { u:0.5, v:0.60, vu:0, vv:0 };
+const keeper = { u:0.5 };
+const GOAL = { uMin:0.42, uMax:0.58 };   // boca do gol no fundo (v≈0)
+
+// =========================================================================
+//  ROSTO / PERSONALIZAÇÃO
+// =========================================================================
+const FACE_SIZE=16;
+const facePrev=document.getElementById('facePreview');
+const fpx=facePrev.getContext('2d');
+function makeFaceFrom(source, sw, sh){
+  const side=Math.min(sw,sh), sx=(sw-side)/2, sy=(sh-side)/2;
+  const c=document.createElement('canvas'); c.width=c.height=FACE_SIZE;
+  const g=c.getContext('2d'); g.imageSmoothingEnabled=true;
+  g.drawImage(source,sx,sy,side,side,0,0,FACE_SIZE,FACE_SIZE);
+  const im=g.getImageData(0,0,FACE_SIZE,FACE_SIZE),d=im.data;
+  for(let i=0;i<d.length;i+=4) for(let k=0;k<3;k++){let v=(d[i+k]-128)*1.25+128;d[i+k]=Math.max(0,Math.min(255,v));}
+  g.putImageData(im,0,0);
+  state.faceCanvas=c; drawFacePreview();
+}
+function drawFacePreview(){
+  facePrev.width=FACE_SIZE; facePrev.height=FACE_SIZE; fpx.imageSmoothingEnabled=false;
+  fpx.clearRect(0,0,FACE_SIZE,FACE_SIZE);
+  if(state.faceCanvas){ fpx.drawImage(state.faceCanvas,0,0); }
+  else{ fpx.fillStyle='#334155'; fpx.fillRect(0,0,FACE_SIZE,FACE_SIZE);
+        fpx.fillStyle='#94a3b8'; fpx.fillRect(5,6,2,2); fpx.fillRect(9,6,2,2); fpx.fillRect(5,11,6,1); }
+}
+drawFacePreview();
+document.getElementById('fileInput').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f) return; const i=new Image();
+  i.onload=()=>makeFaceFrom(i,i.width,i.height); i.src=URL.createObjectURL(f);
+});
+document.getElementById('clearFace').onclick=()=>{ state.faceCanvas=null; drawFacePreview(); };
+const webcam=document.getElementById('webcam'), camBtn=document.getElementById('camBtn'), snapBtn=document.getElementById('snapBtn');
+let camStream=null;
+camBtn.onclick=async()=>{ try{
+    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+    webcam.srcObject=camStream; webcam.classList.remove('hidden'); facePrev.classList.add('hidden'); snapBtn.style.display='inline-block';
+  }catch(_){ alert('Não consegui abrir a webcam 😕 (precisa de HTTPS). Use a opção FOTO!'); } };
+snapBtn.onclick=()=>{ if(!webcam.videoWidth) return;
+  const t=document.createElement('canvas'); t.width=webcam.videoWidth; t.height=webcam.videoHeight;
+  const g=t.getContext('2d'); g.translate(t.width,0); g.scale(-1,1); g.drawImage(webcam,0,0);
+  makeFaceFrom(t,t.width,t.height); stopCam();
+  webcam.classList.add('hidden'); facePrev.classList.remove('hidden'); snapBtn.style.display='none'; };
+function stopCam(){ if(camStream){camStream.getTracks().forEach(t=>t.stop()); camStream=null;} }
+
+// =========================================================================
+//  TELAS
+// =========================================================================
+const scr={title:document.getElementById('scrTitle'),custom:document.getElementById('scrCustom'),end:document.getElementById('scrEnd')};
+const hud=document.getElementById('hud'), pad=document.getElementById('pad');
+function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden'); }
+document.getElementById('goCustom').onclick=()=>{ show('custom'); state.scene='custom'; };
+document.getElementById('backTitle').onclick=()=>{ stopCam(); show('title'); state.scene='title'; };
+document.getElementById('startGame').onclick=()=>{ stopCam(); startMatch(); };
+document.getElementById('playAgain').onclick=()=>startMatch();
+document.getElementById('endCustom').onclick=()=>{ show('custom'); state.scene='custom'; };
+
+function startMatch(){
+  show(null); state.scene='game'; state.score=0; state.time=60; state.running=true;
+  hud.classList.add('on'); pad.classList.add('on');
+  document.getElementById('score').textContent='0'; document.getElementById('time').textContent='60';
+  resetPositions(); startTimer();
+}
+function resetPositions(){
+  player.u=0.5; player.v=0.72; player.face=1; player.anim=0;
+  ball.u=0.5; ball.v=0.58; ball.vu=0; ball.vv=0; keeper.u=0.5;
+}
+let timerId=null;
+function startTimer(){ clearInterval(timerId); timerId=setInterval(()=>{
+  if(!state.running) return; state.time--; document.getElementById('time').textContent=state.time;
+  if(state.time<=0) endMatch();
+},1000); }
+function endMatch(){ state.running=false; clearInterval(timerId);
+  hud.classList.remove('on'); pad.classList.remove('on');
+  document.getElementById('endScore').textContent=`Você marcou ${state.score} gol${state.score===1?'':'s'}!`;
+  show('end'); state.scene='end'; }
+
+// =========================================================================
+//  INPUT — joystick (esquerda) + chute (direita) + teclado
+// =========================================================================
+const keys={};
+addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; if(e.key===' '){e.preventDefault(); kick();} });
+addEventListener('keyup',e=> keys[e.key.toLowerCase()]=false);
+
+const stick=document.getElementById('stick'), knob=document.getElementById('knob'), kickBtn=document.getElementById('kick');
+let stickVec={x:0,y:0}, stickPid=null, center={x:0,y:0};
+const MAXR=52;
+function setKnob(dx,dy){ knob.style.left=(42+dx)+'px'; knob.style.top=(42+dy)+'px'; }
+stick.addEventListener('pointerdown',e=>{
+  stickPid=e.pointerId; stick.setPointerCapture(e.pointerId);
+  const r=stick.getBoundingClientRect(); center={x:r.left+r.width/2,y:r.top+r.height/2}; movePointer(e);
+});
+stick.addEventListener('pointermove',e=>{ if(e.pointerId===stickPid) movePointer(e); });
+function endStick(e){ if(e.pointerId===stickPid){ stickPid=null; stickVec={x:0,y:0}; setKnob(0,0); } }
+stick.addEventListener('pointerup',endStick);
+stick.addEventListener('pointercancel',endStick);
+function movePointer(e){
+  let dx=e.clientX-center.x, dy=e.clientY-center.y; const d=Math.hypot(dx,dy);
+  if(d>MAXR){ dx=dx/d*MAXR; dy=dy/d*MAXR; } setKnob(dx,dy);
+  stickVec={x:dx/MAXR, y:dy/MAXR};
+}
+kickBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); kick(); });
+
+// =========================================================================
+//  LÓGICA
+// =========================================================================
+function moveVec(){
+  let mx=0,my=0;
+  if(keys['a']||keys['arrowleft'])mx-=1; if(keys['d']||keys['arrowright'])mx+=1;
+  if(keys['w']||keys['arrowup'])my-=1;   if(keys['s']||keys['arrowdown'])my+=1;
+  mx+=stickVec.x; my+=stickVec.y;
+  const l=Math.hypot(mx,my); if(l>1){mx/=l;my/=l;}
+  return {x:mx,y:my,l:Math.min(1,l)};
+}
+function kick(){
+  if(state.scene!=='game'||!state.running) return;
+  const du=ball.u-player.u, dv=ball.v-player.v;
+  if(Math.hypot(du,dv*1.4) < 0.085){
+    const m=moveVec();
+    let ax=m.x, ay=m.y;
+    if(Math.hypot(ax,ay)<0.2){ ax=0; ay=-1; }       // sem direção: chuta pro gol (fundo)
+    else { const n=Math.hypot(ax,ay); ax/=n; ay/=n; }
+    ball.vu = ax*1.35; ball.vv = ay*1.35;
+  }
+}
+
+function update(dt){
+  if(state.scene!=='game') return;
+  const m=moveVec();
+  player.moving = m.l>0.12;
+  if(player.moving){
+    player.u += m.x*0.42*dt;
+    player.v += m.y*0.40*dt;
+    if(m.x> 0.05) player.face= 1; else if(m.x<-0.05) player.face=-1;
+    player.anim += dt* (10+14*m.l);
+  }
+  player.u=Math.max(0.03,Math.min(0.97,player.u));
+  player.v=Math.max(0.02,Math.min(0.99,player.v));
+
+  // dribble: empurra a bola quando encosta andando
+  if(state.running){
+    const du=ball.u-player.u, dv=ball.v-player.v;
+    if(Math.hypot(du,dv*1.4)<0.07 && player.moving && Math.hypot(ball.vu,ball.vv)<0.9){
+      ball.vu=m.x*0.85; ball.vv=m.y*0.80;
+    }
+  }
+
+  // física da bola
+  ball.u+=ball.vu*dt; ball.v+=ball.vv*dt;
+  const fr=Math.pow(0.20,dt); ball.vu*=fr; ball.vv*=fr;
+  if(Math.abs(ball.vu)<0.01) ball.vu=0; if(Math.abs(ball.vv)<0.01) ball.vv=0;
+  // paredes laterais
+  if(ball.u<0.03){ball.u=0.03; ball.vu*=-0.7;} if(ball.u>0.97){ball.u=0.97; ball.vu*=-0.7;}
+  // linha de frente (perto)
+  if(ball.v>0.99){ball.v=0.99; ball.vv*=-0.7;}
+  // linha de fundo: GOL ou trave
+  if(ball.v<0.02){
+    if(ball.u>GOAL.uMin && ball.u<GOAL.uMax) scoreGoal();
+    else { ball.v=0.02; ball.vv*=-0.7; }
+  }
+
+  // goleiro acompanha a bola e defende
+  if(state.running){
+    const tgt=Math.max(GOAL.uMin+0.01,Math.min(GOAL.uMax-0.01,ball.u));
+    keeper.u += Math.sign(tgt-keeper.u)*Math.min(0.45*dt,Math.abs(tgt-keeper.u));
+    if(ball.v<0.12 && Math.abs(ball.u-keeper.u)<0.05 && ball.vv<0){
+      ball.vv=Math.abs(ball.vv)*0.7+0.4; ball.vu+=(ball.u-keeper.u)*4;  // rebate
+    }
+  }
+}
+
+let goalFlash=0;
+function scoreGoal(){
+  state.score++; document.getElementById('score').textContent=state.score;
+  flashMsg('GOOOOL!'); goalFlash=1; state.running=false;
+  setTimeout(()=>{ if(state.scene==='game'){ resetPositions(); state.running=true; } },1000);
+}
+const msgEl=document.getElementById('msg');
+function flashMsg(t){ msgEl.textContent=t; msgEl.style.opacity=1; setTimeout(()=>msgEl.style.opacity=0,1000); }
+
+// =========================================================================
+//  RENDER
+// =========================================================================
+function render(){
+  ctx.clearRect(0,0,CW,CH);
+  layoutStadium();
+  // estádio (foto) com suavização
+  ctx.imageSmoothingEnabled=true;
+  ctx.fillStyle='#05080f'; ctx.fillRect(0,0,CW,CH);
+  ctx.drawImage(A.stadium,img.dx,img.dy,img.dw,img.dh);
+
+  if(state.scene==='game' || state.scene==='end'){
+    // ordena por profundidade (v) p/ sobreposição correta
+    const ents=[
+      {v:0.0,       d:drawKeeper},
+      {v:ball.v,    d:drawBall},
+      {v:player.v,  d:drawPlayer},
+    ].sort((a,b)=>a.v-b.v);
+    ents.forEach(e=>e.d());
+  }
+
+  if(goalFlash>0){ goalFlash-=0.03;
+    ctx.fillStyle=`rgba(252,211,77,${Math.max(0,goalFlash)*0.30})`; ctx.fillRect(0,0,CW,CH); }
+}
+
+function shadow(x,y,w){ ctx.imageSmoothingEnabled=true; ctx.fillStyle='rgba(0,0,0,0.30)';
+  ctx.beginPath(); ctx.ellipse(x,y,w,w*0.35,0,0,Math.PI*2); ctx.fill(); }
+
+function drawPlayer(){
+  const p=uvToScreen(player.u,player.v);
+  const h=depthScale(player.v), w=h*(SH.FW/SH.FH);
+  shadow(p.x, p.y, w*0.42);
+  // quadro de animação
+  let f = player.moving ? (Math.floor(player.anim)%SH.frames) : 0;
+  const col=f%SH.cols, row=Math.floor(f/SH.cols);
+  ctx.imageSmoothingEnabled=false;
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  if(player.face<0) ctx.scale(-1,1);          // espelha p/ esquerda
+  ctx.drawImage(A.player, col*SH.FW,row*SH.FH,SH.FW,SH.FH, -w/2,-h, w,h);
+  ctx.restore();
+  // rosto personalizado sobre a cabeça
+  if(state.faceCanvas){
+    const fs=h*0.26, fx=p.x - fs/2 + player.face*w*0.02, fy=p.y - h*0.97;
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(state.faceCanvas, fx, fy, fs, fs);
+  }
+}
+
+function drawKeeper(){
+  const p=uvToScreen(keeper.u,0.05);
+  const h=depthScale(0.05), w=h*(SH.FW/SH.FH);
+  shadow(p.x,p.y,w*0.42);
+  // goleiro: usa o mesmo sprite, tom mais claro (filtro)
+  ctx.imageSmoothingEnabled=false;
+  ctx.save(); ctx.translate(p.x,p.y);
+  ctx.globalAlpha=0.95;
+  ctx.drawImage(A.player, 0,0,SH.FW,SH.FH, -w/2,-h, w,h);
+  ctx.restore(); ctx.globalAlpha=1;
+}
+
+let spin=0;
+function drawBall(){
+  const p=uvToScreen(ball.u,ball.v);
+  const r=Math.max(3, depthScale(ball.v)*0.085);
+  spin+=(Math.abs(ball.vu)+Math.abs(ball.vv))*0.3;
+  shadow(p.x,p.y, r*1.1);
+  ctx.imageSmoothingEnabled=true;
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(p.x,p.y-r,r,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='#cbd5e1'; ctx.lineWidth=Math.max(1,r*0.18); ctx.stroke();
+  ctx.fillStyle='#1f2937';
+  ctx.beginPath(); ctx.arc(p.x+Math.cos(spin)*r*0.4, p.y-r+Math.sin(spin)*r*0.4, r*0.32,0,Math.PI*2); ctx.fill();
+}
+
+// =========================================================================
+//  LOOP
+// =========================================================================
+let last=performance.now();
+function loop(now){
+  let dt=(now-last)/1000; last=now; if(dt>0.05) dt=0.05;
+  if(A.loaded>=A.need){ update(dt); render(); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
