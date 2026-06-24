@@ -285,10 +285,14 @@ function update(dt){
   const m=moveVec();
   player.moving = m.l>0.12;
   if(player.moving){
-    player.u += m.x*0.42*dt;
-    player.v += m.y*0.40*dt;
+    // deslocamento real neste frame (no espaço do campo)
+    const du = m.x*0.42*dt, dv = m.y*0.40*dt;
+    player.u += du;
+    player.v += dv;
     if(m.x> 0.05) player.face= 1; else if(m.x<-0.05) player.face=-1;
-    player.anim += dt* (10+14*m.l);
+    // cadência da caminhada proporcional à distância percorrida:
+    // as pernas se mexem na mesma velocidade do passo → nada de "deslizar".
+    player.anim += Math.hypot(du, dv) * 300;
   }
   player.u=Math.max(0.03,Math.min(0.97,player.u));
   player.v=Math.max(0.02,Math.min(0.99,player.v));
