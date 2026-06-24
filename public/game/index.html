@@ -55,6 +55,17 @@
     pointer-events:auto; }
   #kick:active { transform:scale(.93); }
 
+  /* ---------- Zoom da câmera (Longe / Perto) ---------- */
+  #zoom { position:absolute; top:8px; left:50%; transform:translateX(-50%);
+    display:flex; gap:10px; pointer-events:auto; }
+  #zoom button { font-family:inherit; cursor:pointer; padding:6px 14px;
+    font-size:13px; letter-spacing:1px; text-transform:uppercase; color:#e2e8f0;
+    background:rgba(5,8,15,.5); border:1px solid rgba(148,163,184,.4);
+    border-radius:999px; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    transition:transform .08s; }
+  #zoom button:active { transform:scale(.92); }
+  #zoom button:disabled { opacity:.4; }
+
   /* ---------- Botão Voltar (para a Home) ---------- */
   #backBtn { position:fixed; top:10px; left:10px; z-index:60; font-family:inherit;
     cursor:pointer; display:flex; align-items:center; gap:4px; padding:5px 11px;
@@ -107,6 +118,10 @@
 
 <!-- Controles -->
 <div id="pad">
+  <div id="zoom">
+    <button id="zoomOut">🔭 Longe</button>
+    <button id="zoomIn">🔍 Perto</button>
+  </div>
   <div id="stick"><div id="knob"></div></div>
   <div id="kick">⚽</div>
 </div>
@@ -199,6 +214,11 @@ const ball   = { u:0.5, v:0.60, vu:0, vv:0 };
 const keeper = { u:0.5 };
 const GOAL = { uMin:0.42, uMax:0.58 };   // boca do gol no fundo (v≈0)
 
+// Câmera: zoom=1 mostra o estádio inteiro (longe); valores maiores aproximam
+// a câmera do personagem (perto). 'target' é o nível desejado; 'zoom' segue suave.
+const ZOOM_MIN=1, ZOOM_MAX=2.4, ZOOM_STEP=0.35;
+const cam = { zoom:1, target:1 };
+
 // Voltar para a seção Home do app (sai do jogo estático e volta para o React).
 document.getElementById('backBtn').onclick=()=>{ window.location.href='/home'; };
 
@@ -256,6 +276,17 @@ function movePointer(e){
   stickVec={x:dx/MAXR, y:dy/MAXR};
 }
 kickBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); kick(); });
+
+// Botões de zoom da câmera (Longe / Perto)
+const zoomInBtn=document.getElementById('zoomIn'), zoomOutBtn=document.getElementById('zoomOut');
+function setZoom(z){
+  cam.target=Math.max(ZOOM_MIN,Math.min(ZOOM_MAX,z));
+  zoomOutBtn.disabled = cam.target<=ZOOM_MIN+0.001;
+  zoomInBtn.disabled  = cam.target>=ZOOM_MAX-0.001;
+}
+zoomInBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); setZoom(cam.target+ZOOM_STEP); });
+zoomOutBtn.addEventListener('pointerdown',e=>{ e.preventDefault(); setZoom(cam.target-ZOOM_STEP); });
+setZoom(1);
 
 // =========================================================================
 //  LÓGICA
@@ -344,12 +375,25 @@ function flashMsg(t){ msgEl.textContent=t; msgEl.style.opacity=1; setTimeout(()=
 function render(){
   ctx.clearRect(0,0,CW,CH);
   layoutStadium();
+  // suaviza o zoom em direção ao nível escolhido
+  cam.zoom += (cam.target - cam.zoom) * 0.15;
+
+  // fundo (fora da imagem do estádio)
+  ctx.fillStyle='#05080f'; ctx.fillRect(0,0,CW,CH);
+
+  const inGame = (state.scene==='game' || state.scene==='end');
+  // Câmera: amplia o mundo em torno do personagem (perto), mantendo-o no lugar.
+  const focus = inGame ? uvToScreen(player.u,player.v) : { x:CW/2, y:CH*0.6 };
+  ctx.save();
+  ctx.translate(focus.x, focus.y);
+  ctx.scale(cam.zoom, cam.zoom);
+  ctx.translate(-focus.x, -focus.y);
+
   // estádio (foto) com suavização
   ctx.imageSmoothingEnabled=true;
-  ctx.fillStyle='#05080f'; ctx.fillRect(0,0,CW,CH);
   ctx.drawImage(A.stadium,img.dx,img.dy,img.dw,img.dh);
 
-  if(state.scene==='game' || state.scene==='end'){
+  if(inGame){
     // ordena por profundidade (v) p/ sobreposição correta
     const ents=[
       {v:0.0,       d:drawKeeper},
@@ -358,6 +402,8 @@ function render(){
     ].sort((a,b)=>a.v-b.v);
     ents.forEach(e=>e.d());
   }
+
+  ctx.restore();
 
   // vinheta suave: dá profundidade e aspecto "cinematográfico" em alta resolução
   const vg=ctx.createRadialGradient(CW/2, CH*0.55, CH*0.25, CW/2, CH*0.55, CH*0.95);
