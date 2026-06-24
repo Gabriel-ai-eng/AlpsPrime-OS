@@ -177,13 +177,16 @@ resize();
 const isPortrait = () => window.matchMedia('(orientation: portrait)').matches;
 
 // ---------- Assets ----------
-const A = { stadium:new Image(), player:new Image(), loaded:0, need:2 };
+const A = { stadium:new Image(), player:new Image(), runner:new Image(), loaded:0, need:3 };
 A.stadium.src = 'assets/stadium.jpg';
 A.player.src  = 'assets/player.png';
-A.stadium.onload = A.player.onload = ()=> A.loaded++;
+A.runner.src  = 'assets/player_run.png';
+A.stadium.onload = A.player.onload = A.runner.onload = ()=> A.loaded++;
 
-// Sprite sheet: 5 colunas x 12 linhas = 60 quadros (caminhada, perfil p/ direita)
+// Sprite sheet de CAMINHADA: 5 colunas x 12 linhas = 60 quadros (perfil p/ direita)
 const SH = { FW:62, FH:114, cols:5, rows:12, frames:60 };
+// Sprite sheet de CORRIDA: 5 colunas x 4 linhas = 20 quadros (perfil p/ direita)
+const RUN_SH = { FW:113, FH:156, cols:5, rows:4, frames:20 };
 
 // ---------- Pitch (trapézio em perspectiva, normalizado na imagem) ----------
 const PITCH = {
@@ -209,7 +212,7 @@ function depthScale(v){ return lerp(0.035, 0.135, v) * img.dh; } // altura do sp
 
 // ---------- Estado ----------
 const state = { scene:'title', score:0, time:60, running:false };
-const player = { u:0.5, v:0.72, face:1, anim:0, moving:false };  // face: 1 dir / -1 esq
+const player = { u:0.5, v:0.72, face:1, anim:0, moving:false, running:false };  // face: 1 dir / -1 esq
 const ball   = { u:0.5, v:0.60, vu:0, vv:0 };
 const keeper = { u:0.5 };
 const GOAL = { uMin:0.42, uMax:0.58 };   // boca do gol no fundo (v≈0)
@@ -238,7 +241,7 @@ function startMatch(){
   resetPositions(); startTimer();
 }
 function resetPositions(){
-  player.u=0.5; player.v=0.72; player.face=1; player.anim=0;
+  player.u=0.5; player.v=0.72; player.face=1; player.anim=0; player.running=false;
   ball.u=0.5; ball.v=0.58; ball.vu=0; ball.vv=0; keeper.u=0.5;
 }
 let timerId=null;
@@ -316,14 +319,24 @@ function update(dt){
   const m=moveVec();
   player.moving = m.l>0.12;
   if(player.moving){
+    // direção normalizada + intensidade (0..1) do quanto o joystick foi empurrado
+    const dirx=m.x/(m.l||1), diry=m.y/(m.l||1);
+    // Joystick perto da borda (intensidade alta) → CORRE; pouco empurrão → ANDA.
+    const RUN_THR=0.82, WALK=0.40, RUN=0.82;
+    player.running = m.l>=RUN_THR;
+    const speed = m.l<RUN_THR
+      ? WALK*(m.l/RUN_THR)                                  // anda: devagar→normal
+      : WALK + (RUN-WALK)*((m.l-RUN_THR)/(1-RUN_THR));      // corre: acelera no talo
     // deslocamento real neste frame (no espaço do campo)
-    const du = m.x*0.42*dt, dv = m.y*0.40*dt;
+    const du = dirx*speed*dt, dv = diry*speed*0.95*dt;
     player.u += du;
     player.v += dv;
-    if(m.x> 0.05) player.face= 1; else if(m.x<-0.05) player.face=-1;
-    // cadência da caminhada proporcional à distância percorrida:
-    // as pernas se mexem na mesma velocidade do passo → nada de "deslizar".
-    player.anim += Math.hypot(du, dv) * 300;
+    if(dirx> 0.05) player.face= 1; else if(dirx<-0.05) player.face=-1;
+    // cadência da animação proporcional à distância percorrida (pernas não "deslizam").
+    // A corrida tem menos quadros e passada mais longa, por isso multiplicador menor.
+    player.anim += Math.hypot(du, dv) * (player.running ? 130 : 300);
+  } else {
+    player.running = false;
   }
   player.u=Math.max(0.03,Math.min(0.97,player.u));
   player.v=Math.max(0.02,Math.min(0.99,player.v));
@@ -419,16 +432,20 @@ function shadow(x,y,w){ ctx.imageSmoothingEnabled=true; ctx.fillStyle='rgba(0,0,
 
 function drawPlayer(){
   const p=uvToScreen(player.u,player.v);
-  const h=depthScale(player.v), w=h*(SH.FW/SH.FH);
+  // escolhe o sprite conforme o estado: correndo usa o sheet de corrida.
+  const run = player.running && player.moving;
+  const sheet = run ? RUN_SH : SH;
+  const sprite = run ? A.runner : A.player;
+  const h=depthScale(player.v), w=h*(sheet.FW/sheet.FH);
   shadow(p.x, p.y, w*0.42);
   // quadro de animação
-  let f = player.moving ? (Math.floor(player.anim)%SH.frames) : 0;
-  const col=f%SH.cols, row=Math.floor(f/SH.cols);
+  let f = player.moving ? (Math.floor(player.anim)%sheet.frames) : 0;
+  const col=f%sheet.cols, row=Math.floor(f/sheet.cols);
   ctx.imageSmoothingEnabled=true;
   ctx.save();
   ctx.translate(p.x, p.y);
   if(player.face<0) ctx.scale(-1,1);          // espelha p/ esquerda
-  ctx.drawImage(A.player, col*SH.FW,row*SH.FH,SH.FW,SH.FH, -w/2,-h, w,h);
+  ctx.drawImage(sprite, col*sheet.FW,row*sheet.FH,sheet.FW,sheet.FH, -w/2,-h, w,h);
   ctx.restore();
 }
 
