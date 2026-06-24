@@ -101,7 +101,8 @@ export default function Home() {
                 {EXT.map((slide, i) => (
                   <div
                     key={i}
-                    className="h-full flex items-center justify-center"
+                    onClick={slide.id === 'branco' ? () => { window.location.href = '/game/'; } : undefined}
+                    className={`h-full flex items-center justify-center${slide.id === 'branco' ? ' cursor-pointer' : ''}`}
                     style={{
                       width: `${100 / EXT_LEN}%`,
                       backgroundColor: slide.bg ?? 'transparent',
