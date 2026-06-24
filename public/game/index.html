@@ -59,10 +59,49 @@
     display:flex; align-items:center; justify-content:center; font-size:42px; color:#06251c;
     pointer-events:auto; }
   #kick:active { transform:scale(.93); }
+
+  /* ---------- Botão Voltar (para a Home) ---------- */
+  #backBtn { position:fixed; top:14px; left:14px; z-index:60; font-family:inherit;
+    cursor:pointer; display:flex; align-items:center; gap:8px; padding:10px 20px;
+    font-size:15px; letter-spacing:1px; color:#e2e8f0; background:rgba(5,8,15,.5);
+    border:1.5px solid rgba(148,163,184,.4); border-radius:999px;
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:transform .08s; }
+  #backBtn:active { transform:scale(.93); }
+
+  /* ---------- Overlay: gire o celular para a horizontal ---------- */
+  #rotate { position:fixed; inset:0; z-index:50; display:none;
+    flex-direction:column; align-items:center; justify-content:center; gap:30px; padding:34px;
+    background:radial-gradient(circle at 50% 38%, #0b1424, #05080f); text-align:center; }
+  @media (orientation:portrait) { #rotate { display:flex; } }
+  #rotate h2 { color:#7dd3fc; font-size:clamp(20px,6vw,30px); letter-spacing:2px;
+    text-shadow:2px 2px 0 #0a3d62; }
+  #rotate p { color:#cbd5e1; font-size:15px; max-width:380px; line-height:1.55; }
+  .phone { width:62px; height:110px; border:5px solid #7dd3fc; border-radius:14px;
+    position:relative; box-shadow:0 0 26px rgba(125,211,252,.5);
+    animation:tilt 2.4s ease-in-out infinite; }
+  .phone::before { content:''; position:absolute; left:50%; bottom:7px; width:20px; height:4px;
+    border-radius:3px; background:#7dd3fc; transform:translateX(-50%); }
+  .phone::after { content:''; position:absolute; inset:7px; border-radius:7px;
+    background:rgba(125,211,252,.12); }
+  @keyframes tilt {
+    0%,16%   { transform:rotate(0deg); }
+    46%,72%  { transform:rotate(-90deg); }
+    96%,100% { transform:rotate(0deg); }
+  }
 </style>
 </head>
 <body>
 <canvas id="cv"></canvas>
+
+<!-- Voltar para a Home -->
+<button id="backBtn">← Voltar</button>
+
+<!-- Gire o celular -->
+<div id="rotate">
+  <div class="phone"></div>
+  <h2>VIRE O CELULAR</h2>
+  <p>Deite o aparelho na horizontal 📱➡️🎮 para entrar em campo e começar a partida.</p>
+</div>
 
 <!-- HUD -->
 <div id="hud">
@@ -130,12 +169,26 @@
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 
-let CW=0, CH=0;
+let CW=0, CH=0, DPR=1;
 function resize(){
-  CW = cv.width  = Math.floor(window.innerWidth);
-  CH = cv.height = Math.floor(window.innerHeight);
+  // Renderiza na densidade real da tela (retina) → alta resolução, nada de "serrilhado".
+  DPR = Math.min(window.devicePixelRatio || 1, 3);
+  CW = Math.floor(window.innerWidth);
+  CH = Math.floor(window.innerHeight);
+  cv.width  = Math.floor(CW * DPR);
+  cv.height = Math.floor(CH * DPR);
+  cv.style.width  = CW + 'px';
+  cv.style.height = CH + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);   // desenhamos em px de CSS; o canvas escala sozinho
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 }
-window.addEventListener('resize', resize); resize();
+window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', resize);
+resize();
+
+// Em retrato mostramos o aviso "vire o celular" e pausamos a partida.
+const isPortrait = () => window.matchMedia('(orientation: portrait)').matches;
 
 // ---------- Assets ----------
 const A = { stadium:new Image(), player:new Image(), loaded:0, need:2 };
@@ -217,6 +270,9 @@ snapBtn.onclick=()=>{ if(!webcam.videoWidth) return;
   webcam.classList.add('hidden'); facePrev.classList.remove('hidden'); snapBtn.style.display='none'; };
 function stopCam(){ if(camStream){camStream.getTracks().forEach(t=>t.stop()); camStream=null;} }
 
+// Voltar para a seção Home do app (sai do jogo estático e volta para o React).
+document.getElementById('backBtn').onclick=()=>{ stopCam(); window.location.href='/home'; };
+
 // =========================================================================
 //  TELAS
 // =========================================================================
@@ -241,7 +297,7 @@ function resetPositions(){
 }
 let timerId=null;
 function startTimer(){ clearInterval(timerId); timerId=setInterval(()=>{
-  if(!state.running) return; state.time--; document.getElementById('time').textContent=state.time;
+  if(!state.running || isPortrait()) return; state.time--; document.getElementById('time').textContent=state.time;
   if(state.time<=0) endMatch();
 },1000); }
 function endMatch(){ state.running=false; clearInterval(timerId);
@@ -299,7 +355,7 @@ function kick(){
 }
 
 function update(dt){
-  if(state.scene!=='game') return;
+  if(state.scene!=='game' || isPortrait()) return;
   const m=moveVec();
   player.moving = m.l>0.12;
   if(player.moving){
@@ -373,6 +429,11 @@ function render(){
     ents.forEach(e=>e.d());
   }
 
+  // vinheta suave: dá profundidade e aspecto "cinematográfico" em alta resolução
+  const vg=ctx.createRadialGradient(CW/2, CH*0.55, CH*0.25, CW/2, CH*0.55, CH*0.95);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.42)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,CW,CH);
+
   if(goalFlash>0){ goalFlash-=0.03;
     ctx.fillStyle=`rgba(252,211,77,${Math.max(0,goalFlash)*0.30})`; ctx.fillRect(0,0,CW,CH); }
 }
@@ -387,7 +448,7 @@ function drawPlayer(){
   // quadro de animação
   let f = player.moving ? (Math.floor(player.anim)%SH.frames) : 0;
   const col=f%SH.cols, row=Math.floor(f/SH.cols);
-  ctx.imageSmoothingEnabled=false;
+  ctx.imageSmoothingEnabled=true;
   ctx.save();
   ctx.translate(p.x, p.y);
   if(player.face<0) ctx.scale(-1,1);          // espelha p/ esquerda
@@ -396,7 +457,7 @@ function drawPlayer(){
   // rosto personalizado sobre a cabeça
   if(state.faceCanvas){
     const fs=h*0.26, fx=p.x - fs/2 + player.face*w*0.02, fy=p.y - h*0.97;
-    ctx.imageSmoothingEnabled=false;
+    ctx.imageSmoothingEnabled=true;
     ctx.drawImage(state.faceCanvas, fx, fy, fs, fs);
   }
 }
@@ -406,7 +467,7 @@ function drawKeeper(){
   const h=depthScale(0.05), w=h*(SH.FW/SH.FH);
   shadow(p.x,p.y,w*0.42);
   // goleiro: usa o mesmo sprite, tom mais claro (filtro)
-  ctx.imageSmoothingEnabled=false;
+  ctx.imageSmoothingEnabled=true;
   ctx.save(); ctx.translate(p.x,p.y);
   ctx.globalAlpha=0.95;
   ctx.drawImage(A.player, 0,0,SH.FW,SH.FH, -w/2,-h, w,h);
