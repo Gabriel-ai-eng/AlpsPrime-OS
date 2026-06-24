@@ -185,7 +185,8 @@ A.stadium.onload = A.player.onload = A.runner.onload = ()=> A.loaded++;
 // Sprite sheet de CAMINHADA: 5 colunas x 12 linhas = 60 quadros (perfil p/ direita)
 const SH = { FW:62, FH:114, cols:5, rows:12, frames:60 };
 // Sprite sheet de CORRIDA: 5 colunas x 4 linhas = 20 quadros (perfil p/ direita)
-const RUN_SH = { FW:113, FH:156, cols:5, rows:4, frames:20 };
+// Alta resolução (quadro 430x608) → personagem nítido e suave, sem serrilhado.
+const RUN_SH = { FW:430, FH:608, cols:5, rows:4, frames:20 };
 
 // ---------- Pitch (trapézio em perspectiva, normalizado na imagem) ----------
 const PITCH = {
@@ -236,7 +237,19 @@ function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n])
 document.getElementById('startGame').onclick=()=>startMatch();
 document.getElementById('playAgain').onclick=()=>startMatch();
 
+// Entra em tela cheia (e tenta travar em paisagem). Chamado a partir de um
+// gesto do usuário (clique em "Jogar bola"), que é o exigido pelos navegadores.
+function goFullscreen(){
+  const el=document.documentElement;
+  const req=el.requestFullscreen||el.webkitRequestFullscreen||el.msRequestFullscreen;
+  try { const r=req&&req.call(el); if(r&&r.catch) r.catch(()=>{}); } catch(_){}
+  try { if(screen.orientation&&screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{}); } catch(_){}
+}
+document.addEventListener('fullscreenchange', resize);
+document.addEventListener('webkitfullscreenchange', resize);
+
 function startMatch(){
+  goFullscreen();
   show(null); state.scene='game'; state.score=0; state.time=60; state.running=true;
   hud.classList.add('on'); pad.classList.add('on');
   document.getElementById('score').textContent='0'; document.getElementById('time').textContent='60';
@@ -335,8 +348,8 @@ function update(dt){
     player.v += dv;
     if(dirx> 0.05) player.face= 1; else if(dirx<-0.05) player.face=-1;
     // cadência da animação proporcional à distância percorrida (pernas não "deslizam").
-    // A corrida tem menos quadros e passada mais longa, por isso multiplicador menor.
-    player.anim += Math.hypot(du, dv) * (player.running ? 130 : 300);
+    // Mesmo ciclo (20 quadros): correndo tem passada mais longa → multiplicador menor.
+    player.anim += Math.hypot(du, dv) * (player.running ? 130 : 220);
   } else {
     player.running = false;
   }
@@ -436,16 +449,15 @@ function shadow(x,y,w){ ctx.imageSmoothingEnabled=true; ctx.fillStyle='rgba(0,0,
 
 function drawPlayer(){
   const p=uvToScreen(player.u,player.v);
-  // escolhe o sprite conforme o estado: correndo usa o sheet de corrida.
-  const run = player.running && player.moving;
-  const sheet = run ? RUN_SH : SH;
-  const sprite = run ? A.runner : A.player;
+  // Sempre o sprite de ALTA RESOLUÇÃO (mesmo andando ou correndo) → máxima qualidade.
+  const sheet = RUN_SH, sprite = A.runner;
   const h=depthScale(player.v), w=h*(sheet.FW/sheet.FH);
   shadow(p.x, p.y, w*0.42);
   // quadro de animação
   let f = player.moving ? (Math.floor(player.anim)%sheet.frames) : 0;
   const col=f%sheet.cols, row=Math.floor(f/sheet.cols);
-  ctx.imageSmoothingEnabled=false;   // Filter Mode: Point/Nearest → sprite nítido (sem borrão)
+  ctx.imageSmoothingEnabled=true;        // filtragem suave (alta qualidade, sem serrilhado)
+  ctx.imageSmoothingQuality='high';
   ctx.save();
   ctx.translate(p.x, p.y);
   if(player.face<0) ctx.scale(-1,1);          // espelha p/ esquerda
