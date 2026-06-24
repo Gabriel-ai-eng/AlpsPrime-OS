@@ -33,7 +33,10 @@ export default function Home() {
   const [telaAtual, setTelaAtual] = useState('hub');
   const [pos, setPos] = useState(1); // 1 = primeiro slide real (índice 0 é o clone)
   const [anim, setAnim] = useState(true);
+  const [dragX, setDragX] = useState(0); // deslocamento (px) enquanto arrasta com o dedo
   const timerRef = useRef(null);
+  const sliderRef = useRef(null);
+  const touchRef = useRef({ startX: 0, dragging: false, moved: false });
   const location = useLocation();
 
   useEffect(() => {
@@ -56,6 +59,36 @@ export default function Home() {
   const navSlide = (dir) => {
     setPos(p => p + dir);
     resetTimer();
+  };
+
+  // Arrastar com o dedo (swipe) para trocar de slide.
+  const onTouchStart = (e) => {
+    clearInterval(timerRef.current);
+    touchRef.current = { startX: e.touches[0].clientX, dragging: true, moved: false };
+    setAnim(false);
+  };
+
+  const onTouchMove = (e) => {
+    if (!touchRef.current.dragging) return;
+    const delta = e.touches[0].clientX - touchRef.current.startX;
+    if (Math.abs(delta) > 5) touchRef.current.moved = true;
+    setDragX(delta);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchRef.current.dragging) return;
+    const delta = dragX;
+    const largura = sliderRef.current?.offsetWidth || window.innerWidth;
+    // Troca de slide se arrastou mais de 20% da largura (ou pelo menos 50px).
+    const limiar = Math.min(largura * 0.2, 80);
+    touchRef.current.dragging = false;
+    setDragX(0);
+    setAnim(true);
+    if (Math.abs(delta) > limiar) {
+      navSlide(delta < 0 ? 1 : -1);
+    } else {
+      resetTimer();
+    }
   };
 
   // Ao chegar num clone, salta sem animação para o slide real equivalente.
@@ -86,14 +119,19 @@ export default function Home() {
 
             {/* SLIDER */}
             <div
+              ref={sliderRef}
               className="relative w-full flex-shrink-0 overflow-hidden"
               style={{ height: '28vh' }}
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+              onTouchCancel={onTouchEnd}
             >
               <div
-                className="flex h-full"
+                className="flex h-full touch-pan-y"
                 style={{
                   width: `${EXT_LEN * 100}%`,
-                  transform: `translateX(-${(pos * 100) / EXT_LEN}%)`,
+                  transform: `translateX(calc(-${(pos * 100) / EXT_LEN}% + ${dragX}px))`,
                   transition: anim ? 'transform 500ms ease-out' : 'none',
                 }}
                 onTransitionEnd={handleEnd}
@@ -101,7 +139,7 @@ export default function Home() {
                 {EXT.map((slide, i) => (
                   <div
                     key={i}
-                    onClick={slide.id === 'branco' ? () => { window.location.href = '/game/'; } : undefined}
+                    onClick={slide.id === 'branco' ? () => { if (!touchRef.current.moved) window.location.href = '/game/'; } : undefined}
                     className={`h-full flex items-center justify-center${slide.id === 'branco' ? ' cursor-pointer' : ''}`}
                     style={{
                       width: `${100 / EXT_LEN}%`,
