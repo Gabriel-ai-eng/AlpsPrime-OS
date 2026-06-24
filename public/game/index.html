@@ -189,12 +189,13 @@ const RUN_SH = { FW:113, FH:156, cols:5, rows:4, frames:20 };
 
 // ---------- Pitch (trapézio em perspectiva, normalizado na imagem) ----------
 const PITCH = {
-  TL:{x:0.205,y:0.355}, TR:{x:0.795,y:0.355},
-  BR:{x:0.975,y:0.905}, BL:{x:0.025,y:0.905},
+  TL:{x:0.285,y:0.611}, TR:{x:0.715,y:0.611},
+  BR:{x:0.960,y:0.935}, BL:{x:0.040,y:0.935},
 };
-let img = {dx:0,dy:0,dw:0,dh:0};   // retângulo onde o estádio é desenhado (contain)
+let img = {dx:0,dy:0,dw:0,dh:0};   // retângulo onde o estádio é desenhado (cover)
 function layoutStadium(){
-  const s = Math.min(CW/A.stadium.width, CH/A.stadium.height) || 1;
+  // "cover": preenche a tela inteira, recortando o excedente (sem bordas pretas).
+  const s = Math.max(CW/A.stadium.width, CH/A.stadium.height) || 1;
   img.dw = A.stadium.width*s; img.dh = A.stadium.height*s;
   img.dx = (CW-img.dw)/2;     img.dy = (CH-img.dh)/2;
 }
