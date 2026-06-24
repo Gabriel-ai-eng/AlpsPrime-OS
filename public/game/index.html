@@ -30,11 +30,6 @@
   .row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; align-items:center; }
   small.hint { color:#64748b; font-size:12px; max-width:520px; }
 
-  #facePreview { width:120px; height:120px; image-rendering:pixelated;
-    border:4px solid #334155; border-radius:12px; background:#0f172a; }
-  #webcam { width:180px; max-width:55vw; border-radius:10px; border:3px solid #334155;
-    transform:scaleX(-1); }
-
   /* ---------- HUD ---------- */
   #hud { position:fixed; top:10px; left:0; right:0; z-index:8; display:none;
     justify-content:space-between; padding:0 14px; pointer-events:none;
@@ -61,10 +56,10 @@
   #kick:active { transform:scale(.93); }
 
   /* ---------- Botão Voltar (para a Home) ---------- */
-  #backBtn { position:fixed; top:14px; left:14px; z-index:60; font-family:inherit;
-    cursor:pointer; display:flex; align-items:center; gap:8px; padding:10px 20px;
-    font-size:15px; letter-spacing:1px; color:#e2e8f0; background:rgba(5,8,15,.5);
-    border:1.5px solid rgba(148,163,184,.4); border-radius:999px;
+  #backBtn { position:fixed; top:10px; left:10px; z-index:60; font-family:inherit;
+    cursor:pointer; display:flex; align-items:center; gap:4px; padding:5px 11px;
+    font-size:12px; letter-spacing:.5px; color:#e2e8f0; background:rgba(5,8,15,.5);
+    border:1px solid rgba(148,163,184,.4); border-radius:999px;
     backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:transform .08s; }
   #backBtn:active { transform:scale(.93); }
 
@@ -119,33 +114,10 @@
 <!-- TÍTULO -->
 <div id="scrTitle" class="screen">
   <h1>FREE KICK WORLD</h1>
-  <p class="sub">Entre em campo no estádio em pixel art! Use o <b>joystick</b> para andar,
-     dribla e chuta no gol. Você pode até jogar com o <b>seu próprio rosto</b>. ⚽</p>
-  <button class="btn" id="goCustom">JOGAR</button>
+  <p class="sub">Entre em campo no estádio! Use o <b>joystick</b> para andar,
+     dribla e chuta no gol. ⚽</p>
+  <button class="btn" id="startGame">⚽ JOGAR BOLA</button>
   <small class="hint">No PC: WASD / setas para andar • ESPAÇO para chutar (ou use os controles na tela)</small>
-</div>
-
-<!-- PERSONALIZAR -->
-<div id="scrCustom" class="screen hidden">
-  <h2>SEU JOGADOR</h2>
-  <div class="row">
-    <canvas id="facePreview" width="16" height="16"></canvas>
-    <video id="webcam" autoplay playsinline class="hidden"></video>
-  </div>
-  <div class="row">
-    <label class="btn alt" style="display:inline-block">📁 FOTO
-      <input id="fileInput" type="file" accept="image/*" capture="user" style="display:none" />
-    </label>
-    <button class="btn alt" id="camBtn">📷 WEBCAM</button>
-    <button class="btn" id="snapBtn" style="display:none">CAPTURAR</button>
-    <button class="btn ghost" id="clearFace">SEM ROSTO</button>
-  </div>
-  <small class="hint">Opcional: coloque sua foto e ela vira pixel art na cabeça do craque.
-     A webcam precisa de HTTPS (use o link do GitHub Pages).</small>
-  <div class="row">
-    <button class="btn ghost" id="backTitle">VOLTAR</button>
-    <button class="btn" id="startGame">ENTRAR EM CAMPO ⚽</button>
-  </div>
 </div>
 
 <!-- FIM -->
@@ -153,7 +125,6 @@
   <h1 style="color:#fcd34d">FIM DE JOGO</h1>
   <h2 id="endScore">Você marcou 0 gols!</h2>
   <div class="row">
-    <button class="btn ghost" id="endCustom">TROCAR ROSTO</button>
     <button class="btn" id="playAgain">JOGAR DE NOVO</button>
   </div>
 </div>
@@ -222,68 +193,23 @@ function uvToScreen(u,v){
 function depthScale(v){ return lerp(0.035, 0.135, v) * img.dh; } // altura do sprite em px
 
 // ---------- Estado ----------
-const state = { scene:'title', score:0, time:60, running:false, faceCanvas:null };
+const state = { scene:'title', score:0, time:60, running:false };
 const player = { u:0.5, v:0.72, face:1, anim:0, moving:false };  // face: 1 dir / -1 esq
 const ball   = { u:0.5, v:0.60, vu:0, vv:0 };
 const keeper = { u:0.5 };
 const GOAL = { uMin:0.42, uMax:0.58 };   // boca do gol no fundo (v≈0)
 
-// =========================================================================
-//  ROSTO / PERSONALIZAÇÃO
-// =========================================================================
-const FACE_SIZE=16;
-const facePrev=document.getElementById('facePreview');
-const fpx=facePrev.getContext('2d');
-function makeFaceFrom(source, sw, sh){
-  const side=Math.min(sw,sh), sx=(sw-side)/2, sy=(sh-side)/2;
-  const c=document.createElement('canvas'); c.width=c.height=FACE_SIZE;
-  const g=c.getContext('2d'); g.imageSmoothingEnabled=true;
-  g.drawImage(source,sx,sy,side,side,0,0,FACE_SIZE,FACE_SIZE);
-  const im=g.getImageData(0,0,FACE_SIZE,FACE_SIZE),d=im.data;
-  for(let i=0;i<d.length;i+=4) for(let k=0;k<3;k++){let v=(d[i+k]-128)*1.25+128;d[i+k]=Math.max(0,Math.min(255,v));}
-  g.putImageData(im,0,0);
-  state.faceCanvas=c; drawFacePreview();
-}
-function drawFacePreview(){
-  facePrev.width=FACE_SIZE; facePrev.height=FACE_SIZE; fpx.imageSmoothingEnabled=false;
-  fpx.clearRect(0,0,FACE_SIZE,FACE_SIZE);
-  if(state.faceCanvas){ fpx.drawImage(state.faceCanvas,0,0); }
-  else{ fpx.fillStyle='#334155'; fpx.fillRect(0,0,FACE_SIZE,FACE_SIZE);
-        fpx.fillStyle='#94a3b8'; fpx.fillRect(5,6,2,2); fpx.fillRect(9,6,2,2); fpx.fillRect(5,11,6,1); }
-}
-drawFacePreview();
-document.getElementById('fileInput').addEventListener('change',e=>{
-  const f=e.target.files[0]; if(!f) return; const i=new Image();
-  i.onload=()=>makeFaceFrom(i,i.width,i.height); i.src=URL.createObjectURL(f);
-});
-document.getElementById('clearFace').onclick=()=>{ state.faceCanvas=null; drawFacePreview(); };
-const webcam=document.getElementById('webcam'), camBtn=document.getElementById('camBtn'), snapBtn=document.getElementById('snapBtn');
-let camStream=null;
-camBtn.onclick=async()=>{ try{
-    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
-    webcam.srcObject=camStream; webcam.classList.remove('hidden'); facePrev.classList.add('hidden'); snapBtn.style.display='inline-block';
-  }catch(_){ alert('Não consegui abrir a webcam 😕 (precisa de HTTPS). Use a opção FOTO!'); } };
-snapBtn.onclick=()=>{ if(!webcam.videoWidth) return;
-  const t=document.createElement('canvas'); t.width=webcam.videoWidth; t.height=webcam.videoHeight;
-  const g=t.getContext('2d'); g.translate(t.width,0); g.scale(-1,1); g.drawImage(webcam,0,0);
-  makeFaceFrom(t,t.width,t.height); stopCam();
-  webcam.classList.add('hidden'); facePrev.classList.remove('hidden'); snapBtn.style.display='none'; };
-function stopCam(){ if(camStream){camStream.getTracks().forEach(t=>t.stop()); camStream=null;} }
-
 // Voltar para a seção Home do app (sai do jogo estático e volta para o React).
-document.getElementById('backBtn').onclick=()=>{ stopCam(); window.location.href='/home'; };
+document.getElementById('backBtn').onclick=()=>{ window.location.href='/home'; };
 
 // =========================================================================
 //  TELAS
 // =========================================================================
-const scr={title:document.getElementById('scrTitle'),custom:document.getElementById('scrCustom'),end:document.getElementById('scrEnd')};
+const scr={title:document.getElementById('scrTitle'),end:document.getElementById('scrEnd')};
 const hud=document.getElementById('hud'), pad=document.getElementById('pad');
 function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden'); }
-document.getElementById('goCustom').onclick=()=>{ show('custom'); state.scene='custom'; };
-document.getElementById('backTitle').onclick=()=>{ stopCam(); show('title'); state.scene='title'; };
-document.getElementById('startGame').onclick=()=>{ stopCam(); startMatch(); };
+document.getElementById('startGame').onclick=()=>startMatch();
 document.getElementById('playAgain').onclick=()=>startMatch();
-document.getElementById('endCustom').onclick=()=>{ show('custom'); state.scene='custom'; };
 
 function startMatch(){
   show(null); state.scene='game'; state.score=0; state.time=60; state.running=true;
@@ -454,12 +380,6 @@ function drawPlayer(){
   if(player.face<0) ctx.scale(-1,1);          // espelha p/ esquerda
   ctx.drawImage(A.player, col*SH.FW,row*SH.FH,SH.FW,SH.FH, -w/2,-h, w,h);
   ctx.restore();
-  // rosto personalizado sobre a cabeça
-  if(state.faceCanvas){
-    const fs=h*0.26, fx=p.x - fs/2 + player.face*w*0.02, fy=p.y - h*0.97;
-    ctx.imageSmoothingEnabled=true;
-    ctx.drawImage(state.faceCanvas, fx, fy, fs, fs);
-  }
 }
 
 function drawKeeper(){
