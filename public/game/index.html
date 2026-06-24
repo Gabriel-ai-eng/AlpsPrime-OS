@@ -215,13 +215,14 @@ function depthScale(v){ return lerp(0.035, 0.135, v) * img.dh; } // altura do sp
 const state = { scene:'title', score:0, time:60, running:false };
 const player = { u:0.5, v:0.72, face:1, anim:0, moving:false, running:false };  // face: 1 dir / -1 esq
 const ball   = { u:0.5, v:0.60, vu:0, vv:0 };
-const keeper = { u:0.5 };
 const GOAL = { uMin:0.42, uMax:0.58 };   // boca do gol no fundo (v≈0)
 
-// Câmera: zoom=1 mostra o estádio inteiro (longe); NEAR_ZOOM aproxima bem do
-// personagem (perto), centralizando-o na tela. 'target' é o nível desejado.
-const NEAR_ZOOM = 3.8;
-const cam = { zoom:1, target:1, near:false };
+// Câmera: 'near' liga o modo Perto; 'prog' (0..1) é a transição suave entre
+// Longe (estádio inteiro) e Perto (segue o personagem, centralizado).
+// No Perto o zoom é DINÂMICO: ajusta conforme a profundidade para o personagem
+// ficar sempre do mesmo tamanho e sempre no centro da tela, onde quer que vá.
+const CHAR_ON_SCREEN = 0.50;   // altura alvo do personagem na tela (fração) no Perto
+const cam = { prog:0, near:false };
 
 // Voltar para a seção Home do app (sai do jogo estático e volta para o React).
 document.getElementById('backBtn').onclick=()=>{ window.location.href='/home'; };
@@ -243,7 +244,7 @@ function startMatch(){
 }
 function resetPositions(){
   player.u=0.5; player.v=0.72; player.face=1; player.anim=0; player.running=false;
-  ball.u=0.5; ball.v=0.58; ball.vu=0; ball.vv=0; keeper.u=0.5;
+  ball.u=0.5; ball.v=0.58; ball.vu=0; ball.vv=0;
 }
 let timerId=null;
 function startTimer(){ clearInterval(timerId); timerId=setInterval(()=>{
@@ -288,7 +289,6 @@ function updateCamBtn(){ camToggleBtn.textContent = cam.near ? '🔭 Longe' : '�
 camToggleBtn.addEventListener('pointerdown',e=>{
   e.preventDefault();
   cam.near=!cam.near;
-  cam.target = cam.near ? NEAR_ZOOM : 1;
   updateCamBtn();
 });
 updateCamBtn();
@@ -364,15 +364,6 @@ function update(dt){
     if(ball.u>GOAL.uMin && ball.u<GOAL.uMax) scoreGoal();
     else { ball.v=0.02; ball.vv*=-0.7; }
   }
-
-  // goleiro acompanha a bola e defende
-  if(state.running){
-    const tgt=Math.max(GOAL.uMin+0.01,Math.min(GOAL.uMax-0.01,ball.u));
-    keeper.u += Math.sign(tgt-keeper.u)*Math.min(0.45*dt,Math.abs(tgt-keeper.u));
-    if(ball.v<0.12 && Math.abs(ball.u-keeper.u)<0.05 && ball.vv<0){
-      ball.vv=Math.abs(ball.vv)*0.7+0.4; ball.vu+=(ball.u-keeper.u)*4;  // rebate
-    }
-  }
 }
 
 let goalFlash=0;
@@ -390,28 +381,30 @@ function flashMsg(t){ msgEl.textContent=t; msgEl.style.opacity=1; setTimeout(()=
 function render(){
   ctx.clearRect(0,0,CW,CH);
   layoutStadium();
-  // suaviza o zoom em direção ao nível escolhido
-  cam.zoom += (cam.target - cam.zoom) * 0.15;
+  // transição suave Longe <-> Perto
+  cam.prog += ((cam.near?1:0) - cam.prog) * 0.15;
+  const t = cam.prog;
 
   // fundo (fora da imagem do estádio)
   ctx.fillStyle='#05080f'; ctx.fillRect(0,0,CW,CH);
 
   const inGame = (state.scene==='game' || state.scene==='end');
-  // Câmera: ao aproximar (Perto), amplia e CENTRALIZA o personagem na tela,
-  // para vê-lo perfeitamente. Em 'Longe' (zoom=1) volta ao enquadramento normal.
+  // Câmera-perseguição: no Perto centraliza o personagem e o mantém sempre do
+  // mesmo tamanho (zoom dinâmico). No Longe (t=0) volta ao enquadramento normal.
   ctx.save();
   if(inGame){
-    const p = uvToScreen(player.u, player.v);
-    const t = (cam.zoom-1)/(NEAR_ZOOM-1);            // 0=longe, 1=perto
-    const ax = p.x + (CW/2     - p.x)*t;             // âncora desliza p/ o centro
-    const ay = p.y + (CH*0.60  - p.y)*t;
-    ctx.translate(ax, ay);
-    ctx.scale(cam.zoom, cam.zoom);
-    ctx.translate(-p.x, -p.y);
-  } else {
-    ctx.translate(CW/2, CH*0.6);
-    ctx.scale(cam.zoom, cam.zoom);
-    ctx.translate(-CW/2, -CH*0.6);
+    const p = uvToScreen(player.u, player.v);     // pés do personagem (base)
+    const charH = depthScale(player.v);           // altura do sprite (base, zoom 1)
+    // zoom p/ o personagem ocupar CHAR_ON_SCREEN da altura da tela
+    const zNear = Math.max(1, Math.min(8, (CH*CHAR_ON_SCREEN)/charH));
+    const zoom  = lerp(1, zNear, t);
+    // ponto do MUNDO que vai p/ o centro: pés (Longe) → meio do corpo (Perto)
+    const wx = p.x, wy = p.y - charH*0.5*t;
+    // onde ele aparece na TELA: posição real (Longe) → centro da tela (Perto)
+    const sx = lerp(p.x, CW/2, t), sy = lerp(p.y, CH*0.5, t);
+    ctx.translate(sx, sy);
+    ctx.scale(zoom, zoom);
+    ctx.translate(-wx, -wy);
   }
 
   // estádio (foto) com suavização
@@ -421,7 +414,6 @@ function render(){
   if(inGame){
     // ordena por profundidade (v) p/ sobreposição correta
     const ents=[
-      {v:0.0,       d:drawKeeper},
       {v:ball.v,    d:drawBall},
       {v:player.v,  d:drawPlayer},
     ].sort((a,b)=>a.v-b.v);
@@ -459,18 +451,6 @@ function drawPlayer(){
   if(player.face<0) ctx.scale(-1,1);          // espelha p/ esquerda
   ctx.drawImage(sprite, col*sheet.FW,row*sheet.FH,sheet.FW,sheet.FH, -w/2,-h, w,h);
   ctx.restore();
-}
-
-function drawKeeper(){
-  const p=uvToScreen(keeper.u,0.05);
-  const h=depthScale(0.05), w=h*(SH.FW/SH.FH);
-  shadow(p.x,p.y,w*0.42);
-  // goleiro: usa o mesmo sprite, tom mais claro (filtro)
-  ctx.imageSmoothingEnabled=false;   // Filter Mode: Point/Nearest → sprite nítido
-  ctx.save(); ctx.translate(p.x,p.y);
-  ctx.globalAlpha=0.95;
-  ctx.drawImage(A.player, 0,0,SH.FW,SH.FH, -w/2,-h, w,h);
-  ctx.restore(); ctx.globalAlpha=1;
 }
 
 let spin=0;
