@@ -189,15 +189,16 @@ const RUN_SH = { FW:113, FH:156, cols:5, rows:4, frames:20 };
 
 // ---------- Pitch (trapézio em perspectiva, normalizado na imagem) ----------
 const PITCH = {
-  TL:{x:0.285,y:0.611}, TR:{x:0.715,y:0.611},
-  BR:{x:0.960,y:0.935}, BL:{x:0.040,y:0.935},
+  TL:{x:0.215,y:0.550}, TR:{x:0.785,y:0.550},
+  BR:{x:0.955,y:0.895}, BL:{x:0.045,y:0.895},
 };
 let img = {dx:0,dy:0,dw:0,dh:0};   // retângulo onde o estádio é desenhado (cover)
 function layoutStadium(){
-  // "cover": preenche a tela inteira, recortando o excedente (sem bordas pretas).
+  // "cover": preenche a tela inteira, sem bordas pretas. Alinhado pela BASE
+  // (mostra o campo e corta o topo da arquibancada quando sobra altura).
   const s = Math.max(CW/A.stadium.width, CH/A.stadium.height) || 1;
   img.dw = A.stadium.width*s; img.dh = A.stadium.height*s;
-  img.dx = (CW-img.dw)/2;     img.dy = (CH-img.dh)/2;
+  img.dx = (CW-img.dw)/2;     img.dy = CH-img.dh;
 }
 const lerp=(a,b,t)=>a+(b-a)*t;
 // (u,v) no campo: u=0 esquerda→1 direita; v=0 fundo(longe)→1 frente(perto)
@@ -217,9 +218,9 @@ const ball   = { u:0.5, v:0.60, vu:0, vv:0 };
 const keeper = { u:0.5 };
 const GOAL = { uMin:0.42, uMax:0.58 };   // boca do gol no fundo (v≈0)
 
-// Câmera: zoom=1 mostra o estádio inteiro (longe); NEAR_ZOOM aproxima do
-// personagem (perto). 'target' é o nível desejado; 'zoom' segue suave.
-const NEAR_ZOOM = 2.6;
+// Câmera: zoom=1 mostra o estádio inteiro (longe); NEAR_ZOOM aproxima bem do
+// personagem (perto), centralizando-o na tela. 'target' é o nível desejado.
+const NEAR_ZOOM = 3.8;
 const cam = { zoom:1, target:1, near:false };
 
 // Voltar para a seção Home do app (sai do jogo estático e volta para o React).
@@ -396,12 +397,22 @@ function render(){
   ctx.fillStyle='#05080f'; ctx.fillRect(0,0,CW,CH);
 
   const inGame = (state.scene==='game' || state.scene==='end');
-  // Câmera: amplia o mundo em torno do personagem (perto), mantendo-o no lugar.
-  const focus = inGame ? uvToScreen(player.u,player.v) : { x:CW/2, y:CH*0.6 };
+  // Câmera: ao aproximar (Perto), amplia e CENTRALIZA o personagem na tela,
+  // para vê-lo perfeitamente. Em 'Longe' (zoom=1) volta ao enquadramento normal.
   ctx.save();
-  ctx.translate(focus.x, focus.y);
-  ctx.scale(cam.zoom, cam.zoom);
-  ctx.translate(-focus.x, -focus.y);
+  if(inGame){
+    const p = uvToScreen(player.u, player.v);
+    const t = (cam.zoom-1)/(NEAR_ZOOM-1);            // 0=longe, 1=perto
+    const ax = p.x + (CW/2     - p.x)*t;             // âncora desliza p/ o centro
+    const ay = p.y + (CH*0.60  - p.y)*t;
+    ctx.translate(ax, ay);
+    ctx.scale(cam.zoom, cam.zoom);
+    ctx.translate(-p.x, -p.y);
+  } else {
+    ctx.translate(CW/2, CH*0.6);
+    ctx.scale(cam.zoom, cam.zoom);
+    ctx.translate(-CW/2, -CH*0.6);
+  }
 
   // estádio (foto) com suavização
   ctx.imageSmoothingEnabled=true;
