@@ -196,7 +196,7 @@ export default function Profile() {
         {/* --- IDENTITY LAYER --- */}
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-end gap-5 mb-4">
           {/* Avatar Clickable */}
-          <div className="relative inline-block">
+          <div className="relative w-fit shrink-0">
             <div 
               onClick={() => !readOnly && avatarInputRef.current?.click()}
               className={cn(
