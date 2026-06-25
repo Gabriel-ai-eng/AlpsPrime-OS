@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import CachedImage from '@/components/CachedImage';
 
 const Vivart = lazy(() => import('./Vivart'));
 const Sexta = lazy(() => import('./Sexta'));
@@ -156,8 +157,9 @@ export default function Home() {
                       />
                     )}
                     {slide.img && (
-                      <img
+                      <CachedImage
                         src={slide.img}
+                        cacheKey="fkw_slide"
                         alt="Free Kick World"
                         decoding="async"
                         className="w-full h-full object-cover select-none"
