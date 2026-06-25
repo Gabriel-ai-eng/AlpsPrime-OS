@@ -182,9 +182,9 @@ A.walk.src    = 'assets/player_walk.png';
 A.runner.src  = 'assets/player_run.png';
 A.stadium.onload = A.walk.onload = A.runner.onload = ()=> A.loaded++;
 
-// Sprite sheet de CAMINHADA: 5 colunas x 9 linhas = 42 quadros (perfil p/ direita)
-// Alta resolução (quadro 277x528) → personagem nítido; alpha original (cabelo intacto).
-const WALK_SH = { FW:277, FH:528, cols:5, rows:9, frames:42 };
+// Sprite sheet de CAMINHADA: 7 colunas x 6 linhas = 42 quadros (perfil p/ direita)
+// Grade larga p/ a textura ficar < 4096px (limite de GPU de celular) e não travar.
+const WALK_SH = { FW:277, FH:528, cols:7, rows:6, frames:42 };
 // Sprite sheet de CORRIDA: 5 colunas x 4 linhas = 20 quadros (perfil p/ direita)
 // Alta resolução (quadro 430x608) → personagem nítido e suave, sem serrilhado.
 const RUN_SH = { FW:430, FH:608, cols:5, rows:4, frames:20 };
@@ -338,8 +338,10 @@ function update(dt){
     // direção normalizada + intensidade (0..1) do quanto o joystick foi empurrado
     const dirx=m.x/(m.l||1), diry=m.y/(m.l||1);
     // Joystick perto da borda (intensidade alta) → CORRE; pouco empurrão → ANDA.
+    // Histerese: entra em corrida em 0.88 e só sai abaixo de 0.66, p/ NÃO ficar
+    // piscando a troca de sprite (andar↔correr) quando o joystick fica no limiar.
     const RUN_THR=0.82, WALK=0.40, RUN=0.82;
-    player.running = m.l>=RUN_THR;
+    if (m.l>=0.88) player.running=true; else if (m.l<=0.66) player.running=false;
     const speed = m.l<RUN_THR
       ? WALK*(m.l/RUN_THR)                                  // anda: devagar→normal
       : WALK + (RUN-WALK)*((m.l-RUN_THR)/(1-RUN_THR));      // corre: acelera no talo
