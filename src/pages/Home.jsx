@@ -19,8 +19,6 @@ const LoadingScreen = () => (
 const SLIDES = [
   { id: 'alps', bg: null, titulo: true },
   { id: 'branco', bg: '#FFFFFF', titulo: false, img: '/apps/fkw-bg.jpg' },
-  { id: 'vermelho', bg: '#FF5050', titulo: false },
-  { id: 'verde', bg: '#5CD65C', titulo: false },
 ];
 
 const TOTAL = SLIDES.length;
@@ -49,7 +47,7 @@ export default function Home() {
 
   const resetTimer = () => {
     clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => setPos(p => p + 1), 5000);
+    timerRef.current = setInterval(() => setPos(p => p + 1), 2000);
   };
 
   useEffect(() => {
