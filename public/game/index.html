@@ -423,11 +423,33 @@ function update(dt){
   player.z  += player.vz*dt;
   if(player.z<0){ player.z=0; player.vz=0; }
 
-  // dribble: empurra a bola quando encosta andando (não quando está no ar)
-  if(state.running){
-    const du=ball.u-player.u, dv=ball.v-player.v;
-    if(Math.hypot(du,dv*1.4)<0.07 && player.moving && player.z<6 && Math.hypot(ball.vu,ball.vv)<0.9){
-      ball.vu=m.x*0.85; ball.vv=m.y*0.80;
+  // DRIBLE por CONTATO REAL do pé com a bola.
+  // Modela a passada a partir da folha em uso (WALK_SH ao andar, RUN_SH ao correr):
+  // o pé da frente avança (reach) na direção em que o jogador olha e SOBE/DESCE
+  // (footLift) conforme o quadro. Como o pé erguido fica fisicamente mais alto que
+  // a bola (no chão), só há contato — e portanto arrasto — quando um pé BAIXO e
+  // ADIANTADO encosta nela. Nada de empurrar a bola de longe.
+  if(state.running && player.moving && player.z<6 && Math.hypot(ball.vu,ball.vv)<0.9){
+    const sheet = player.running ? RUN_SH : WALK_SH;          // folha de corrida/caminhada
+    const pf = uvToScreen(player.u, player.v);                // base = pés do jogador
+    const charH = depthScale(player.v);
+    const charW = charH * (sheet.FW / sheet.FH);
+    // fase do passo: 2 passadas (um pé de cada vez) por ciclo completo da folha
+    const phase = (player.anim / sheet.frames) * 4 * Math.PI;
+    const swing = Math.max(0, Math.sin(phase));              // avanço do pé da frente (0..1)
+    // pé da frente: parte da base e estica na passada, na direção em que o jogador olha
+    const footX = pf.x + player.face * (0.08 + (player.running ? 0.26 : 0.18) * swing) * charW;
+    // o pé SOBE conforme avança e DESCE ao plantar: quando está no ar (alto) não
+    // alcança a bola (que está no chão), então só há contato com o pé baixo.
+    const footLift = (player.running ? 0.14 : 0.10) * charH * swing;
+    const footY = pf.y - footLift;
+    const footR = charW * 0.30;                              // raio de contato dos pés
+    // bola na tela (mesma projeção/zoom do jogador)
+    const pb = uvToScreen(ball.u, ball.v);
+    const ballR = Math.max(3, depthScale(ball.v) * 0.085);
+    const dxp = pb.x - footX, dyp = (pb.y - ballR) - footY;
+    if(Math.hypot(dxp, dyp) < footR + ballR){
+      ball.vu = m.x * 0.85; ball.vv = m.y * 0.80;            // arrasta na direção do movimento
     }
   }
 
