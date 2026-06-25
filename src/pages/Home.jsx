@@ -146,11 +146,11 @@ export default function Home() {
                     }}
                   >
                     {slide.titulo && (
-                      <img
+                      <CachedImage
                         src="/apps/alps-os-bg.jpg"
+                        cacheKey="alps_slide"
                         alt="Alps OS"
                         decoding="async"
-                        fetchpriority="high"
                         className="w-full h-full object-cover select-none"
                       />
                     )}
