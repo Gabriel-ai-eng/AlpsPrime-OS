@@ -17,7 +17,7 @@ const LoadingScreen = () => (
 
 const SLIDES = [
   { id: 'alps', bg: null, titulo: true },
-  { id: 'branco', bg: '#FFFFFF', titulo: false },
+  { id: 'branco', bg: '#FFFFFF', titulo: false, img: '/apps/fkw-bg.jpg' },
   { id: 'vermelho', bg: '#FF5050', titulo: false },
   { id: 'verde', bg: '#5CD65C', titulo: false },
 ];
@@ -152,6 +152,14 @@ export default function Home() {
                         alt="Alps OS"
                         decoding="async"
                         fetchpriority="high"
+                        className="w-full h-full object-cover select-none"
+                      />
+                    )}
+                    {slide.img && (
+                      <img
+                        src={slide.img}
+                        alt="Free Kick World"
+                        decoding="async"
                         className="w-full h-full object-cover select-none"
                       />
                     )}
