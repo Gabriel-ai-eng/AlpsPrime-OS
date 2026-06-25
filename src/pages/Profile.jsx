@@ -220,7 +220,17 @@ export default function Profile() {
               </div>
             </div>
             {!readOnly && (
-              <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+              <>
+                {/* Badge de câmera sempre visível (descobrível no celular, sem hover) */}
+                <button
+                  onClick={() => avatarInputRef.current?.click()}
+                  className="absolute bottom-1 right-1 z-20 w-9 h-9 flex items-center justify-center rounded-full bg-card/90 backdrop-blur-md border border-border hover:border-gold/40 text-foreground/80 hover:text-foreground shadow-md transition-all active:scale-90"
+                  title="Alterar foto"
+                >
+                  {uploadingAvatar ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                </button>
+                <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+              </>
             )}
           </div>
 
@@ -265,38 +275,37 @@ export default function Profile() {
         </motion.div>
 
         {/* --- ACTION BUTTONS --- */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-3 w-full border-b border-border pb-5 mb-5">
-          
-          <div className="flex-1 w-full">
-            <ShareProfileButton profileEmail={user.email} displayName={primaryName} />
-          </div>
+        <motion.div variants={itemVariants} className="flex flex-row flex-wrap items-center gap-3 w-full border-b border-border pb-5 mb-5">
+
+          <ShareProfileButton profileEmail={user.email} displayName={primaryName} />
 
           {readOnly && authUser && (
             <Button
+              size="sm"
               onClick={() => {
                 const key = getConversationKey(authUser.email, user.email);
                 navigate(`/chat-dm?c=${encodeURIComponent(key)}`);
               }}
-              className="w-full sm:w-auto h-12 px-6 gap-2 bg-foreground hover:bg-foreground/90 text-background rounded-xl font-semibold text-[15px] transition-colors"
+              className="h-8 gap-1.5 bg-foreground hover:bg-foreground/90 text-background"
             >
-              <MessageCircle className="w-4 h-4" /> Mensagem
+              <MessageCircle className="w-3.5 h-3.5" /> Mensagem
             </Button>
           )}
 
           {!readOnly && (
             editing ? (
-              <div className="flex gap-3 w-full sm:w-auto">
-                <Button variant="outline" onClick={handleCancel} className="flex-1 sm:w-auto h-12 gap-2 border-border bg-muted text-foreground hover:bg-muted/70 rounded-xl font-medium">
-                  <X className="w-4 h-4" /> Cancelar
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm" onClick={handleCancel} className="h-8 gap-1.5 border-border bg-muted text-foreground hover:bg-muted/70">
+                  <X className="w-3.5 h-3.5" /> Cancelar
                 </Button>
-                <Button onClick={handleSave} disabled={saving} className="flex-1 sm:w-auto h-12 gap-2 bg-foreground hover:bg-foreground/90 text-background rounded-xl font-semibold">
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                <Button size="sm" onClick={handleSave} disabled={saving} className="h-8 gap-1.5 bg-foreground hover:bg-foreground/90 text-background">
+                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                   {saving ? 'Salvando...' : 'Salvar'}
                 </Button>
               </div>
             ) : (
-              <Button variant="outline" onClick={() => setEditing(true)} className="w-full sm:w-auto h-12 px-6 gap-2 border-border bg-muted hover:bg-muted/70 text-foreground rounded-xl font-semibold text-[15px] transition-colors">
-                <Edit3 className="w-4 h-4" /> Editar Perfil
+              <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="h-8 gap-1.5 border-border hover:border-gold/40 hover:text-gold">
+                <Edit3 className="w-3.5 h-3.5" /> Editar Perfil
               </Button>
             )
           )}
