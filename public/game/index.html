@@ -176,14 +176,15 @@ resize();
 const isPortrait = () => window.matchMedia('(orientation: portrait)').matches;
 
 // ---------- Assets ----------
-const A = { stadium:new Image(), player:new Image(), runner:new Image(), loaded:0, need:3 };
+const A = { stadium:new Image(), walk:new Image(), runner:new Image(), loaded:0, need:3 };
 A.stadium.src = 'assets/stadium.jpg';
-A.player.src  = 'assets/player.png';
+A.walk.src    = 'assets/player_walk.png';
 A.runner.src  = 'assets/player_run.png';
-A.stadium.onload = A.player.onload = A.runner.onload = ()=> A.loaded++;
+A.stadium.onload = A.walk.onload = A.runner.onload = ()=> A.loaded++;
 
-// Sprite sheet de CAMINHADA: 5 colunas x 12 linhas = 60 quadros (perfil p/ direita)
-const SH = { FW:62, FH:114, cols:5, rows:12, frames:60 };
+// Sprite sheet de CAMINHADA: 5 colunas x 5 linhas = 21 quadros (perfil p/ direita)
+// Alta resolução (quadro 318x608) → personagem nítido e suave, sem serrilhado.
+const WALK_SH = { FW:318, FH:608, cols:5, rows:5, frames:21 };
 // Sprite sheet de CORRIDA: 5 colunas x 4 linhas = 20 quadros (perfil p/ direita)
 // Alta resolução (quadro 430x608) → personagem nítido e suave, sem serrilhado.
 const RUN_SH = { FW:430, FH:608, cols:5, rows:4, frames:20 };
@@ -449,8 +450,10 @@ function shadow(x,y,w){ ctx.imageSmoothingEnabled=true; ctx.fillStyle='rgba(0,0,
 
 function drawPlayer(){
   const p=uvToScreen(player.u,player.v);
-  // Sempre o sprite de ALTA RESOLUÇÃO (mesmo andando ou correndo) → máxima qualidade.
-  const sheet = RUN_SH, sprite = A.runner;
+  // Andando usa o sheet de CAMINHADA; correndo usa o de CORRIDA (ambos alta resolução).
+  const run = player.running && player.moving;
+  const sheet = run ? RUN_SH : WALK_SH;
+  const sprite = run ? A.runner : A.walk;
   const h=depthScale(player.v), w=h*(sheet.FW/sheet.FH);
   shadow(p.x, p.y, w*0.42);
   // quadro de animação
