@@ -241,11 +241,22 @@ const GOAL = { uMin:0.42, uMax:0.58 };   // boca do gol no fundo (v≈0)
 const CHAR_ON_SCREEN = 0.50;   // altura alvo do personagem na tela (fração) no Perto
 const cam = { prog:0, near:false };
 
-// Voltar para a seção Home do app (sai do jogo estático e volta para o React).
-// Salva o estado antes de sair; navega no máximo após ~600ms (não trava se a rede demorar).
+// Botão Voltar:
+//  • dentro do jogo / fim / tabela  → volta para a TELA INICIAL (Jogar bola / Ver tabela);
+//  • já na tela inicial              → sai para a Home do Alps OS (salva antes de navegar).
+function goToTitle(){
+  state.running=false; clearInterval(timerId);
+  hud.classList.remove('on'); pad.classList.remove('on');
+  state.scene='title'; show('title');
+  saveNow();   // best-effort
+}
 document.getElementById('backBtn').onclick=()=>{
-  const go=()=>{ window.location.href='/home'; };
-  Promise.race([ saveNow(), new Promise(r=>setTimeout(r,600)) ]).finally(go);
+  if(state.scene==='title'){
+    const go=()=>{ window.location.href='/home'; };
+    Promise.race([ saveNow(), new Promise(r=>setTimeout(r,600)) ]).finally(go);
+  } else {
+    goToTitle();
+  }
 };
 
 // =========================================================================
@@ -259,6 +270,10 @@ document.getElementById('playAgain').onclick=()=>startMatch();
 // Tela de TABELA (placeholder por enquanto)
 document.getElementById('verTabela').onclick=()=>{ show('tabela'); state.scene='tabela'; };
 document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='title'; };
+
+// Tocar em QUALQUER lugar da tela inicial entra em tela cheia (preenche o celular
+// inteiro). Precisa ser num gesto do usuário — o toque/clique cumpre esse requisito.
+document.getElementById('scrTitle').addEventListener('pointerdown', goFullscreen);
 
 // Entra em tela cheia (e tenta travar em paisagem). Chamado a partir de um
 // gesto do usuário (clique em "Jogar bola"), que é o exigido pelos navegadores.
