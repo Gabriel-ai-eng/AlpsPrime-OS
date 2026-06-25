@@ -131,6 +131,7 @@
   <p class="sub">Entre em campo no estádio! Use o <b>joystick</b> para andar,
      dribla e chuta no gol. ⚽</p>
   <button class="btn" id="startGame">⚽ JOGAR BOLA</button>
+  <button class="btn alt" id="verTabela">📊 VER TABELA</button>
   <p class="sub" id="recorde" style="color:#fcd34d;min-height:1.2em;margin:0"></p>
   <small class="hint">No PC: WASD / setas para andar • ESPAÇO para chutar (ou use os controles na tela)</small>
 </div>
@@ -142,6 +143,14 @@
   <div class="row">
     <button class="btn" id="playAgain">JOGAR DE NOVO</button>
   </div>
+</div>
+
+<!-- TABELA (placeholder — conteúdo virá depois) -->
+<div id="scrTabela" class="screen hidden">
+  <h1 style="color:#7dd3fc">TABELA</h1>
+  <h2>Em breve 📊</h2>
+  <p class="sub">A classificação vai aparecer aqui em breve.</p>
+  <button class="btn ghost" id="tabelaBack">VOLTAR</button>
 </div>
 
 <!-- Config do Supabase (gerada pelo Vite a partir das env do app) + cliente supabase-js -->
@@ -242,11 +251,14 @@ document.getElementById('backBtn').onclick=()=>{
 // =========================================================================
 //  TELAS
 // =========================================================================
-const scr={title:document.getElementById('scrTitle'),end:document.getElementById('scrEnd')};
+const scr={title:document.getElementById('scrTitle'),end:document.getElementById('scrEnd'),tabela:document.getElementById('scrTabela')};
 const hud=document.getElementById('hud'), pad=document.getElementById('pad');
 function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden'); }
 document.getElementById('startGame').onclick=()=>startMatch();
 document.getElementById('playAgain').onclick=()=>startMatch();
+// Tela de TABELA (placeholder por enquanto)
+document.getElementById('verTabela').onclick=()=>{ show('tabela'); state.scene='tabela'; };
+document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='title'; };
 
 // Entra em tela cheia (e tenta travar em paisagem). Chamado a partir de um
 // gesto do usuário (clique em "Jogar bola"), que é o exigido pelos navegadores.
@@ -580,9 +592,8 @@ async function initPersistence(){
     gameUser = (data && data.user) ? data.user : null;
     if(!gameUser) return;                 // deslogado: joga sem salvar
     await loadBest();
-    const { data: row } = await sb.from('fkw_game_state')
-      .select('state').eq('user_id', gameUser.id).maybeSingle();
-    if(row && row.state) applySnapshot(row.state);
+    // Ao entrar, abre SEMPRE na tela inicial ("Jogar bola"). Os dados continuam
+    // sendo salvos no Supabase; o retomar-de-onde-parou fica para depois.
   }catch(_){ /* offline/sem sessão: segue sem persistência */ }
 }
 
