@@ -131,6 +131,7 @@
   <p class="sub">Entre em campo no estádio! Use o <b>joystick</b> para andar,
      dribla e chuta no gol. ⚽</p>
   <button class="btn" id="startGame">⚽ JOGAR BOLA</button>
+  <p class="sub" id="recorde" style="color:#fcd34d;min-height:1.2em;margin:0"></p>
   <small class="hint">No PC: WASD / setas para andar • ESPAÇO para chutar (ou use os controles na tela)</small>
 </div>
 
@@ -142,6 +143,10 @@
     <button class="btn" id="playAgain">JOGAR DE NOVO</button>
   </div>
 </div>
+
+<!-- Config do Supabase (gerada pelo Vite a partir das env do app) + cliente supabase-js -->
+<script src="supabase-config.js"></script>
+<script src="vendor/supabase.min.js"></script>
 
 <script>
 "use strict";
@@ -228,7 +233,11 @@ const CHAR_ON_SCREEN = 0.50;   // altura alvo do personagem na tela (fração) n
 const cam = { prog:0, near:false };
 
 // Voltar para a seção Home do app (sai do jogo estático e volta para o React).
-document.getElementById('backBtn').onclick=()=>{ window.location.href='/home'; };
+// Salva o estado antes de sair; navega no máximo após ~600ms (não trava se a rede demorar).
+document.getElementById('backBtn').onclick=()=>{
+  const go=()=>{ window.location.href='/home'; };
+  Promise.race([ saveNow(), new Promise(r=>setTimeout(r,600)) ]).finally(go);
+};
 
 // =========================================================================
 //  TELAS
@@ -256,6 +265,7 @@ function startMatch(){
   hud.classList.add('on'); pad.classList.add('on');
   document.getElementById('score').textContent='0'; document.getElementById('time').textContent='60';
   resetPositions(); startTimer();
+  scheduleSave();   // persiste a partida recém-iniciada
 }
 function resetPositions(){
   player.u=0.5; player.v=0.72; player.face=1; player.anim=0; player.running=false;
@@ -269,7 +279,11 @@ function startTimer(){ clearInterval(timerId); timerId=setInterval(()=>{
 function endMatch(){ state.running=false; clearInterval(timerId);
   hud.classList.remove('on'); pad.classList.remove('on');
   document.getElementById('endScore').textContent=`Você marcou ${state.score} gol${state.score===1?'':'s'}!`;
-  show('end'); state.scene='end'; }
+  show('end'); state.scene='end';
+  recordHistory(state.score);   // registra a partida no histórico
+  saveNow();                    // salva o estado 'end' (placar final) p/ retomar na tela de fim
+  loadBest();                   // atualiza o recorde mostrado no título
+}
 
 // =========================================================================
 //  INPUT — joystick (esquerda) + chute (direita) + teclado
@@ -390,6 +404,7 @@ let goalFlash=0;
 function scoreGoal(){
   state.score++; document.getElementById('score').textContent=state.score;
   flashMsg('GOOOOL!'); goalFlash=1; state.running=false;
+  scheduleSave();   // persiste o novo placar
   setTimeout(()=>{ if(state.scene==='game'){ resetPositions(); state.running=true; } },1000);
 }
 const msgEl=document.getElementById('msg');
@@ -486,6 +501,97 @@ function drawBall(){
   ctx.fillStyle='#1f2937';
   ctx.beginPath(); ctx.arc(p.x+Math.cos(spin)*r*0.4, p.y-r+Math.sin(spin)*r*0.4, r*0.32,0,Math.PI*2); ctx.fill();
 }
+
+// =========================================================================
+//  PERSISTÊNCIA (Supabase) — salva o jogo do usuário e retoma de onde parou
+// =========================================================================
+// Mesma origem do app React → o supabase-js restaura sozinho a sessão guardada
+// no localStorage. Sem login/sem config, o jogo segue funcionando sem salvar.
+let sb=null, gameUser=null, saveQueued=false;
+
+function snapshot(){
+  return {
+    scene: state.scene, score: state.score, time: state.time,
+    player: { u:player.u, v:player.v, face:player.face, anim:player.anim, running:player.running },
+    ball:   { u:ball.u, v:ball.v, vu:ball.vu, vv:ball.vv },
+    cam:    { near: cam.near },
+    savedAt: Date.now(),
+  };
+}
+
+function scheduleSave(){
+  if(!sb || !gameUser || saveQueued) return;
+  saveQueued=true;
+  setTimeout(()=>{ saveQueued=false; saveNow(); }, 800);   // debounce
+}
+
+async function saveNow(){
+  if(!sb || !gameUser) return;
+  try{
+    await sb.from('fkw_game_state').upsert({
+      user_id: gameUser.id, state: snapshot(), updated_at: new Date().toISOString(),
+    });
+  }catch(_){}
+}
+
+async function recordHistory(score){
+  if(!sb || !gameUser) return;
+  try{
+    await sb.from('fkw_match_history').insert({ user_id: gameUser.id, score: score, duration: 60 });
+  }catch(_){}
+}
+
+async function loadBest(){
+  if(!sb || !gameUser) return;
+  try{
+    const { data } = await sb.from('fkw_match_history')
+      .select('score').eq('user_id', gameUser.id).order('score',{ ascending:false }).limit(1);
+    const best = (data && data[0]) ? data[0].score : 0;
+    const el = document.getElementById('recorde');
+    if(el) el.textContent = best>0 ? `🏆 Seu recorde: ${best} gol${best===1?'':'s'}` : '';
+  }catch(_){}
+}
+
+function applySnapshot(s){
+  if(!s || state.scene!=='title') return;   // não sobrescreve se o usuário já começou
+  if(s.player) Object.assign(player, s.player);
+  if(s.ball)   Object.assign(ball, s.ball);
+  if(s.cam){ cam.near=!!s.cam.near; updateCamBtn(); }
+  if(s.scene==='game'){
+    state.scene='game'; state.score=s.score||0;
+    state.time=(typeof s.time==='number'?s.time:60); state.running=true;
+    document.getElementById('score').textContent=state.score;
+    document.getElementById('time').textContent=state.time;
+    show(null); hud.classList.add('on'); pad.classList.add('on');
+    startTimer();
+  } else if(s.scene==='end'){
+    state.scene='end'; state.score=s.score||0;
+    document.getElementById('endScore').textContent=`Você marcou ${state.score} gol${state.score===1?'':'s'}!`;
+    show('end');
+  }
+}
+
+async function initPersistence(){
+  try{
+    const C = window.__ALPS_SB__;
+    if(!C || !C.url || !C.anonKey || !window.supabase) return;
+    sb = window.supabase.createClient(C.url, C.anonKey);
+    const { data } = await sb.auth.getUser();
+    gameUser = (data && data.user) ? data.user : null;
+    if(!gameUser) return;                 // deslogado: joga sem salvar
+    await loadBest();
+    const { data: row } = await sb.from('fkw_game_state')
+      .select('state').eq('user_id', gameUser.id).maybeSingle();
+    if(row && row.state) applySnapshot(row.state);
+  }catch(_){ /* offline/sem sessão: segue sem persistência */ }
+}
+
+// Autosave periódico durante a partida + salvar ao ocultar/sair a aba.
+setInterval(()=>{ if(state.scene==='game' && state.running) scheduleSave(); }, 5000);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') saveNow(); });
+window.addEventListener('pagehide', ()=>{ saveNow(); });
+
+initPersistence();
 
 // =========================================================================
 //  LOOP
