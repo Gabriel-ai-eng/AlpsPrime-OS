@@ -182,9 +182,9 @@ A.walk.src    = 'assets/player_walk.png';
 A.runner.src  = 'assets/player_run.png';
 A.stadium.onload = A.walk.onload = A.runner.onload = ()=> A.loaded++;
 
-// Sprite sheet de CAMINHADA: 5 colunas x 5 linhas = 21 quadros (perfil p/ direita)
-// Alta resolução (quadro 318x608) → personagem nítido e suave, sem serrilhado.
-const WALK_SH = { FW:318, FH:608, cols:5, rows:5, frames:21 };
+// Sprite sheet de CAMINHADA: 5 colunas x 9 linhas = 42 quadros (perfil p/ direita)
+// Alta resolução (quadro 277x528) → personagem nítido; alpha original (cabelo intacto).
+const WALK_SH = { FW:277, FH:528, cols:5, rows:9, frames:42 };
 // Sprite sheet de CORRIDA: 5 colunas x 4 linhas = 20 quadros (perfil p/ direita)
 // Alta resolução (quadro 430x608) → personagem nítido e suave, sem serrilhado.
 const RUN_SH = { FW:430, FH:608, cols:5, rows:4, frames:20 };
@@ -349,8 +349,8 @@ function update(dt){
     player.v += dv;
     if(dirx> 0.05) player.face= 1; else if(dirx<-0.05) player.face=-1;
     // cadência da animação proporcional à distância percorrida (pernas não "deslizam").
-    // Mesmo ciclo (20 quadros): correndo tem passada mais longa → multiplicador menor.
-    player.anim += Math.hypot(du, dv) * (player.running ? 130 : 220);
+    // Caminhada tem 42 quadros → cadência mais baixa = passos suaves e naturais.
+    player.anim += Math.hypot(du, dv) * (player.running ? 130 : 120);
   } else {
     player.running = false;
   }
