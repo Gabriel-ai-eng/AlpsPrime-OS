@@ -202,11 +202,12 @@ resize();
 const isPortrait = () => window.matchMedia('(orientation: portrait)').matches;
 
 // ---------- Assets ----------
-const A = { stadium:new Image(), walk:new Image(), runner:new Image(), loaded:0, need:3 };
+const A = { stadium:new Image(), walk:new Image(), runner:new Image(), kick:new Image(), loaded:0, need:4 };
 A.stadium.src = 'assets/stadium.jpg';
 A.walk.src    = 'assets/player_walk.png';
 A.runner.src  = 'assets/player_run.png';
-A.stadium.onload = A.walk.onload = A.runner.onload = ()=> A.loaded++;
+A.kick.src    = 'assets/player_kick.png';
+A.stadium.onload = A.walk.onload = A.runner.onload = A.kick.onload = ()=> A.loaded++;
 
 // Sprite sheet de CAMINHADA: folha ORIGINAL, exatamente como desenhada.
 // 5 colunas x 9 linhas = 42 quadros (perfil p/ direita). Lidos da esquerda p/ a
@@ -215,6 +216,12 @@ const WALK_SH = { FW:340, FH:664, cols:9, rows:5, frames:43 };
 // Sprite sheet de CORRIDA: 5 colunas x 4 linhas = 20 quadros (perfil p/ direita)
 // Alta resolução (quadro 430x608) → personagem nítido e suave, sem serrilhado.
 const RUN_SH = { FW:430, FH:608, cols:5, rows:4, frames:20 };
+// Sprite sheet de CHUTE PARADO: 12 colunas x 15 linhas = 180 quadros (perfil p/
+// direita), alinhados pelo tronco (estavel) com os pes na base.
+const KICK_SH = { FW:273, FH:273, cols:12, rows:15, frames:180 };
+const KICK_FPS = 140;        // velocidade de reproducao da animacao de chute
+const KICK_CONTACT = 121;    // quadro em que o pe encosta na bola (lanca a bola)
+const KICK_FOOT_DX = 0.406;  // posicao do pe no contato: fracao da largura do sprite a frente do centro
 
 // ---------- Pitch (trapézio em perspectiva, normalizado na imagem) ----------
 const PITCH = {
@@ -242,11 +249,15 @@ function depthScale(v){ return lerp(0.035, 0.135, v) * img.dh; } // altura do sp
 
 // ---------- Estado ----------
 const state = { scene:'title', score:0, time:60, running:false };
-const player = { u:0.5, v:0.72, face:1, anim:0, moving:false, running:false, z:0, vz:0 };  // z: altura do pulo (px) / face: 1 dir / -1 esq
+const player = { u:0.5, v:0.72, face:1, anim:0, moving:false, running:false, z:0, vz:0, kicking:false, kickT:0 };  // z: altura do pulo (px) / face: 1 dir / -1 esq / kicking: tocando a animacao de chute parado
 const ball   = { u:0.5, v:0.60, vu:0, vv:0 };
 const GOAL = { uMin:0.42, uMax:0.58 };   // boca do gol no fundo (v≈0)
 const GOAL_NET = 0.06;                    // profundidade da trave (atrás da linha de fundo)
 let goalScored = false;                   // evita contar o mesmo gol várias vezes
+// Estado do chute parado: direcao do lancamento, se a bola sera chutada e se ja foi lancada.
+let kickDir = { x:0, y:-1 };
+let kickBall = false;
+let kickFired = false;
 
 // Câmera: 'near' liga o modo Perto; 'prog' (0..1) é a transição suave entre
 // Longe (estádio inteiro) e Perto (segue o personagem, centralizado).
@@ -310,6 +321,7 @@ function startMatch(){
 }
 function resetPositions(){
   player.u=0.5; player.v=0.72; player.face=1; player.anim=0; player.running=false; player.z=0; player.vz=0;
+  player.kicking=false; player.kickT=0; kickFired=false; kickBall=false;
   ball.u=0.5; ball.v=0.58; ball.vu=0; ball.vv=0;
   goalScored=false;   // libera a contagem do próximo gol
 }
@@ -386,18 +398,61 @@ function jump(){
 }
 function kick(){
   if(state.scene!=='game'||!state.running) return;
+  if(player.kicking) return;                         // já está no meio de um chute
+  const m=moveVec();
+  let ax=m.x, ay=m.y;
+  if(Math.hypot(ax,ay)<0.2){ ax=0; ay=-1; }          // sem direção: chuta pro gol (fundo)
+  else { const n=Math.hypot(ax,ay); ax/=n; ay/=n; }
+
+  // PARADO: toca a animação de chute parado e gruda a bola no ponto do pé.
+  if(!player.moving){
+    player.kicking=true; player.kickT=0; kickFired=false;
+    kickDir={ x:ax, y:ay };
+    if(ax>0.05) player.face=1; else if(ax<-0.05) player.face=-1;
+    // Se a bola está por perto, posiciona-a exatamente onde o pé encosta no contato
+    // (à frente do jogador, no chão). Ela espera ali até o quadro de contato.
+    const du=ball.u-player.u, dv=ball.v-player.v;
+    kickBall = (Math.hypot(du, dv*1.4) < 0.20);
+    if(kickBall){
+      const w = depthScale(player.v)*(KICK_SH.FW/KICK_SH.FH);
+      const fieldW = Math.abs(uvToScreen(1,player.v).x - uvToScreen(0,player.v).x) || 1;
+      ball.u = player.u + player.face*KICK_FOOT_DX*w/fieldW;
+      ball.v = player.v;
+      ball.vu = 0; ball.vv = 0;
+    }
+    return;
+  }
+
+  // EM MOVIMENTO: chute instantâneo atual (a folha de chute andando/correndo virá depois).
   const du=ball.u-player.u, dv=ball.v-player.v;
   if(Math.hypot(du,dv*1.4) < 0.085){
-    const m=moveVec();
-    let ax=m.x, ay=m.y;
-    if(Math.hypot(ax,ay)<0.2){ ax=0; ay=-1; }       // sem direção: chuta pro gol (fundo)
-    else { const n=Math.hypot(ax,ay); ax/=n; ay/=n; }
     ball.vu = ax*1.35; ball.vv = ay*1.35;
   }
 }
 
 function update(dt){
   if(state.scene!=='game' || isPortrait()) return;
+
+  // ANIMAÇÃO DE CHUTE PARADO: roda a folha de chute; no quadro de contato a bola
+  // (se estiver por perto) é lançada e sai rolando pelo campo. Movimento fica travado.
+  if(player.kicking){
+    player.moving=false; player.running=false;
+    const prevT=player.kickT;
+    player.kickT += dt*KICK_FPS;
+    // contato: o pé encosta na bola e a lança na direção escolhida
+    if(!kickFired && prevT < KICK_CONTACT && player.kickT >= KICK_CONTACT){
+      if(kickBall){ ball.vu=kickDir.x*1.35; ball.vv=kickDir.y*1.35; }
+      kickFired=true;
+    }
+    // antes do contato, a bola fica parada grudada no ponto do pé
+    if(kickBall && !kickFired){ ball.vu=0; ball.vv=0; }
+    // gravidade (caso esteja no ar) e fim da animação
+    player.vz -= GRAV*dt; player.z += player.vz*dt; if(player.z<0){ player.z=0; player.vz=0; }
+    if(player.kickT >= KICK_SH.frames){ player.kicking=false; }
+    ballPhysics(dt);
+    return;
+  }
+
   const m=moveVec();
   player.moving = m.l>0.12;
   if(player.moving){
@@ -466,7 +521,12 @@ function update(dt){
     }
   }
 
-  // física da bola
+  ballPhysics(dt);
+}
+
+// Física da bola (integração + atrito + paredes + linha de fundo/gol). Numa função
+// própria para rodar tanto no fluxo normal quanto durante a animação de chute.
+function ballPhysics(dt){
   ball.u+=ball.vu*dt; ball.v+=ball.vv*dt;
   const fr=Math.pow(0.20,dt); ball.vu*=fr; ball.vv*=fr;
   if(Math.abs(ball.vu)<0.01) ball.vu=0; if(Math.abs(ball.vv)<0.01) ball.vv=0;
@@ -554,10 +614,11 @@ function shadow(x,y,w){ ctx.imageSmoothingEnabled=true; ctx.fillStyle='rgba(0,0,
 
 function drawPlayer(){
   const p=uvToScreen(player.u,player.v);
-  // Andando usa o sheet de CAMINHADA; correndo usa o de CORRIDA (ambos alta resolução).
-  const run = player.running && player.moving;
-  const sheet = run ? RUN_SH : WALK_SH;
-  const sprite = run ? A.runner : A.walk;
+  // Chutando parado usa a folha de CHUTE; andando a de CAMINHADA; correndo a de CORRIDA.
+  const kicking = player.kicking;
+  const run = !kicking && player.running && player.moving;
+  const sheet = kicking ? KICK_SH : (run ? RUN_SH : WALK_SH);
+  const sprite = kicking ? A.kick : (run ? A.runner : A.walk);
   const h=depthScale(player.v), w=h*(sheet.FW/sheet.FH);
   // sombra fica menor quanto mais alto está o pulo
   const sj=1/(1+player.z/Math.max(20,h*0.6));
@@ -567,7 +628,9 @@ function drawPlayer(){
   // jogador não anda. Andando, pulamos esse quadro (0) e também o penúltimo
   // (41), que é idêntico ao último (42), e ciclamos pelos demais.
   let f;
-  if(!player.moving){
+  if(kicking){
+    f = Math.min(sheet.frames-1, Math.max(0, Math.floor(player.kickT)));
+  } else if(!player.moving){
     f = 0;
   } else if(sheet === WALK_SH){
     const last = sheet.frames - 1;            // 42 (último quadro)
