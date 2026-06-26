@@ -16,6 +16,16 @@
     align-items:center; justify-content:center; gap:18px; padding:24px;
     background:rgba(5,8,15,.86); text-align:center; z-index:20; }
   .hidden { display:none !important; }
+
+  /* ---------- Tela de TÍTULO: imagem cheia (arte do FKW) + hotspots ---------- */
+  #scrTitle { padding:0; gap:0; background:#05080f; }
+  #titleWrap { position:relative; line-height:0; }
+  #titleImg { display:block; max-width:100vw; max-height:100vh; width:auto; height:auto; }
+  /* Áreas clicáveis transparentes sobre os botões desenhados na arte */
+  .hotspot { position:absolute; background:transparent; border:none; padding:0; margin:0;
+    cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  #startGame  { left:5%;    top:42.5%; width:22.5%; height:10%; }
+  #startQuick { left:75.5%; top:71%;   width:19%;   height:16%; }
   h1 { font-size:clamp(30px,7vw,66px); letter-spacing:3px; color:#7dd3fc;
     text-shadow:3px 3px 0 #0a3d62, 6px 6px 0 rgba(0,0,0,.5); }
   h2 { font-size:clamp(18px,4vw,30px); color:#fcd34d; letter-spacing:2px; }
@@ -129,15 +139,13 @@
   <div id="kick" class="actbtn">CHUTAR</div>
 </div>
 
-<!-- TÍTULO -->
+<!-- TÍTULO (arte cheia do FKW + hotspots sobre JOGAR / INICIAR) -->
 <div id="scrTitle" class="screen">
-  <h1>FREE KICK WORLD</h1>
-  <p class="sub">Entre em campo no estádio! Use o <b>joystick</b> para andar,
-     dribla e chuta no gol. ⚽</p>
-  <button class="btn" id="startGame">⚽ JOGAR BOLA</button>
-  <button class="btn alt" id="verTabela">📊 VER TABELA</button>
-  <p class="sub" id="recorde" style="color:#fcd34d;min-height:1.2em;margin:0"></p>
-  <small class="hint">No PC: WASD / setas para andar • ESPAÇO para chutar (ou use os controles na tela)</small>
+  <div id="titleWrap">
+    <img id="titleImg" src="assets/fkw-title.jpg" alt="Free Kick World" decoding="async" fetchpriority="high" />
+    <button class="hotspot" id="startGame" aria-label="Jogar"></button>
+    <button class="hotspot" id="startQuick" aria-label="Iniciar partida rápida"></button>
+  </div>
 </div>
 
 <!-- FIM -->
@@ -270,9 +278,9 @@ const scr={title:document.getElementById('scrTitle'),end:document.getElementById
 const hud=document.getElementById('hud'), pad=document.getElementById('pad');
 function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden'); }
 document.getElementById('startGame').onclick=()=>startMatch();
+document.getElementById('startQuick').onclick=()=>startMatch();   // botão "INICIAR / partida rápida" da arte
 document.getElementById('playAgain').onclick=()=>startMatch();
 // Tela de TABELA (placeholder por enquanto)
-document.getElementById('verTabela').onclick=()=>{ show('tabela'); state.scene='tabela'; };
 document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='title'; };
 
 // Tocar em QUALQUER lugar da tela inicial entra em tela cheia (preenche o celular
