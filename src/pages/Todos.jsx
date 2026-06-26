@@ -8,6 +8,9 @@ const APPS = [
   { id: 'vivart', nome: 'Vivart', desc: 'Estúdio de criação e galeria visual.', icon: Palette, corIcone: 'text-purple-400', bgIcone: 'bg-purple-500/10' },
 ];
 
+// Apps indisponíveis: aparecem na lista, mas clicar neles NÃO faz nada.
+const BLOQUEADOS = new Set(['sexta', 'vivart']);
+
 export default function Todos() {
   const navigate = useNavigate();
 
@@ -31,8 +34,8 @@ export default function Todos() {
           return (
             <div
               key={app.id}
-              onClick={() => navigate('/home')} // Por enquanto, volta pra Home
-              className="flex items-center gap-4 p-4 rounded-3xl bg-card border border-border shadow-sm active:scale-[0.98] transition-all cursor-pointer"
+              onClick={() => { if (BLOQUEADOS.has(app.id)) return; navigate('/home'); }} // bloqueados não fazem nada
+              className={`flex items-center gap-4 p-4 rounded-3xl bg-card border border-border shadow-sm transition-all ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
             >
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${app.bgIcone}`}>
                 <Icon className={`w-7 h-7 ${app.corIcone}`} />

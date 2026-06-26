@@ -39,8 +39,11 @@ export default function Home() {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.state?.openApp) {
-      setTelaAtual(location.state.openApp);
+    const app = location.state?.openApp;
+    // Sexta-feira e Vivart estão indisponíveis: nunca abrir, mesmo que algum
+    // fluxo tente navegar com esse openApp.
+    if (app && app !== 'sexta' && app !== 'vivart') {
+      setTelaAtual(app);
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);

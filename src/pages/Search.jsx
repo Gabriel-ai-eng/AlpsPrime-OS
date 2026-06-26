@@ -26,6 +26,10 @@ const SUB_APPS = [
   }
 ];
 
+// Apps indisponíveis: continuam aparecendo na lista, mas clicar neles NÃO faz
+// nada (o usuário não consegue acessar Sexta-feira nem Vivart).
+const BLOQUEADOS = new Set(['sexta', 'vivart']);
+
 // minúsculas + sem acentos, para a busca casar "Projeto" com "projeto" etc.
 const normalize = (s) =>
   s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -101,9 +105,10 @@ export default function Search() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-                  // Envia o id do aplicativo no estado da navegação
-                  onClick={() => navigate('/home', { state: { openApp: app.id } })}
-                  className="w-full rounded-[32px] overflow-hidden relative aspect-[4/3] group cursor-pointer active:scale-95 transition-all outline-none"
+                  // Envia o id do aplicativo no estado da navegação.
+                  // Sexta-feira e Vivart estão bloqueados: clicar não faz nada.
+                  onClick={() => { if (BLOQUEADOS.has(app.id)) return; navigate('/home', { state: { openApp: app.id } }); }}
+                  className={`w-full rounded-[32px] overflow-hidden relative aspect-[4/3] group transition-all outline-none ${BLOQUEADOS.has(app.id) ? '' : 'cursor-pointer active:scale-95'}`}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <img

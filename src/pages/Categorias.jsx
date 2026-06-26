@@ -19,6 +19,9 @@ const APPS = [
   { id: 'vivart', nome: 'Vivart', desc: 'Estúdio de criação e galeria visual.', cat: 'design', logo: '/apps/vivart-logo.webp', status: 'soon' },
 ];
 
+// Apps indisponíveis: aparecem na lista, mas clicar neles NÃO faz nada.
+const BLOQUEADOS = new Set(['sexta', 'vivart']);
+
 export default function Categorias() {
   const navigate = useNavigate();
   const [filtro, setFiltro] = useState('todos');
@@ -63,8 +66,8 @@ export default function Categorias() {
           return (
             <div
               key={app.id}
-              onClick={() => navigate('/home')}
-              className="flex items-center gap-4 p-4 rounded-3xl bg-card border border-border active:scale-[0.98] transition-all cursor-pointer"
+              onClick={() => { if (BLOQUEADOS.has(app.id)) return; navigate('/home'); }}
+              className={`flex items-center gap-4 p-4 rounded-3xl bg-card border border-border transition-all ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
             >
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white overflow-hidden">
                 <img src={app.logo} alt={app.nome} className="w-full h-full object-contain" decoding="async" fetchpriority="high" />
