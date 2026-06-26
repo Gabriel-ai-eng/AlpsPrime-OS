@@ -548,12 +548,16 @@ function drawPlayer(){
   shadow(p.x, p.y, w*0.42*sj);
   // quadro de animação
   // O 1º quadro da folha de caminhada é a pose PARADO: usado só quando o
-  // jogador não anda. Andando, pulamos esse quadro e ciclamos pelos demais.
+  // jogador não anda. Andando, pulamos esse quadro (0) e também o penúltimo
+  // (41), que é idêntico ao último (42), e ciclamos pelos demais.
   let f;
   if(!player.moving){
     f = 0;
   } else if(sheet === WALK_SH){
-    f = 1 + (Math.floor(player.anim) % (sheet.frames - 1));
+    const last = sheet.frames - 1;            // 42 (último quadro)
+    const n = sheet.frames - 2;               // 41 quadros úteis (sem o 0 e o 41)
+    const idx = Math.floor(player.anim) % n;  // 0..40
+    f = idx < n - 1 ? idx + 1 : last;         // 1..40 e depois 42 (pula o 41)
   } else {
     f = Math.floor(player.anim) % sheet.frames;
   }
