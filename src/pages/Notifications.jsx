@@ -4,11 +4,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Heart, MessageCircle, UserPlus, Mail, User, CheckCheck, Sparkles, ArrowLeft, Megaphone, AppWindow } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { ptBR, enUS } from 'date-fns/locale';
 import { base44 } from '@/api/base44Client';
 import { cn, parseServerDate } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
 import { useUsersDirectory } from '@/lib/useUsersDirectory';
+import { useLang } from '@/lib/i18n';
 
 const ICON_BY_TYPE = {
   like: Heart,
@@ -49,6 +50,8 @@ export default function Notifications() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { getAvatar } = useUsersDirectory();
+  const { t, lang } = useLang();
+  const dateLocale = lang === 'en' ? enUS : ptBR;
 
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['notifications', user?.email],
@@ -122,7 +125,7 @@ export default function Notifications() {
         </button>
 
         <h1 className="text-[20px] font-semibold tracking-tight text-foreground select-none absolute left-1/2 -translate-x-1/2">
-          Notificações
+          {t('Notificações')}
         </h1>
 
         {/* Botão Marcar como Lido */}
@@ -131,7 +134,7 @@ export default function Notifications() {
             onClick={markAllRead}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/70 active:scale-95 border border-border text-[12px] font-medium text-gold transition-all"
           >
-            <CheckCheck className="w-3.5 h-3.5" /> Lido
+            <CheckCheck className="w-3.5 h-3.5" /> {t('Lido')}
           </button>
         ) : (
           <div className="w-16" /* Espaçador para manter o título centralizado */ />
@@ -158,8 +161,8 @@ export default function Notifications() {
             <div className="w-20 h-20 rounded-full bg-muted border border-border flex items-center justify-center mb-5">
               <Bell className="w-8 h-8 text-muted-foreground/50" />
             </div>
-            <h2 className="text-[20px] font-semibold text-foreground mb-2 tracking-tight">Tudo em silêncio</h2>
-            <p className="text-[14px] text-muted-foreground">Você ainda não tem novas notificações.</p>
+            <h2 className="text-[20px] font-semibold text-foreground mb-2 tracking-tight">{t('Tudo em silêncio')}</h2>
+            <p className="text-[14px] text-muted-foreground">{t('Você ainda não tem novas notificações.')}</p>
           </motion.div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -214,7 +217,7 @@ export default function Notifications() {
                     <div className="flex-1 min-w-0">
                       <p className="text-[14px] leading-snug text-muted-foreground">
                         <span className="font-semibold text-foreground tracking-tight">{n.actor_name}</span>{' '}
-                        {buildMessage(n)}
+                        {t(buildMessage(n))}
                       </p>
                       {preview && (
                         <p className="text-[13px] text-muted-foreground truncate mt-1 italic font-light">
@@ -222,7 +225,7 @@ export default function Notifications() {
                         </p>
                       )}
                       <p className="text-[10px] text-muted-foreground mt-2 font-medium uppercase tracking-[0.05em]">
-                        {formatDistanceToNow(parseServerDate(n.created_date), { addSuffix: true, locale: ptBR })}
+                        {formatDistanceToNow(parseServerDate(n.created_date), { addSuffix: true, locale: dateLocale })}
                       </p>
                     </div>
 

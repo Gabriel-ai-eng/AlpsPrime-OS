@@ -8,6 +8,7 @@ import {
   Settings, HelpCircle, Home, LayoutList, Star, Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n';
 import { useAIUnlock } from '@/lib/useAIUnlock';
 import { usePushNotifications } from '@/lib/usePushNotifications';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -50,6 +51,7 @@ function AtmosphericOrbs() {
 
 /* ── Sidebar (Desktop) ── */
 function Sidebar({ user, location, aiUnlocked, onNavigate, onAILocked }) {
+  const t = useT();
   return (
     <div className="flex flex-col h-full bg-background border-r border-border relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -65,25 +67,25 @@ function Sidebar({ user, location, aiUnlocked, onNavigate, onAILocked }) {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold truncate text-foreground group-hover:text-gold transition-colors">{user?.username || user?.full_name || 'Usuário'}</p>
-            <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider mt-0.5">Ver Perfil</p>
+            <p className="text-xs font-semibold truncate text-foreground group-hover:text-gold transition-colors">{user?.username || user?.full_name || t('Usuário')}</p>
+            <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider mt-0.5">{t('Ver Perfil')}</p>
           </div>
         </Link>
         <Link to="/favoritos" onClick={onNavigate} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <Star className="w-4 h-4" />
-          <span>Favoritos</span>
+          <span>{t('Favoritos')}</span>
         </Link>
         <Link to="/settings" onClick={onNavigate} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <Settings className="w-4 h-4" />
-          <span>Configurações</span>
+          <span>{t('Configurações')}</span>
         </Link>
         <Link to="/suporte" onClick={onNavigate} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <HelpCircle className="w-4 h-4" />
-          <span>Suporte</span>
+          <span>{t('Suporte')}</span>
         </Link>
         <button onClick={() => signOut()} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
           <LogOut className="w-4 h-4" />
-          <span>Sair</span>
+          <span>{t('Sair')}</span>
         </button>
       </div>
     </div>
@@ -92,6 +94,7 @@ function Sidebar({ user, location, aiUnlocked, onNavigate, onAILocked }) {
 
 /* ── AppShell ── */
 export default function AppShell() {
+  const t = useT();
   const { user } = useAuth();
   const location = useLocation();
   // Na tela de Suporte escondemos o cabeçalho e a barra inferior (a própria
@@ -183,7 +186,7 @@ export default function AppShell() {
 
             <button
               onClick={() => setMobileOpen(false)}
-              aria-label="Fechar"
+              aria-label={t('Fechar')}
               className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-90 outline-none bg-muted border border-border"
             >
               <X className="w-4 h-4 text-muted-foreground" />
@@ -195,25 +198,25 @@ export default function AppShell() {
                   <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
                     <Home className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-foreground">Home</span>
+                  <span className="text-[15px] font-medium text-foreground">{t('Home')}</span>
                 </Link>
                 <Link to="/categorias" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-muted transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                     <LayoutList className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-foreground">Categorias</span>
+                  <span className="text-[15px] font-medium text-foreground">{t('Categorias')}</span>
                 </Link>
                 <Link to="/favoritos" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-muted transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-xl bg-yellow-500/20 flex items-center justify-center text-yellow-400 group-hover:scale-110 transition-transform">
                     <Star className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-foreground">Favoritos</span>
+                  <span className="text-[15px] font-medium text-foreground">{t('Favoritos')}</span>
                 </Link>
                 <button onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-muted transition-colors group outline-none cursor-not-allowed opacity-50">
                   <div className="w-8 h-8 rounded-xl bg-gold/20 flex items-center justify-center text-gold group-hover:scale-110 transition-transform">
                     <Sparkles className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-foreground">Em breve</span>
+                  <span className="text-[15px] font-medium text-foreground">{t('Em breve')}</span>
                 </button>
               </div>
 
@@ -224,19 +227,19 @@ export default function AppShell() {
                   <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground border border-border group-hover:text-foreground transition-colors">
                     <Settings className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-foreground/80 group-hover:text-foreground transition-colors">Configurações</span>
+                  <span className="text-[15px] font-medium text-foreground/80 group-hover:text-foreground transition-colors">{t('Configurações')}</span>
                 </Link>
                 <Link to="/suporte" onClick={() => setMobileOpen(false)} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-muted transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground border border-border group-hover:text-foreground transition-colors">
                     <HelpCircle className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-foreground/80 group-hover:text-foreground transition-colors">Suporte</span>
+                  <span className="text-[15px] font-medium text-foreground/80 group-hover:text-foreground transition-colors">{t('Suporte')}</span>
                 </Link>
                 <button onClick={() => { setMobileOpen(false); signOut(window.location.origin); }} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-500/10 transition-colors group outline-none">
                   <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground border border-border group-hover:text-red-500 group-hover:border-red-400/20 transition-colors">
                     <LogOut className="w-4 h-4" />
                   </div>
-                  <span className="text-[15px] font-medium text-foreground/80 group-hover:text-red-500 transition-colors">Sair</span>
+                  <span className="text-[15px] font-medium text-foreground/80 group-hover:text-red-500 transition-colors">{t('Sair')}</span>
                 </button>
               </div>
             </div>
@@ -251,7 +254,7 @@ export default function AppShell() {
             <Link
               to="/settings"
               className="p-3 -ml-2 min-w-[48px] min-h-[48px] hover:bg-muted rounded-xl transition-colors outline-none inline-flex items-center justify-center"
-              aria-label="Configurações"
+              aria-label={t('Configurações')}
               style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
             >
               <Menu className="w-5 h-5 text-foreground" strokeWidth={2.6} />
@@ -265,7 +268,7 @@ export default function AppShell() {
           </span>
 
           <div className="flex items-center gap-1">
-            <Link to="/search" className="p-2 rounded-full hover:bg-muted transition-colors outline-none" aria-label="Buscar">
+            <Link to="/search" className="p-2 rounded-full hover:bg-muted transition-colors outline-none" aria-label={t('Buscar')}>
               <SearchIcon className="w-5 h-5 text-foreground hover:text-foreground" strokeWidth={2.6} />
             </Link>
 

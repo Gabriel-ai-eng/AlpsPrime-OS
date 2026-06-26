@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Trash2, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n';
 
 export default function Favoritos() {
   const navigate = useNavigate();
+  const t = useT();
 
   // Lista de favoritos. (Começa vazia)
   const [favorites, setFavorites] = useState([]);
@@ -27,11 +29,11 @@ export default function Favoritos() {
       >
         <div className="mb-2">
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-            Favoritos
+            {t('Favoritos')}
           </h1>
         </div>
         <p className="text-muted-foreground text-[15px] font-light ml-1">
-          Sua coleção pessoal de apps preferidos.
+          {t('Sua coleção pessoal de apps preferidos.')}
         </p>
       </motion.div>
 
@@ -84,7 +86,7 @@ export default function Favoritos() {
                           removeFavorite(app);
                         }}
                         className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 outline-none text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
-                        title="Remover dos favoritos"
+                        title={t('Remover dos favoritos')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -92,7 +94,7 @@ export default function Favoritos() {
                       {/* Botão de Abrir App */}
                       <button
                         className="hidden sm:flex w-10 h-10 rounded-full items-center justify-center bg-muted border border-border text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-all duration-300 outline-none group/btn"
-                        title="Acessar"
+                        title={t('Acessar')}
                       >
                         <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform" />
                       </button>
@@ -112,10 +114,10 @@ export default function Favoritos() {
                 <Star className="w-7 h-7 text-muted-foreground" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-1" style={{ fontFamily: "'Open Sans', sans-serif" }}>
-                Nenhum favorito
+                {t('Nenhum favorito')}
               </h3>
               <p className="text-sm text-muted-foreground max-w-[260px] font-medium">
-                Explore a plataforma para adicionar apps aos seus favoritos.
+                {t('Explore a plataforma para adicionar apps aos seus favoritos.')}
               </p>
             </motion.div>
           )}

@@ -10,6 +10,7 @@ import {
 } from '@/lib/auth';
 import { Mail, Lock, User, ArrowLeft, Loader2, KeyRound, Eye, EyeOff, ShoppingBag } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
+import { useT } from '@/lib/i18n';
 
 // Checkout da Hotmart (mesmo usado no Welcome/HotmartGate).
 const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
@@ -26,6 +27,7 @@ function msgErro(e) {
 }
 
 export default function AuthSection({ onClose }) {
+  const t = useT();
   const [mode, setMode] = useState('login');
   const [step, setStep] = useState('form');
   const [email, setEmail] = useState('');
@@ -140,7 +142,7 @@ export default function AuthSection({ onClose }) {
       type="button"
       onClick={onToggle}
       tabIndex={-1}
-      aria-label={shown ? 'Ocultar senha' : 'Mostrar senha'}
+      aria-label={shown ? t('Ocultar senha') : t('Mostrar senha')}
       className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors z-20"
     >
       {shown ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -156,15 +158,15 @@ export default function AuthSection({ onClose }) {
           onClick={onClose}
           className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors outline-none"
         >
-          <ArrowLeft className="w-4 h-4" /> Voltar
+          <ArrowLeft className="w-4 h-4" /> {t('Voltar')}
         </button>
 
         <div className="bg-[#161618]/95 backdrop-blur-xl border border-gold/20 rounded-3xl p-7 shadow-2xl shadow-gold/10 relative z-20">
           <div className="flex flex-col items-center mb-6">
             <img src={LOGO_URL} alt="Sexta-feira" className="w-14 h-14 rounded-2xl object-cover shadow-lg shadow-gold/20" />
-            <h1 className="mt-4 text-xl font-semibold text-white">{titulo}</h1>
+            <h1 className="mt-4 text-xl font-semibold text-white">{t(titulo)}</h1>
             <p className="text-xs text-muted-foreground mt-1 text-center">
-              Use o mesmo e-mail da sua compra na Hotmart.
+              {t('Use o mesmo e-mail da sua compra na Hotmart.')}
             </p>
           </div>
 
@@ -179,7 +181,7 @@ export default function AuthSection({ onClose }) {
                     mode === m ? 'bg-gold/20 text-gold' : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  {m === 'login' ? 'Entrar' : 'Criar conta'}
+                  {m === 'login' ? t('Entrar') : t('Criar conta')}
                 </button>
               ))}
             </div>
@@ -191,7 +193,7 @@ export default function AuthSection({ onClose }) {
                 <User className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                 <input
                   className={inputCls}
-                  placeholder="Seu nome"
+                  placeholder={t('Seu nome')}
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   autoComplete="name"
@@ -205,7 +207,7 @@ export default function AuthSection({ onClose }) {
                 <input
                   className={inputCls}
                   type="email"
-                  placeholder="E-mail"
+                  placeholder={t('E-mail')}
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); if (noAccess) { setNoAccess(false); setError(''); } }}
                   autoComplete="email"
@@ -220,7 +222,7 @@ export default function AuthSection({ onClose }) {
                 <input
                   className={inputPw}
                   type={showPw ? 'text' : 'password'}
-                  placeholder="Senha"
+                  placeholder={t('Senha')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
@@ -236,7 +238,7 @@ export default function AuthSection({ onClose }) {
                 <input
                   className={`${inputCls} tracking-[0.3em] text-center`}
                   inputMode="numeric"
-                  placeholder="Código do e-mail"
+                  placeholder={t('Código do e-mail')}
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
                 />
@@ -249,7 +251,7 @@ export default function AuthSection({ onClose }) {
                   <KeyRound className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                   <input
                     className={inputCls}
-                    placeholder="Código recebido por e-mail"
+                    placeholder={t('Código recebido por e-mail')}
                     value={resetToken}
                     onChange={(e) => setResetToken(e.target.value)}
                   />
@@ -259,7 +261,7 @@ export default function AuthSection({ onClose }) {
                   <input
                     className={inputPw}
                     type={showNewPw ? 'text' : 'password'}
-                    placeholder="Nova senha"
+                    placeholder={t('Nova senha')}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     autoComplete="new-password"
@@ -270,8 +272,8 @@ export default function AuthSection({ onClose }) {
               </>
             )}
 
-            {error && <p className="text-xs text-red-400 px-1 pt-1">{error}</p>}
-            {info && !error && <p className="text-xs text-emerald-400 px-1 pt-1">{info}</p>}
+            {error && <p className="text-xs text-red-400 px-1 pt-1">{t(error)}</p>}
+            {info && !error && <p className="text-xs text-emerald-400 px-1 pt-1">{t(info)}</p>}
 
             <button
               type="submit"
@@ -280,7 +282,7 @@ export default function AuthSection({ onClose }) {
               style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {botao}
+              {t(botao)}
             </button>
 
             {noAccess && (
@@ -291,7 +293,7 @@ export default function AuthSection({ onClose }) {
                 className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity relative z-20 outline-none"
                 style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
               >
-                <ShoppingBag className="w-4 h-4" /> Comprar acesso
+                <ShoppingBag className="w-4 h-4" /> {t('Comprar acesso')}
               </a>
             )}
 
@@ -301,7 +303,7 @@ export default function AuthSection({ onClose }) {
                 onClick={() => reset('forgot')}
                 className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none"
               >
-                Esqueci minha senha
+                {t('Esqueci minha senha')}
               </button>
             )}
 
@@ -311,7 +313,7 @@ export default function AuthSection({ onClose }) {
                 onClick={() => reset('login')}
                 className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none"
               >
-                Voltar para o login
+                {t('Voltar para o login')}
               </button>
             )}
 
@@ -321,7 +323,7 @@ export default function AuthSection({ onClose }) {
                 onClick={handleResend}
                 className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none"
               >
-                Reenviar código
+                {t('Reenviar código')}
               </button>
             )}
           </form>

@@ -18,8 +18,10 @@ import { ProfileTranslationProvider, Translated } from '@/components/profile/Pro
 import ShareProfileButton from '@/components/profile/ShareProfileButton';
 import { useProfileVisitTracker } from '@/lib/useProfileVisitTracker';
 import CachedImage from '@/components/CachedImage';
+import { useT } from '@/lib/i18n';
 
 export default function Profile() {
+  const t = useT();
   const { user: authUser, refetchUser } = useAuth();
   const { email: paramEmail } = useParams();
   const navigate = useNavigate();
@@ -93,8 +95,8 @@ export default function Profile() {
     return (
       <div className="min-h-full flex flex-col items-center justify-center p-8 text-center bg-background">
         <User className="w-12 h-12 text-muted-foreground mb-4" />
-        <h2 className="text-2xl font-semibold mb-2 text-foreground" style={{ fontFamily: "'Open Sans', sans-serif" }}>Usuário não encontrado</h2>
-        <p className="text-sm text-muted-foreground">Este perfil não existe ou foi removido.</p>
+        <h2 className="text-2xl font-semibold mb-2 text-foreground" style={{ fontFamily: "'Open Sans', sans-serif" }}>{t('Usuário não encontrado')}</h2>
+        <p className="text-sm text-muted-foreground">{t('Este perfil não existe ou foi removido.')}</p>
       </div>
     );
   }
@@ -110,10 +112,10 @@ export default function Profile() {
       await refetchUser();
       const updated = await base44.auth.me();
       setViewedUser(updated);
-      toast.success(folder === 'banners' ? 'Capa atualizada!' : 'Foto atualizada!');
+      toast.success(folder === 'banners' ? t('Capa atualizada!') : t('Foto atualizada!'));
     } catch (err) {
       console.error('upload error:', err);
-      toast.error(folder === 'banners' ? 'Erro ao atualizar capa.' : 'Erro ao atualizar foto.');
+      toast.error(folder === 'banners' ? t('Erro ao atualizar capa.') : t('Erro ao atualizar foto.'));
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -137,10 +139,10 @@ export default function Profile() {
       await refetchUser();
       const updated = await base44.auth.me();
       setViewedUser(updated);
-      toast.success('Perfil atualizado com sucesso!');
+      toast.success(t('Perfil atualizado com sucesso!'));
       setEditing(false);
     } catch (err) {
-      toast.error('Erro ao salvar perfil.');
+      toast.error(t('Erro ao salvar perfil.'));
     } finally {
       setSaving(false);
     }
@@ -154,7 +156,7 @@ export default function Profile() {
     setEditing(false);
   };
 
-  const primaryName = user?.username || user?.full_name || 'Usuário';
+  const primaryName = user?.username || user?.full_name || t('Usuário');
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -182,7 +184,7 @@ export default function Profile() {
               className="absolute top-4 right-4 flex items-center gap-1.5 text-xs bg-card/70 backdrop-blur-md border border-border hover:border-gold/40 text-foreground/80 hover:text-foreground px-3 py-2 rounded-xl transition-all shadow-sm"
             >
               {uploadingBanner ? <span className="w-3 h-3 border border-t-foreground rounded-full animate-spin" /> : <Camera className="w-4 h-4" />}
-              <span className="hidden sm:inline">Alterar capa</span>
+              <span className="hidden sm:inline">{t('Alterar capa')}</span>
             </button>
             <input ref={bannerInputRef} type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
           </>
@@ -225,7 +227,7 @@ export default function Profile() {
                 <button
                   onClick={() => avatarInputRef.current?.click()}
                   className="absolute bottom-1 right-1 z-20 w-9 h-9 flex items-center justify-center rounded-full bg-card/90 backdrop-blur-md border border-border hover:border-gold/40 text-foreground/80 hover:text-foreground shadow-md transition-all active:scale-90"
-                  title="Alterar foto"
+                  title={t('Alterar foto')}
                 >
                   {uploadingAvatar ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
                 </button>
@@ -239,12 +241,12 @@ export default function Profile() {
             {editing && !readOnly ? (
                <div className="mb-3 max-w-sm">
                  <label className="text-xs text-muted-foreground mb-1.5 font-medium flex items-center gap-1.5">
-                   <PenLine className="w-3.5 h-3.5" /> Nome Principal
+                   <PenLine className="w-3.5 h-3.5" /> {t('Nome Principal')}
                  </label>
                  <Input
                    value={form.username}
                    onChange={(e) => setForm(f => ({ ...f, username: e.target.value }))}
-                   placeholder="Seu nome"
+                   placeholder={t('Seu nome')}
                    className="bg-muted border-border focus-visible:ring-gold/40 text-lg text-foreground rounded-xl h-12 px-4"
                    style={{ fontFamily: "'Open Sans', sans-serif" }}
                  />
@@ -263,11 +265,11 @@ export default function Profile() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-20"></span>
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
                   </span>
-                  Online
+                  {t('Online')}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 opacity-70" /> 
-                  Entrou em Março de 2026
+                  <Calendar className="w-4 h-4 opacity-70" />
+                  {t('Entrou em Março de 2026')}
                 </span>
               </div>
             )}
@@ -288,7 +290,7 @@ export default function Profile() {
               }}
               className="h-8 gap-1.5 bg-foreground hover:bg-foreground/90 text-background"
             >
-              <MessageCircle className="w-3.5 h-3.5" /> Mensagem
+              <MessageCircle className="w-3.5 h-3.5" /> {t('Mensagem')}
             </Button>
           )}
 
@@ -296,16 +298,16 @@ export default function Profile() {
             editing ? (
               <div className="flex gap-3">
                 <Button variant="outline" size="sm" onClick={handleCancel} className="h-8 gap-1.5 border-border bg-muted text-foreground hover:bg-muted/70">
-                  <X className="w-3.5 h-3.5" /> Cancelar
+                  <X className="w-3.5 h-3.5" /> {t('Cancelar')}
                 </Button>
                 <Button size="sm" onClick={handleSave} disabled={saving} className="h-8 gap-1.5 bg-foreground hover:bg-foreground/90 text-background">
                   {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-                  {saving ? 'Salvando...' : 'Salvar'}
+                  {saving ? t('Salvando...') : t('Salvar')}
                 </Button>
               </div>
             ) : (
               <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="h-8 gap-1.5 border-border hover:border-gold/40 hover:text-gold">
-                <Edit3 className="w-3.5 h-3.5" /> Editar Perfil
+                <Edit3 className="w-3.5 h-3.5" /> {t('Editar Perfil')}
               </Button>
             )
           )}
@@ -315,13 +317,13 @@ export default function Profile() {
         <motion.div variants={itemVariants} className="w-full">
           <div className="bg-card border border-border rounded-3xl p-6 backdrop-blur-md">
             <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
-              Biografia
+              {t('Biografia')}
             </h2>
             {editing && !readOnly ? (
               <Textarea
                 value={form.bio}
                 onChange={(e) => setForm(f => ({ ...f, bio: e.target.value }))}
-                placeholder="Conte um pouco sobre você..."
+                placeholder={t('Conte um pouco sobre você...')}
                 rows={4}
                 maxLength={200}
                 className="resize-none bg-muted border-border focus-visible:ring-gold/40 text-foreground rounded-xl p-4"
@@ -331,7 +333,7 @@ export default function Profile() {
                 {user.bio}
               </Translated>
             ) : (
-              <p className="text-[15px] text-muted-foreground leading-relaxed italic">Nenhuma biografia adicionada.</p>
+              <p className="text-[15px] text-muted-foreground leading-relaxed italic">{t('Nenhuma biografia adicionada.')}</p>
             )}
           </div>
         </motion.div>

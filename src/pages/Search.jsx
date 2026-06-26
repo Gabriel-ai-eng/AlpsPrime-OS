@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search as SearchIcon, X, Command } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useT } from '@/lib/i18n';
 
 // id = chave usada na navegação (openApp → telaAtual no Home). `status: 'soon'`
 // marca os apps ainda não lançados. Projeto Armor (id 'titan') vem primeiro.
@@ -37,6 +38,7 @@ const normalize = (s) =>
 export default function Search() {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
+  const t = useT();
 
   const filteredApps = useMemo(() => {
     const q = normalize(query.trim());
@@ -71,7 +73,7 @@ export default function Search() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar aplicativos..."
+              placeholder={t('Buscar aplicativos...')}
               className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none font-medium tracking-wide"
               autoFocus
                 style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -121,7 +123,7 @@ export default function Search() {
                   {app.status === 'soon' && (
                     <div className="absolute top-3.5 right-3.5 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur-md border border-white/15">
                       <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-white/90">Em breve</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-white/90">{t('Em breve')}</span>
                     </div>
                   )}
                 </motion.div>
@@ -133,7 +135,7 @@ export default function Search() {
                 className="w-full py-12 flex flex-col items-center justify-center text-center px-4"
               >
                 <SearchIcon className="w-8 h-8 text-muted-foreground/40 mb-3" />
-                <p className="text-sm text-muted-foreground font-medium">Nenhum aplicativo correspondente.</p>
+                <p className="text-sm text-muted-foreground font-medium">{t('Nenhum aplicativo correspondente.')}</p>
               </motion.div>
             )}
           </AnimatePresence>

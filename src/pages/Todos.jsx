@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sparkles, Gamepad2, Palette, Grip } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useT } from '@/lib/i18n';
 
 const APPS = [
   { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', icon: Sparkles, corIcone: 'text-[#C9A24F]', bgIcone: 'bg-[#C9A24F]/10' },
@@ -13,6 +14,7 @@ const BLOQUEADOS = new Set(['sexta', 'vivart']);
 
 export default function Todos() {
   const navigate = useNavigate();
+  const t = useT();
 
   return (
     <div className="w-full min-h-screen bg-background text-foreground font-sans overflow-x-hidden flex flex-col">
@@ -23,7 +25,7 @@ export default function Todos() {
           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center border border-border">
             <Grip className="w-5 h-5 text-foreground" />
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">Todos os Apps</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('Todos os Apps')}</h1>
         </div>
       </div>
 
@@ -42,7 +44,7 @@ export default function Todos() {
               </div>
               <div className="flex-1">
                 <h3 className="text-[17px] font-semibold text-foreground mb-0.5">{app.nome}</h3>
-                <p className="text-muted-foreground text-[13px] leading-snug pr-4">{app.desc}</p>
+                <p className="text-muted-foreground text-[13px] leading-snug pr-4">{t(app.desc)}</p>
               </div>
             </div>
           );

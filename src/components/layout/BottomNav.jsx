@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useLiquidRipple } from '@/lib/useLiquidRipple';
 import { useAuth } from '@/lib/AuthContext';
+import { useT } from '@/lib/i18n';
 import { getPrefs } from '@/lib/appPrefs';
 import CachedImage from '@/components/CachedImage';
 import homeFilledUrl from '@/assets/icons/home-filled.png';
@@ -76,6 +77,7 @@ const ITEMS = [
 
 function NavItem({ item, active }) {
   const { ref, onPointerDown } = useLiquidRipple({ color: 'rgba(255,255,255,0.08)', duration: 400 });
+  const t = useT();
   const Icon = item.icon;
 
   if (item.isDead) {
@@ -86,7 +88,7 @@ function NavItem({ item, active }) {
 
     const handleClick = useCallback(() => {
       if (timerRef.current) clearTimeout(timerRef.current);
-      const frase = FRASES_IA[Math.floor(Math.random() * FRASES_IA.length)];
+      const frase = t(FRASES_IA[Math.floor(Math.random() * FRASES_IA.length)]);
       if (btnRef.current) {
         const r = btnRef.current.getBoundingClientRect();
         // Centraliza o balão acima do próprio ícone do robô
@@ -214,6 +216,7 @@ function AppCenterpiece({ active, path }) {
 
 export default function BottomNav() {
   const location = useLocation();
+  const t = useT();
 
   const [isVisible, setIsVisible] = useState(true);
   const [navStyle, setNavStyle] = useState(() => getPrefs().navbar_style || 'floating');
@@ -277,7 +280,7 @@ export default function BottomNav() {
         'lg:hidden fixed bottom-0 inset-x-0 z-50 pointer-events-none',
         !isFixedBar && 'px-4'
       )}
-      aria-label="Navegação"
+      aria-label={t('Navegação')}
       style={isFixedBar ? undefined : { paddingBottom: 'max(14px, env(safe-area-inset-bottom))' }}
     >
       <motion.div

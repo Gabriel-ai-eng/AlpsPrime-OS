@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Smartphone, Apple, MonitorSmartphone, Share, Plus, MoreVertical, Bookmark, ChevronDown } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n';
 
 /**
  * Card de "Atalho na tela inicial" — sem PWA.
@@ -9,6 +10,7 @@ import { cn } from '@/lib/utils';
  * para o usuário criar um atalho/favorito que abre a Sexta-feira.
  */
 export default function InstallShortcutCard() {
+  const t = useT();
   const [os, setOs] = useState('android');
 
   useEffect(() => {
@@ -31,16 +33,16 @@ export default function InstallShortcutCard() {
           />
           <div className="min-w-0 flex-1">
             <p className="text-[10px] uppercase tracking-[0.2em] text-gold mb-1">
-              Instalação como app
+              {t('Instalação como app')}
             </p>
             <h3 className="font-display text-lg leading-tight mb-1">
-              Instale o <span className="gold-gradient italic">app oficial</span> no seu dispositivo
+              {t('Instale o ')}<span className="gold-gradient italic">{t('app oficial')}</span>{t(' no seu dispositivo')}
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Abra como um app, sem barra do navegador, direto da sua tela inicial.
+              {t('Abra como um app, sem barra do navegador, direto da sua tela inicial.')}
             </p>
             <p className="text-[10px] text-muted-foreground/80 mt-1.5 leading-relaxed">
-              Instalação 100% segura, feita pelo próprio navegador (PWA). Não baixa arquivos no seu aparelho.
+              {t('Instalação 100% segura, feita pelo próprio navegador (PWA). Não baixa arquivos no seu aparelho.')}
             </p>
           </div>
         </div>
@@ -50,7 +52,7 @@ export default function InstallShortcutCard() {
       <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl border border-border bg-background">
         <TabButton active={os === 'ios'} onClick={() => setOs('ios')} icon={Apple} label="iPhone" />
         <TabButton active={os === 'android'} onClick={() => setOs('android')} icon={Smartphone} label="Android" />
-        <TabButton active={os === 'desktop'} onClick={() => setOs('desktop')} icon={MonitorSmartphone} label="Computador" />
+        <TabButton active={os === 'desktop'} onClick={() => setOs('desktop')} icon={MonitorSmartphone} label={t('Computador')} />
       </div>
 
       {/* Instructions */}
@@ -58,39 +60,39 @@ export default function InstallShortcutCard() {
         {os === 'ios' && (
           <>
             <p className="text-xs text-muted-foreground">
-              No <strong className="text-foreground">Safari</strong>, em 3 passos:
+              {t('No ')}<strong className="text-foreground">Safari</strong>{t(', em 3 passos:')}
             </p>
-            <Step n={1} icon={Share} text={<>Toque no botão <strong className="text-foreground">Compartilhar</strong> na barra inferior</>} />
-            <Step n={2} icon={Plus} text={<>Role e escolha <strong className="text-foreground">Adicionar à Tela de Início</strong></>} />
-            <Step n={3} icon={Bookmark} text={<>Confirme com <strong className="text-foreground">Adicionar</strong> no canto superior direito</>} />
+            <Step n={1} icon={Share} text={<>{t('Toque no botão ')}<strong className="text-foreground">{t('Compartilhar')}</strong>{t(' na barra inferior')}</>} />
+            <Step n={2} icon={Plus} text={<>{t('Role e escolha ')}<strong className="text-foreground">{t('Adicionar à Tela de Início')}</strong></>} />
+            <Step n={3} icon={Bookmark} text={<>{t('Confirme com ')}<strong className="text-foreground">{t('Adicionar')}</strong>{t(' no canto superior direito')}</>} />
           </>
         )}
 
         {os === 'android' && (
           <>
             <p className="text-xs text-muted-foreground">
-              No <strong className="text-foreground">Chrome</strong>, em 3 passos:
+              {t('No ')}<strong className="text-foreground">Chrome</strong>{t(', em 3 passos:')}
             </p>
-            <Step n={1} icon={MoreVertical} text={<>Toque no menu <strong className="text-foreground">⋮</strong> no canto superior direito</>} />
-            <Step n={2} icon={Plus} text={<>Escolha <strong className="text-foreground">Instalar app</strong> ou <strong className="text-foreground">Adicionar à tela inicial</strong></>} />
-            <Step n={3} icon={Bookmark} text={<>Confirme tocando em <strong className="text-foreground">Instalar</strong></>} />
+            <Step n={1} icon={MoreVertical} text={<>{t('Toque no menu ')}<strong className="text-foreground">⋮</strong>{t(' no canto superior direito')}</>} />
+            <Step n={2} icon={Plus} text={<>{t('Escolha ')}<strong className="text-foreground">{t('Instalar app')}</strong>{t(' ou ')}<strong className="text-foreground">{t('Adicionar à tela inicial')}</strong></>} />
+            <Step n={3} icon={Bookmark} text={<>{t('Confirme tocando em ')}<strong className="text-foreground">{t('Instalar')}</strong></>} />
           </>
         )}
 
         {os === 'desktop' && (
           <>
             <p className="text-xs text-muted-foreground">
-              No <strong className="text-foreground">computador</strong>, salve como favorito ou crie um atalho:
+              {t('No ')}<strong className="text-foreground">{t('computador')}</strong>{t(', salve como favorito ou crie um atalho:')}
             </p>
-            <Step n={1} icon={Bookmark} text={<>Pressione <strong className="text-foreground">Ctrl + D</strong> (Windows) ou <strong className="text-foreground">⌘ + D</strong> (Mac) para favoritar</>} />
-            <Step n={2} icon={MoreVertical} text={<>Ou no menu do navegador, escolha <strong className="text-foreground">Salvar e compartilhar → Criar atalho</strong></>} />
-            <Step n={3} icon={ChevronDown} text={<>Arraste a aba para a área de trabalho para um atalho rápido</>} />
+            <Step n={1} icon={Bookmark} text={<>{t('Pressione ')}<strong className="text-foreground">Ctrl + D</strong>{t(' (Windows) ou ')}<strong className="text-foreground">⌘ + D</strong>{t(' (Mac) para favoritar')}</>} />
+            <Step n={2} icon={MoreVertical} text={<>{t('Ou no menu do navegador, escolha ')}<strong className="text-foreground">{t('Salvar e compartilhar → Criar atalho')}</strong></>} />
+            <Step n={3} icon={ChevronDown} text={<>{t('Arraste a aba para a área de trabalho para um atalho rápido')}</>} />
           </>
         )}
       </div>
 
       <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
-        Instalação segura via navegador (PWA). Você pode desinstalar a qualquer momento.
+        {t('Instalação segura via navegador (PWA). Você pode desinstalar a qualquer momento.')}
       </p>
     </div>
   );

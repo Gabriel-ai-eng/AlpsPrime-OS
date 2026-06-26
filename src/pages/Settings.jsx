@@ -6,12 +6,13 @@ import {
   ChevronLeft, ChevronDown, ChevronRight, Sun, Moon, Monitor, Palette,
   ShieldCheck, Trash2, AlertTriangle, BarChart3, Coffee,
   Bell, Mail, FlaskConical, Info, Eraser, Download, Loader2,
-  LifeBuoy, LogOut, PanelBottom, RectangleHorizontal,
+  LifeBuoy, LogOut, PanelBottom, RectangleHorizontal, Languages,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
+import { useLang } from '@/lib/i18n';
 import { base44 } from '@/api/base44Client';
 import { signOut } from '@/lib/auth';
 import { useLiquidGlass } from '@/lib/useLiquidGlass';
@@ -137,6 +138,14 @@ export default function Settings() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { setMode } = useLiquidGlass();
+  const { lang, setLang, t } = useLang();
+
+  const LANGS = [
+    { id: 'pt', label: 'Português', flag: '🇧🇷' },
+    { id: 'en', label: 'English', flag: '🇺🇸' },
+  ];
+  // Palavra de confirmação para apagar a conta, no idioma atual.
+  const DELETE_WORD = lang === 'en' ? 'DELETE' : 'EXCLUIR';
 
   const [themePref, setThemePref] = useState(getThemePref());
   const [prefs, setPrefs] = useState(getPrefs());
@@ -165,10 +174,10 @@ export default function Settings() {
     setDeletingAccount(true);
     try {
       await base44.functions.invoke('deleteMyAccount', {});
-      toast.success('Conta excluída. Até breve.');
+      toast.success(t('Conta excluída. Até breve.'));
       setTimeout(() => signOut(), 1200);
     } catch {
-      toast.error('Erro ao excluir conta. Tente novamente.');
+      toast.error(t('Erro ao excluir conta. Tente novamente.'));
       setDeletingAccount(false);
     }
   };
@@ -181,10 +190,10 @@ export default function Settings() {
         await Promise.all(keys.map((k) => caches.delete(k)));
       }
       sessionStorage.clear();
-      toast.success('Cache limpo. Recarregando…');
+      toast.success(t('Cache limpo. Recarregando…'));
       setTimeout(() => window.location.reload(), 800);
     } catch {
-      toast.error('Não foi possível limpar o cache.');
+      toast.error(t('Não foi possível limpar o cache.'));
       setClearing(false);
     }
   };
@@ -198,14 +207,14 @@ export default function Settings() {
   }
 
   const THEMES = [
-    { id: 'light', label: 'Claro', icon: Sun },
-    { id: 'dark', label: 'Escuro', icon: Moon },
-    { id: 'auto', label: 'Automático', icon: Monitor },
+    { id: 'light', label: t('Claro'), icon: Sun },
+    { id: 'dark', label: t('Escuro'), icon: Moon },
+    { id: 'auto', label: t('Automático'), icon: Monitor },
   ];
 
   const NAV_STYLES = [
-    { id: 'floating', label: 'Flutuante', icon: RectangleHorizontal },
-    { id: 'fixed', label: 'Fixa', icon: PanelBottom },
+    { id: 'floating', label: t('Flutuante'), icon: RectangleHorizontal },
+    { id: 'fixed', label: t('Fixa'), icon: PanelBottom },
   ];
   const navStyle = prefs.navbar_style || 'floating';
 
@@ -218,23 +227,48 @@ export default function Settings() {
             className="flex items-center gap-2 mb-7 text-sm font-normal text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5" />
-            <span>Voltar ao início</span>
+            <span>{t('Voltar ao início')}</span>
           </button>
           <h1 className="m-0 font-light text-foreground uppercase" style={{
             fontSize: 'clamp(16px, 4vw, 36px)',
             letterSpacing: 'clamp(2px, 1.5vw, 8px)',
             fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif',
           }}>
-            Configurações
+            {t('Configurações')}
           </h1>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 lg:px-6 py-6 space-y-7 pb-16">
 
+        {/* IDIOMAS */}
+        <Group label={t('Idiomas')}>
+          <Row icon={Languages} label={t('Idioma do aplicativo')} sub={LANGS.find((l) => l.id === lang)?.label}>
+            <div className="grid grid-cols-2 gap-2">
+              {LANGS.map((l) => {
+                const ativo = lang === l.id;
+                return (
+                  <button
+                    key={l.id}
+                    onClick={() => setLang(l.id)}
+                    className={cn(
+                      'flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-medium transition-all',
+                      ativo ? 'border-gold/50 bg-gold/10 text-gold' : 'border-border bg-background text-muted-foreground hover:bg-muted'
+                    )}
+                  >
+                    <span className="text-base leading-none">{l.flag}</span>
+                    {l.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">{t('Escolha o idioma do Alps OS')}</p>
+          </Row>
+        </Group>
+
         {/* APARÊNCIA */}
-        <Group label="Aparência & personalização">
-          <Row icon={Palette} label="Tema" sub={THEMES.find((t) => t.id === themePref)?.label}>
+        <Group label={t('Aparência & personalização')}>
+          <Row icon={Palette} label={t('Tema')} sub={THEMES.find((th) => th.id === themePref)?.label}>
             <div className="grid grid-cols-3 gap-2">
               {THEMES.map((t) => {
                 const ativo = themePref === t.id;
@@ -255,12 +289,12 @@ export default function Settings() {
             </div>
             {themePref === 'auto' && (
               <p className="text-xs text-muted-foreground mt-3">
-                Seguindo o sistema — agora em modo {resolveTheme('auto') === 'dark' ? 'escuro' : 'claro'}.
+                {t('Seguindo o sistema — agora em modo {mode}.', { mode: resolveTheme('auto') === 'dark' ? t('escuro') : t('claro') })}
               </p>
             )}
           </Row>
 
-          <Row icon={PanelBottom} label="Barra de navegação" sub={NAV_STYLES.find((n) => n.id === navStyle)?.label}>
+          <Row icon={PanelBottom} label={t('Barra de navegação')} sub={NAV_STYLES.find((n) => n.id === navStyle)?.label}>
             <div className="grid grid-cols-2 gap-2">
               {NAV_STYLES.map((n) => {
                 const ativo = navStyle === n.id;
@@ -281,16 +315,16 @@ export default function Settings() {
             </div>
             <p className="text-xs text-muted-foreground mt-3">
               {navStyle === 'fixed'
-                ? 'A barra fica acoplada à base da tela. Ao rolar para baixo, ela desce e some — como a flutuante.'
-                : 'A barra flutua acima do conteúdo e some ao rolar a tela para baixo.'}
+                ? t('A barra fica acoplada à base da tela. Ao rolar para baixo, ela desce e some — como a flutuante.')
+                : t('A barra flutua acima do conteúdo e some ao rolar a tela para baixo.')}
             </p>
           </Row>
 
         </Group>
 
         {/* PRIVACIDADE & DADOS */}
-        <Group label="Privacidade & dados">
-          <Row icon={ShieldCheck} label="O que cada sub-app acessa" sub="Transparência de dados por serviço">
+        <Group label={t('Privacidade & dados')}>
+          <Row icon={ShieldCheck} label={t('O que cada sub-app acessa')} sub={t('Transparência de dados por serviço')}>
             <div className="space-y-3 pt-1">
               {SUB_APPS.map((app) => (
                 <div key={app.id} className="rounded-xl border border-border bg-background p-3.5">
@@ -299,25 +333,24 @@ export default function Settings() {
                     {app.dados.map((d) => (
                       <li key={d} className="flex items-start gap-2 text-xs text-muted-foreground">
                         <span className="mt-1.5 w-1 h-1 rounded-full bg-gold flex-shrink-0" />
-                        {d}
+                        {t(d)}
                       </li>
                     ))}
                   </ul>
                 </div>
               ))}
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Seus dados ficam dentro do ecossistema privado da Alps e não são vendidos a terceiros.
+                {t('Seus dados ficam dentro do ecossistema privado da Alps e não são vendidos a terceiros.')}
               </p>
             </div>
           </Row>
 
-          <Row icon={Trash2} label="Apagar minha conta" sub="Exclusão permanente dos seus dados" danger>
+          <Row icon={Trash2} label={t('Apagar minha conta')} sub={t('Exclusão permanente dos seus dados')} danger>
             <div className="pt-1">
               <div className="flex items-start gap-2.5 text-xs text-muted-foreground bg-background border border-border rounded-xl p-3 mb-3">
                 <Info className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                 <p className="leading-relaxed">
-                  Apagar a conta remove seu perfil e dados do Alps OS. Isso <strong>não cancela</strong> sua
-                  compra na Hotmart — com o mesmo e-mail você poderá entrar novamente no futuro.
+                  {t('Apagar a conta remove seu perfil e dados do Alps OS. Isso ')}<strong>{t('não cancela')}</strong>{t(' sua compra na Hotmart — com o mesmo e-mail você poderá entrar novamente no futuro.')}
                 </p>
               </div>
 
@@ -329,7 +362,7 @@ export default function Settings() {
                     variant="outline"
                     className="w-full justify-start h-11 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
                   >
-                    <Trash2 className="w-4 h-4 mr-3" /> Excluir conta permanentemente
+                    <Trash2 className="w-4 h-4 mr-3" /> {t('Excluir conta permanentemente')}
                   </Button>
                 ) : (
                   <motion.div
@@ -341,26 +374,26 @@ export default function Settings() {
                     <div className="flex items-start gap-3 text-destructive text-sm">
                       <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
                       <p className="leading-relaxed">
-                        Ação irreversível. Digite <strong>EXCLUIR</strong> para confirmar.
+                        {t('Ação irreversível. Digite ')}<strong>{DELETE_WORD}</strong>{t(' para confirmar.')}
                       </p>
                     </div>
                     <Input
                       value={deleteConfirmText}
                       onChange={(e) => setDeleteConfirmText(e.target.value)}
-                      placeholder="Digite EXCLUIR"
+                      placeholder={t('Digite {word}', { word: DELETE_WORD })}
                       className="bg-background border-destructive/30 focus-visible:ring-destructive/50 text-center font-mono"
                     />
                     <div className="flex gap-2">
                       <Button variant="outline" className="flex-1" onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(''); }}>
-                        Cancelar
+                        {t('Cancelar')}
                       </Button>
                       <Button
                         variant="destructive"
                         className="flex-1 font-semibold"
-                        disabled={deleteConfirmText !== 'EXCLUIR' || deletingAccount}
+                        disabled={deleteConfirmText !== DELETE_WORD || deletingAccount}
                         onClick={handleDeleteAccount}
                       >
-                        {deletingAccount ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirmar'}
+                        {deletingAccount ? <Loader2 className="w-4 h-4 animate-spin" /> : t('Confirmar')}
                       </Button>
                     </div>
                   </motion.div>
@@ -371,8 +404,8 @@ export default function Settings() {
         </Group>
 
         {/* BEM-ESTAR DIGITAL */}
-        <Group label="Bem-estar digital">
-          <Row icon={BarChart3} label="Tempo de uso" sub={totalSemana ? `${formatDuration(totalSemana)} nos últimos 7 dias` : 'Coletando dados…'}>
+        <Group label={t('Bem-estar digital')}>
+          <Row icon={BarChart3} label={t('Tempo de uso')} sub={totalSemana ? t('{d} nos últimos 7 dias', { d: formatDuration(totalSemana) }) : t('Coletando dados…')}>
             <div className="pt-1">
               {totalSemana > 0 ? (
                 <>
@@ -389,22 +422,22 @@ export default function Settings() {
                     ))}
                   </div>
                   <p className="text-xs text-muted-foreground mt-3">
-                    Total na semana: <strong className="text-foreground">{formatDuration(totalSemana)}</strong>
+                    {t('Total na semana: ')}<strong className="text-foreground">{formatDuration(totalSemana)}</strong>
                   </p>
                 </>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Continue usando o Alps OS que seu tempo de uso aparecerá aqui em um gráfico semanal.
+                  {t('Continue usando o Alps OS que seu tempo de uso aparecerá aqui em um gráfico semanal.')}
                 </p>
               )}
             </div>
           </Row>
 
-          <Row icon={Coffee} label="Lembretes de pausa" sub={prefs.pause_enabled ? `A cada ${prefs.pause_minutes} min` : 'Desativado'}>
+          <Row icon={Coffee} label={t('Lembretes de pausa')} sub={prefs.pause_enabled ? t('A cada {n} min', { n: prefs.pause_minutes }) : t('Desativado')}>
             <div className="pt-1">
               <ToggleLine
-                label="Ativar lembretes de pausa"
-                sub="Avisamos quando você passar muito tempo seguido no app."
+                label={t('Ativar lembretes de pausa')}
+                sub={t('Avisamos quando você passar muito tempo seguido no app.')}
                 checked={prefs.pause_enabled}
                 onChange={(v) => updatePref('pause_enabled', v)}
               />
@@ -429,8 +462,8 @@ export default function Settings() {
         </Group>
 
         {/* NOTIFICAÇÕES */}
-        <Group label="Notificações">
-          <Row icon={Bell} label="Por sub-app" sub="Escolha de quais serviços receber">
+        <Group label={t('Notificações')}>
+          <Row icon={Bell} label={t('Por sub-app')} sub={t('Escolha de quais serviços receber')}>
             <div className="pt-1 divide-y divide-border">
               {SUB_APPS.map((app) => (
                 <ToggleLine
@@ -443,36 +476,36 @@ export default function Settings() {
             </div>
           </Row>
 
-          <Row icon={Moon} label="Não perturbe" sub={prefs.dnd_enabled ? `${prefs.dnd_from} – ${prefs.dnd_to}` : 'Desativado'}>
+          <Row icon={Moon} label={t('Não perturbe')} sub={prefs.dnd_enabled ? `${prefs.dnd_from} – ${prefs.dnd_to}` : t('Desativado')}>
             <div className="pt-1">
               <ToggleLine
-                label="Silenciar num horário"
-                sub="Nenhuma notificação durante o período escolhido."
+                label={t('Silenciar num horário')}
+                sub={t('Nenhuma notificação durante o período escolhido.')}
                 checked={prefs.dnd_enabled}
                 onChange={(v) => updatePref('dnd_enabled', v)}
               />
               {prefs.dnd_enabled && (
                 <div className="flex items-center gap-3 mt-2">
-                  <label className="text-xs text-muted-foreground">Das</label>
+                  <label className="text-xs text-muted-foreground">{t('Das')}</label>
                   <Input type="time" value={prefs.dnd_from} onChange={(e) => updatePref('dnd_from', e.target.value)} className="bg-background w-32" />
-                  <label className="text-xs text-muted-foreground">às</label>
+                  <label className="text-xs text-muted-foreground">{t('às')}</label>
                   <Input type="time" value={prefs.dnd_to} onChange={(e) => updatePref('dnd_to', e.target.value)} className="bg-background w-32" />
                 </div>
               )}
             </div>
           </Row>
 
-          <Row icon={Mail} label="Resumo agendado" sub={prefs.digest_enabled ? `Todo dia às ${prefs.digest_at}` : 'Desativado'}>
+          <Row icon={Mail} label={t('Resumo agendado')} sub={prefs.digest_enabled ? t('Todo dia às {h}', { h: prefs.digest_at }) : t('Desativado')}>
             <div className="pt-1">
               <ToggleLine
-                label="Juntar notificações"
-                sub="Em vez de avisos a todo momento, entregamos um resumo no horário definido."
+                label={t('Juntar notificações')}
+                sub={t('Em vez de avisos a todo momento, entregamos um resumo no horário definido.')}
                 checked={prefs.digest_enabled}
                 onChange={(v) => updatePref('digest_enabled', v)}
               />
               {prefs.digest_enabled && (
                 <div className="flex items-center gap-3 mt-2">
-                  <label className="text-xs text-muted-foreground">Entregar às</label>
+                  <label className="text-xs text-muted-foreground">{t('Entregar às')}</label>
                   <Input type="time" value={prefs.digest_at} onChange={(e) => updatePref('digest_at', e.target.value)} className="bg-background w-32" />
                 </div>
               )}
@@ -481,12 +514,12 @@ export default function Settings() {
         </Group>
 
         {/* SISTEMA & SOBRE */}
-        <Group label="Sistema & sobre">
-          <Row icon={FlaskConical} label="Recursos beta" sub={prefs.beta_features ? 'Ativados' : 'Desativados'}>
+        <Group label={t('Sistema & sobre')}>
+          <Row icon={FlaskConical} label={t('Recursos beta')} sub={prefs.beta_features ? t('Ativados') : t('Desativados')}>
             <div className="pt-1">
               <ToggleLine
-                label="Ativar funcionalidades experimentais"
-                sub="Receba recursos novos antes de todo mundo. Podem conter instabilidades."
+                label={t('Ativar funcionalidades experimentais')}
+                sub={t('Receba recursos novos antes de todo mundo. Podem conter instabilidades.')}
                 checked={prefs.beta_features}
                 onChange={(v) => updatePref('beta_features', v)}
               />
@@ -494,17 +527,17 @@ export default function Settings() {
           </Row>
 
           <div id="install" className="scroll-mt-24">
-            <Row icon={Download} label="Instalar como app" sub="Adicione o Alps OS à sua tela inicial">
+            <Row icon={Download} label={t('Instalar como app')} sub={t('Adicione o Alps OS à sua tela inicial')}>
               <div className="pt-1">
                 <InstallShortcutCard />
               </div>
             </Row>
           </div>
 
-          <Row icon={Info} label="Sobre & novidades" sub={`Versão ${APP_VERSION}`}>
+          <Row icon={Info} label={t('Sobre & novidades')} sub={t('Versão {v}', { v: APP_VERSION })}>
             <div className="pt-1 space-y-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">O que há de novo</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">{t('O que há de novo')}</p>
                 {CHANGELOG.map((c) => (
                   <div key={c.versao} className="rounded-xl border border-border bg-background p-3.5">
                     <p className="text-sm font-medium text-foreground mb-2">{c.versao}</p>
@@ -512,7 +545,7 @@ export default function Settings() {
                       {c.itens.map((it) => (
                         <li key={it} className="flex items-start gap-2 text-xs text-muted-foreground">
                           <span className="mt-1.5 w-1 h-1 rounded-full bg-gold flex-shrink-0" />
-                          {it}
+                          {t(it)}
                         </li>
                       ))}
                     </ul>
@@ -520,17 +553,17 @@ export default function Settings() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                <a href="https://alpsprime.com.br/termos-de-uso" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">Termos de Uso</a>
-                <a href="https://alpsprime.com.br/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">Política de Privacidade</a>
+                <a href="https://alpsprime.com.br/termos-de-uso" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">{t('Termos de Uso')}</a>
+                <a href="https://alpsprime.com.br/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">{t('Política de Privacidade')}</a>
               </div>
               <p className="text-[11px] text-muted-foreground">© {new Date().getFullYear()} Alps OS</p>
             </div>
           </Row>
 
-          <Row icon={Eraser} label="Limpar cache" sub="Libera espaço local do app">
+          <Row icon={Eraser} label={t('Limpar cache')} sub={t('Libera espaço local do app')}>
             <div className="pt-1">
               <p className="text-xs text-muted-foreground mb-3">
-                Remove arquivos temporários guardados no dispositivo. Suas preferências e sua conta não são afetadas.
+                {t('Remove arquivos temporários guardados no dispositivo. Suas preferências e sua conta não são afetadas.')}
               </p>
               <Button
                 onClick={handleClearCache}
@@ -539,24 +572,24 @@ export default function Settings() {
                 className="w-full h-11 justify-start"
               >
                 {clearing ? <Loader2 className="w-4 h-4 mr-3 animate-spin" /> : <Eraser className="w-4 h-4 mr-3" />}
-                Limpar cache agora
+                {t('Limpar cache agora')}
               </Button>
             </div>
           </Row>
         </Group>
 
         {/* CONTA */}
-        <Group label="Conta">
+        <Group label={t('Conta')}>
           <ActionRow
             icon={LifeBuoy}
-            label="Suporte"
-            sub="Fale com a nossa equipe"
+            label={t('Suporte')}
+            sub={t('Fale com a nossa equipe')}
             onClick={() => navigate('/suporte')}
           />
           <ActionRow
             icon={LogOut}
-            label="Sair"
-            sub="Encerrar a sessão neste dispositivo"
+            label={t('Sair')}
+            sub={t('Encerrar a sessão neste dispositivo')}
             danger
             onClick={() => signOut(window.location.origin)}
           />
@@ -564,7 +597,7 @@ export default function Settings() {
 
         {/* ADMIN (somente administradores) */}
         {user?.role === 'admin' && (
-          <Group label="Administração">
+          <Group label={t('Administração')}>
             <div className="p-4">
               <AdminBroadcastSection />
             </div>

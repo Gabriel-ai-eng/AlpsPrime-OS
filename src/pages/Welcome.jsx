@@ -4,6 +4,7 @@ import AuthSection from '@/components/access/AuthSection';
 import { motion } from 'framer-motion';
 import { ShoppingBag, ChevronDown, MessageSquare, Sparkles, Users } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
+import { useT } from '@/lib/i18n';
 
 const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
 
@@ -17,16 +18,17 @@ const FAQ = [
 
 function FaqItem({ q, a }) {
   const [open, setOpen] = useState(false);
+  const t = useT();
   return (
     <button
       onClick={() => setOpen((o) => !o)}
       className="w-full text-left rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 transition-colors hover:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
     >
       <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium text-white">{q}</span>
+        <span className="text-sm font-medium text-white">{t(q)}</span>
         <ChevronDown className={`w-4 h-4 text-gold flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
       </div>
-      {open && <p className="mt-3 text-sm leading-relaxed text-white/60">{a}</p>}
+      {open && <p className="mt-3 text-sm leading-relaxed text-white/60">{t(a)}</p>}
     </button>
   );
 }
@@ -34,6 +36,7 @@ function FaqItem({ q, a }) {
 export default function Welcome() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [showAuth, setShowAuth] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     base44.functions.invoke('getUsersCount', {})
@@ -55,7 +58,7 @@ export default function Welcome() {
           onClick={() => setShowAuth(true)}
           className="rounded-full border border-white/15 px-4 py-1.5 text-sm font-medium text-white/80 transition-colors hover:border-white/30 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
         >
-          Entrar
+          {t('Entrar')}
         </button>
       </header>
 
@@ -71,8 +74,8 @@ export default function Welcome() {
             transition={{ delay: 0.1 }}
             className="relative z-10 text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl"
           >
-            Tudo da Alps Prime.<br />
-            em um só lugar.
+            {t('Tudo da Alps Prime.')}<br />
+            {t('em um só lugar.')}
           </motion.h1>
 
           <motion.p
@@ -81,7 +84,7 @@ export default function Welcome() {
             transition={{ delay: 0.2 }}
             className="relative z-10 mt-6 max-w-md text-base leading-relaxed text-white/60 sm:text-lg"
           >
-            Um login. Todo o ecossistema Alps. Garanta o seu acesso.
+            {t('Um login. Todo o ecossistema Alps. Garanta o seu acesso.')}
           </motion.p>
 
           {/* CTA — botão menor, redondo, alinhado e sem borda verde */}
@@ -99,7 +102,7 @@ export default function Welcome() {
               style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
             >
               <ShoppingBag className="h-4 w-4" />
-              Garantir acesso
+              {t('Garantir acesso')}
             </a>
           </motion.div>
         </section>
@@ -131,7 +134,7 @@ export default function Welcome() {
 
         {/* ---- FAQ ---- */}
         <section className="mx-auto max-w-2xl pb-16 sm:pb-24">
-          <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">Perguntas frequentes</h2>
+          <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">{t('Perguntas frequentes')}</h2>
           <div className="space-y-3">
             {FAQ.map((item) => <FaqItem key={item.q} {...item} />)}
           </div>
@@ -141,15 +144,15 @@ export default function Welcome() {
       {/* ---- RODAPÉ ---- */}
       <footer className="relative z-10 mx-auto max-w-5xl border-t border-white/10 px-5 py-8 text-center sm:px-8">
         <p className="mx-auto max-w-lg text-[11px] leading-relaxed text-white/40">
-          Versão Beta, ainda em aperfeiçoamento — podem ocorrer erros.{' '}
-          <a href="https://alpsprime.com.br/sexta-feira-10" target="_blank" rel="noopener noreferrer" className="text-gold/80 underline underline-offset-2 hover:text-gold">Saiba mais</a>
+          {t('Versão Beta, ainda em aperfeiçoamento — podem ocorrer erros.')}{' '}
+          <a href="https://alpsprime.com.br/sexta-feira-10" target="_blank" rel="noopener noreferrer" className="text-gold/80 underline underline-offset-2 hover:text-gold">{t('Saiba mais')}</a>
         </p>
         <p className="mt-3 text-[11px] text-white/40">
-          <a href="https://alpsprime.com.br/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white/70">Termos de Uso</a>
+          <a href="https://alpsprime.com.br/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white/70">{t('Termos de Uso')}</a>
           {' · '}
-          <a href="https://alpsprime.com.br/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white/70">Privacidade</a>
+          <a href="https://alpsprime.com.br/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white/70">{t('Privacidade')}</a>
           {' · '}
-          <a href="https://alpsprime.com.br/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white/70">Pagamento</a>
+          <a href="https://alpsprime.com.br/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white/70">{t('Pagamento')}</a>
         </p>
         <p className="mt-4 text-[11px] text-white/30">© {new Date().getFullYear()} Alps OS</p>
       </footer>

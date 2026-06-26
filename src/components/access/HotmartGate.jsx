@@ -3,6 +3,7 @@ import { hasPaidAccess, signOut } from '@/lib/auth';
 import { Loader2, ShoppingBag, RefreshCcw, LogOut, Lock } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
 import { motion } from 'framer-motion';
+import { useT } from '@/lib/i18n';
 
 /**
  * Bloqueia o app até que o usuário logado tenha comprado o acesso na Hotmart.
@@ -11,6 +12,7 @@ import { motion } from 'framer-motion';
  * - Caso contrário, mostra paywall com CTA pra Hotmart e botão "Já comprei"
  */
 export default function HotmartGate({ userEmail, children }) {
+  const t = useT();
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
   const [rechecking, setRechecking] = useState(false);
@@ -81,10 +83,10 @@ export default function HotmartGate({ userEmail, children }) {
           </div>
 
           <h1 className="font-display text-3xl mt-5 tracking-tight">
-            <span className="gold-gradient font-bold">Acesso restrito</span>
+            <span className="gold-gradient font-bold">{t('Acesso restrito')}</span>
           </h1>
           <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-            Sexta-feira agora é um produto exclusivo. Adquira seu acesso vitalício por apenas <strong className="text-foreground">R$ 19,90</strong> e libere todos os recursos imediatamente.
+            {t('Sexta-feira agora é um produto exclusivo. Adquira seu acesso vitalício por apenas ')}<strong className="text-foreground">R$ 19,90</strong>{t(' e libere todos os recursos imediatamente.')}
           </p>
 
           <div className="w-full mt-6 space-y-2.5 text-left">
@@ -96,7 +98,7 @@ export default function HotmartGate({ userEmail, children }) {
             ].map((item) => (
               <div key={item} className="flex items-start gap-2 text-sm">
                 <span className="mt-0.5 w-4 h-4 rounded-full bg-gold/20 text-gold flex items-center justify-center text-[10px] flex-shrink-0">✓</span>
-                <span className="text-muted-foreground">{item}</span>
+                <span className="text-muted-foreground">{t(item)}</span>
               </div>
             ))}
           </div>
@@ -111,7 +113,7 @@ export default function HotmartGate({ userEmail, children }) {
             style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
           >
             <ShoppingBag className="w-4 h-4 mr-2" />
-            Comprar acesso por R$ 19,90
+            {t('Comprar acesso por R$ 19,90')}
           </a>
 
           <button
@@ -120,18 +122,18 @@ export default function HotmartGate({ userEmail, children }) {
             className="mt-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             {rechecking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCcw className="w-3.5 h-3.5" />}
-            Já comprei — verificar novamente
+            {t('Já comprei — verificar novamente')}
           </button>
 
           <p className="mt-5 text-[11px] text-muted-foreground leading-relaxed">
-            Você entrou com <strong className="text-foreground">{userEmail}</strong>, mas esse e-mail ainda não tem acesso. Faça o cadastro/login com o <strong className="text-foreground">mesmo e-mail usado na compra da Hotmart</strong> — só ele libera a plataforma. Se ainda não comprou, use este mesmo e-mail no checkout para o acesso ser liberado automaticamente.
+            {t('Você entrou com ')}<strong className="text-foreground">{userEmail}</strong>{t(', mas esse e-mail ainda não tem acesso. Faça o cadastro/login com o ')}<strong className="text-foreground">{t('mesmo e-mail usado na compra da Hotmart')}</strong>{t(' — só ele libera a plataforma. Se ainda não comprou, use este mesmo e-mail no checkout para o acesso ser liberado automaticamente.')}
           </p>
 
           <button
             onClick={() => signOut()}
             className="mt-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors"
           >
-            <LogOut className="w-3 h-3" /> Sair da conta
+            <LogOut className="w-3 h-3" /> {t('Sair da conta')}
           </button>
         </div>
       </motion.div>

@@ -10,11 +10,13 @@ import { cn } from '@/lib/utils';
 import { getConversationKey } from '@/lib/chatUtils';
 import { createNotification } from '@/lib/notifications';
 import VerifiedBadge from '@/components/common/VerifiedBadge';
+import { useT } from '@/lib/i18n';
 
 export default function Verified() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const t = useT();
 
   const { data: allUsers = [], isLoading } = useQuery({
     queryKey: ['all-users'],
@@ -39,14 +41,14 @@ export default function Verified() {
     const existing = myFollows.find((f) => f.followed_email === targetEmail);
     if (existing) {
       await base44.entities.Follow.delete(existing.id);
-      toast.success('Deixou de seguir');
+      toast.success(t('Deixou de seguir'));
     } else {
       await base44.entities.Follow.create({
         follower_email: user.email,
         followed_email: targetEmail,
       });
       createNotification({ recipientEmail: targetEmail, actor: user, type: 'follow' });
-      toast.success('Seguindo!');
+      toast.success(t('Seguindo!'));
     }
     queryClient.invalidateQueries({ queryKey: ['my-follows'] });
     queryClient.invalidateQueries({ queryKey: ['followers'] });
@@ -67,13 +69,13 @@ export default function Verified() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gold/40 bg-gold/10 mb-5">
               <BadgeCheck className="w-3.5 h-3.5 text-gold" fill="rgba(212,175,55,0.15)" />
-              <span className="text-[10px] uppercase tracking-widest text-gold font-bold">Selo de verificação</span>
+              <span className="text-[10px] uppercase tracking-widest text-gold font-bold">{t('Selo de verificação')}</span>
             </div>
             <h1 className="font-display text-4xl lg:text-6xl tracking-tight leading-[1.05]">
-              <span className="gold-gradient italic">Verificados</span>
+              <span className="gold-gradient italic">{t('Verificados')}</span>
             </h1>
             <p className="text-muted-foreground mt-4 text-sm lg:text-base max-w-xl mx-auto">
-              Usuários verificados da comunidade Sexta-feira.
+              {t('Usuários verificados da comunidade Sexta-feira.')}
             </p>
           </motion.div>
         </div>
@@ -87,9 +89,9 @@ export default function Verified() {
         ) : verifiedUsers.length === 0 ? (
           <div className="text-center py-16 bg-card border border-border rounded-2xl">
             <BadgeCheck className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-            <h3 className="font-display text-xl mb-1">Ainda sem verificados</h3>
+            <h3 className="font-display text-xl mb-1">{t('Ainda sem verificados')}</h3>
             <p className="text-sm text-muted-foreground">
-              Seja um dos primeiros a conquistar o selo.
+              {t('Seja um dos primeiros a conquistar o selo.')}
             </p>
           </div>
         ) : (
@@ -115,7 +117,7 @@ export default function Verified() {
 
                 <Link to={`/profile/${encodeURIComponent(u.email)}`} className="flex-1 min-w-0 group">
                   <p className="font-semibold text-sm truncate group-hover:text-gold transition-colors inline-flex items-center gap-1 flex-wrap">
-                    {u.ranking_display_name || u.full_name || 'Usuário'}
+                    {u.ranking_display_name || u.full_name || t('Usuário')}
                     <VerifiedBadge size={13} />
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
@@ -131,7 +133,7 @@ export default function Verified() {
                     <button
                       onClick={() => handleMessage(u.email)}
                       className="w-9 h-9 rounded-lg border border-border hover:border-gold/40 hover:bg-gold/5 hover:text-gold text-muted-foreground flex items-center justify-center transition-colors"
-                      title="Enviar mensagem"
+                      title={t('Enviar mensagem')}
                     >
                       <MessageCircle className="w-4 h-4" />
                     </button>
@@ -145,9 +147,9 @@ export default function Verified() {
                       )}
                     >
                       {followedSet.has(u.email) ? (
-                        <><UserCheck className="w-3.5 h-3.5" /> Seguindo</>
+                        <><UserCheck className="w-3.5 h-3.5" /> {t('Seguindo')}</>
                       ) : (
-                        <><UserPlus className="w-3.5 h-3.5" /> Seguir</>
+                        <><UserPlus className="w-3.5 h-3.5" /> {t('Seguir')}</>
                       )}
                     </button>
                   </div>

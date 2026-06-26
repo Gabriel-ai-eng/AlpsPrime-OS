@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useT } from '@/lib/i18n';
 
 // Filtros de categoria — "Todos" mostra tudo; "Em breve" mostra os ainda não
 // lançados; os demais filtram por tipo.
@@ -24,6 +25,7 @@ const BLOQUEADOS = new Set(['sexta', 'vivart']);
 
 export default function Categorias() {
   const navigate = useNavigate();
+  const t = useT();
   const [filtro, setFiltro] = useState('todos');
 
   const appsVisiveis =
@@ -36,8 +38,8 @@ export default function Categorias() {
 
       {/* HEADER */}
       <div className="pt-12 pb-5 px-6 sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border">
-        <h1 className="text-2xl font-semibold tracking-tight">Categorias</h1>
-        <p className="text-muted-foreground text-[14px] mt-1">Escolha uma categoria para explorar.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('Categorias')}</h1>
+        <p className="text-muted-foreground text-[14px] mt-1">{t('Escolha uma categoria para explorar.')}</p>
 
         {/* FILTROS */}
         <div className="flex gap-2 mt-5 overflow-x-auto -mx-6 px-6 pb-1 scrollbar-none">
@@ -53,7 +55,7 @@ export default function Categorias() {
                     : 'bg-muted text-muted-foreground border border-border hover:text-foreground hover:bg-muted/70'
                 }`}
               >
-                {f.label}
+                {t(f.label)}
               </button>
             );
           })}
@@ -77,11 +79,11 @@ export default function Categorias() {
                   <h3 className="text-[17px] font-semibold text-foreground">{app.nome}</h3>
                   {app.status === 'soon' && (
                     <span className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wider text-gold bg-gold/10 border border-gold/20 px-2 py-0.5 rounded-full">
-                      Em breve
+                      {t('Em breve')}
                     </span>
                   )}
                 </div>
-                <p className="text-muted-foreground text-[13px] leading-snug pr-2">{app.desc}</p>
+                <p className="text-muted-foreground text-[13px] leading-snug pr-2">{t(app.desc)}</p>
               </div>
             </div>
           );
@@ -89,7 +91,7 @@ export default function Categorias() {
 
         {appsVisiveis.length === 0 && (
           <p className="text-center text-muted-foreground text-sm pt-10">
-            Nenhum serviço nesta categoria ainda.
+            {t('Nenhum serviço nesta categoria ainda.')}
           </p>
         )}
       </div>

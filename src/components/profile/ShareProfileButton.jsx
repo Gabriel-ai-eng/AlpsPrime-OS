@@ -3,6 +3,7 @@ import { Share2, Copy, Check, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { useT } from '@/lib/i18n';
 
 /**
  * Lets a user share their profile (or any profile) so others can install
@@ -13,6 +14,7 @@ import { toast } from 'sonner';
  * - Fallback: copy a friendly invite text + link to clipboard.
  */
 export default function ShareProfileButton({ profileEmail, displayName }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -46,10 +48,10 @@ export default function ShareProfileButton({ profileEmail, displayName }) {
     try {
       await navigator.clipboard.writeText(inviteText);
       setCopied(true);
-      toast.success('Link copiado!');
+      toast.success(t('Link copiado!'));
       setTimeout(() => setCopied(false), 1800);
     } catch {
-      toast.error('Não foi possível copiar.');
+      toast.error(t('Não foi possível copiar.'));
     }
   };
 
@@ -60,10 +62,10 @@ export default function ShareProfileButton({ profileEmail, displayName }) {
         variant="outline"
         onClick={handleNativeShare}
         className="h-8 gap-1.5 border-border hover:border-gold/40 hover:text-gold"
-        title="Compartilhar perfil"
+        title={t('Compartilhar perfil')}
       >
         <Share2 className="w-3.5 h-3.5" />
-        Compartilhar
+        {t('Compartilhar')}
       </Button>
 
       <AnimatePresence>
@@ -87,8 +89,8 @@ export default function ShareProfileButton({ profileEmail, displayName }) {
                   <Smartphone className="w-4 h-4 text-gold" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-sm">Compartilhar perfil</h3>
-                  <p className="text-[11px] text-muted-foreground">Quem abrir o link pode instalar o app PWA na tela inicial.</p>
+                  <h3 className="font-semibold text-sm">{t('Compartilhar perfil')}</h3>
+                  <p className="text-[11px] text-muted-foreground">{t('Quem abrir o link pode instalar o app PWA na tela inicial.')}</p>
                 </div>
               </div>
 
@@ -103,7 +105,7 @@ export default function ShareProfileButton({ profileEmail, displayName }) {
                   onClick={() => setOpen(false)}
                   className="h-9 border-border"
                 >
-                  Fechar
+                  {t('Fechar')}
                 </Button>
                 <Button
                   size="sm"
@@ -111,7 +113,7 @@ export default function ShareProfileButton({ profileEmail, displayName }) {
                   className="h-9 gap-1.5 bg-gold hover:bg-gold-dark text-background flex-1"
                 >
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copied ? 'Copiado!' : 'Copiar convite'}
+                  {copied ? t('Copiado!') : t('Copiar convite')}
                 </Button>
               </div>
             </motion.div>
