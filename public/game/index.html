@@ -395,7 +395,7 @@ function update(dt){
     // Joystick perto da borda (intensidade alta) → CORRE; pouco empurrão → ANDA.
     // Histerese: entra em corrida em 0.88 e só sai abaixo de 0.66, p/ NÃO ficar
     // piscando a troca de sprite (andar↔correr) quando o joystick fica no limiar.
-    const RUN_THR=0.82, WALK=0.40, RUN=0.82;
+    const RUN_THR=0.82, WALK=0.14, RUN=0.28;
     if (m.l>=0.88) player.running=true; else if (m.l<=0.66) player.running=false;
     const speed = m.l<RUN_THR
       ? WALK*(m.l/RUN_THR)                                  // anda: devagar→normal
@@ -409,7 +409,7 @@ function update(dt){
     // sempre fluidos, sem "travar" em passos lentos. Levemente proporcional ao empurrão
     // do joystick p/ manter a velocidade natural de caminhada de um jogador. O loop é
     // infinito (módulo nº de quadros), passando por TODOS os quadros em sequência.
-    const animFps = player.running ? (24 + 14*m.l) : (24 + 14*(m.l/RUN_THR));
+    const animFps = player.running ? (9 + 5*m.l) : (9 + 5*(m.l/RUN_THR));
     player.anim += dt * animFps;
   } else {
     player.running = false;
