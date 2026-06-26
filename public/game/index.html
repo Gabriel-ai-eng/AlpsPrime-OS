@@ -245,6 +245,8 @@ const state = { scene:'title', score:0, time:60, running:false };
 const player = { u:0.5, v:0.72, face:1, anim:0, moving:false, running:false, z:0, vz:0 };  // z: altura do pulo (px) / face: 1 dir / -1 esq
 const ball   = { u:0.5, v:0.60, vu:0, vv:0 };
 const GOAL = { uMin:0.42, uMax:0.58 };   // boca do gol no fundo (v≈0)
+const GOAL_NET = 0.06;                    // profundidade da trave (atrás da linha de fundo)
+let goalScored = false;                   // evita contar o mesmo gol várias vezes
 
 // Câmera: 'near' liga o modo Perto; 'prog' (0..1) é a transição suave entre
 // Longe (estádio inteiro) e Perto (segue o personagem, centralizado).
@@ -309,6 +311,7 @@ function startMatch(){
 function resetPositions(){
   player.u=0.5; player.v=0.72; player.face=1; player.anim=0; player.running=false; player.z=0; player.vz=0;
   ball.u=0.5; ball.v=0.58; ball.vu=0; ball.vv=0;
+  goalScored=false;   // libera a contagem do próximo gol
 }
 let timerId=null;
 function startTimer(){ clearInterval(timerId); timerId=setInterval(()=>{
@@ -422,8 +425,11 @@ function update(dt){
   } else {
     player.running = false;
   }
-  player.u=Math.max(0.03,Math.min(0.97,player.u));
-  player.v=Math.max(0.02,Math.min(0.99,player.v));
+  // Limites do campo: o jogador alcança as LINHAS BRANCAS (0..1). Dentro da boca
+  // do gol, pode entrar na trave (v abaixo de 0, até -GOAL_NET).
+  player.u = Math.max(0, Math.min(1, player.u));
+  const pInGoal = player.u > GOAL.uMin && player.u < GOAL.uMax;
+  player.v = Math.max(pInGoal ? -GOAL_NET : 0, Math.min(1, player.v));
 
   // pulo: altura (z) em px na tela, com gravidade
   player.vz -= GRAV*dt;
@@ -464,14 +470,16 @@ function update(dt){
   ball.u+=ball.vu*dt; ball.v+=ball.vv*dt;
   const fr=Math.pow(0.20,dt); ball.vu*=fr; ball.vv*=fr;
   if(Math.abs(ball.vu)<0.01) ball.vu=0; if(Math.abs(ball.vv)<0.01) ball.vv=0;
-  // paredes laterais
-  if(ball.u<0.03){ball.u=0.03; ball.vu*=-0.7;} if(ball.u>0.97){ball.u=0.97; ball.vu*=-0.7;}
+  // paredes laterais (linhas brancas)
+  if(ball.u<0){ball.u=0; ball.vu*=-0.7;} if(ball.u>1){ball.u=1; ball.vu*=-0.7;}
   // linha de frente (perto)
-  if(ball.v>0.99){ball.v=0.99; ball.vv*=-0.7;}
-  // linha de fundo: GOL ou trave
-  if(ball.v<0.02){
-    if(ball.u>GOAL.uMin && ball.u<GOAL.uMax) scoreGoal();
-    else { ball.v=0.02; ball.vv*=-0.7; }
+  if(ball.v>1){ball.v=1; ball.vv*=-0.7;}
+  // linha de fundo: dentro da boca a bola ENTRA na trave (e é GOL); fora, bate na linha
+  if(ball.v<0){
+    if(ball.u>GOAL.uMin && ball.u<GOAL.uMax){
+      if(ball.v<-GOAL_NET){ ball.v=-GOAL_NET; ball.vv*=-0.5; }       // fundo da rede
+      if(!goalScored && ball.v<-0.015){ goalScored=true; scoreGoal(); } // entrou na trave → gol
+    } else { ball.v=0; ball.vv*=-0.7; }                              // bate na linha de fundo
   }
 }
 
