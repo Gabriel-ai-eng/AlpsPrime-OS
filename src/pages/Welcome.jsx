@@ -2,9 +2,65 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import AuthSection from '@/components/access/AuthSection';
 import { motion } from 'framer-motion';
-import { ShoppingBag, ChevronDown, MessageSquare, Sparkles, Users } from 'lucide-react';
+import { ShoppingBag, ChevronDown, MessageSquare, Sparkles, Users, Languages, Check } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
-import { useT } from '@/lib/i18n';
+import { useT, useLang } from '@/lib/i18n';
+
+const LANG_OPTIONS = [
+  { id: 'pt', label: 'Português' },
+  { id: 'en', label: 'English' },
+];
+
+// Seletor de idioma minimalista (estilo Netflix): pílula com ícone + idioma
+// atual e um menu suspenso com Português / English.
+function LanguagePicker() {
+  const { lang, setLang } = useLang();
+  const [open, setOpen] = useState(false);
+  const current = LANG_OPTIONS.find((l) => l.id === lang) || LANG_OPTIONS[0];
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="flex items-center gap-1.5 rounded-md border border-white/25 bg-white/[0.04] px-2.5 py-1.5 text-xs font-medium text-white/90 transition-colors hover:border-white/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
+      >
+        <Languages className="w-3.5 h-3.5" />
+        <span>{current.label}</span>
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div
+            role="listbox"
+            className="absolute right-0 mt-1.5 z-20 min-w-[150px] overflow-hidden rounded-xl border border-white/15 bg-[#161618] py-1 shadow-2xl shadow-black/50"
+          >
+            {LANG_OPTIONS.map((l) => {
+              const ativo = lang === l.id;
+              return (
+                <button
+                  key={l.id}
+                  role="option"
+                  aria-selected={ativo}
+                  onClick={() => { setLang(l.id); setOpen(false); }}
+                  className={`flex w-full items-center justify-between px-3.5 py-2 text-sm transition-colors ${
+                    ativo ? 'text-gold' : 'text-white/80 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  {l.label}
+                  {ativo && <Check className="w-3.5 h-3.5" />}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
 
@@ -54,12 +110,15 @@ export default function Welcome() {
           <img src={LOGO_URL} alt="Alps OS" className="h-8 w-8 rounded-lg object-cover" />
           <span className="text-lg font-bold gold-gradient">Alps OS</span>
         </div>
-        <button
-          onClick={() => setShowAuth(true)}
-          className="rounded-full border border-white/15 px-4 py-1.5 text-sm font-medium text-white/80 transition-colors hover:border-white/30 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
-        >
-          {t('Entrar')}
-        </button>
+        <div className="flex items-center gap-2.5">
+          <LanguagePicker />
+          <button
+            onClick={() => setShowAuth(true)}
+            className="rounded-full border border-white/15 px-4 py-1.5 text-sm font-medium text-white/80 transition-colors hover:border-white/30 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
+          >
+            {t('Entrar')}
+          </button>
+        </div>
       </header>
 
       <main className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8">
