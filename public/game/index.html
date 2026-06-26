@@ -276,7 +276,10 @@ const KICK_EVENTS = [
 // No Perto o zoom é DINÂMICO: ajusta conforme a profundidade para o personagem
 // ficar sempre do mesmo tamanho e sempre no centro da tela, onde quer que vá.
 const CHAR_ON_SCREEN = 0.50;   // altura alvo do personagem na tela (fração) no Perto
-const cam = { prog:0, near:false };
+// userZoom: fator de zoom livre controlado pelo usuário (pinça com 2 dedos),
+// multiplica o zoom da câmera focada no personagem. 1 = padrão.
+const cam = { prog:0, near:false, userZoom:1 };
+const USER_ZOOM_MIN = 0.6, USER_ZOOM_MAX = 3.0;
 
 // Botão Voltar:
 //  • dentro do jogo / fim / tabela  → volta para a TELA INICIAL (Jogar bola / Ver tabela);
@@ -391,6 +394,36 @@ camToggleBtn.addEventListener('pointerdown',e=>{
   updateCamBtn();
 });
 updateCamBtn();
+
+// PINÇA (2 dedos) para aproximar/afastar a câmera livremente, focada no
+// personagem. Funciona junto com o botão Longe/Perto (multiplica o zoom).
+// Os toques chegam ao canvas pelas áreas vazias (o joystick e os botões capturam
+// os seus próprios toques), então o pinça não conflita com os controles.
+const pinchPts = new Map();
+let pinchDist0 = 0, pinchZoom0 = 1;
+function pinchBase(){
+  if(pinchPts.size === 2){
+    const [a,b] = [...pinchPts.values()];
+    pinchDist0 = Math.hypot(a.x-b.x, a.y-b.y) || 1;
+    pinchZoom0 = cam.userZoom;
+  }
+}
+cv.addEventListener('pointerdown', e=>{
+  pinchPts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+  pinchBase();
+});
+cv.addEventListener('pointermove', e=>{
+  if(!pinchPts.has(e.pointerId)) return;
+  pinchPts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+  if(pinchPts.size === 2){
+    const [a,b] = [...pinchPts.values()];
+    const d = Math.hypot(a.x-b.x, a.y-b.y) || 1;
+    cam.userZoom = Math.max(USER_ZOOM_MIN, Math.min(USER_ZOOM_MAX, pinchZoom0 * d/pinchDist0));
+  }
+});
+function pinchEnd(e){ pinchPts.delete(e.pointerId); pinchBase(); }
+cv.addEventListener('pointerup', pinchEnd);
+cv.addEventListener('pointercancel', pinchEnd);
 
 // =========================================================================
 //  LÓGICA
@@ -587,7 +620,8 @@ function render(){
     const charH = depthScale(player.v);           // altura do sprite (base, zoom 1)
     // zoom p/ o personagem ocupar CHAR_ON_SCREEN da altura da tela
     const zNear = Math.max(1, Math.min(8, (CH*CHAR_ON_SCREEN)/charH));
-    const zoom  = lerp(1, zNear, t);
+    // zoom da transição Longe↔Perto, multiplicado pelo zoom livre do usuário (pinça)
+    const zoom  = lerp(1, zNear, t) * cam.userZoom;
     // ponto do MUNDO que vai p/ o centro: pés (Longe) → meio do corpo (Perto)
     const wx = p.x, wy = p.y - charH*0.5*t;
     // onde ele aparece na TELA: posição real (Longe) → centro da tela (Perto)
@@ -687,7 +721,7 @@ function snapshot(){
     scene: state.scene, score: state.score, time: state.time,
     player: { u:player.u, v:player.v, face:player.face, anim:player.anim, running:player.running },
     ball:   { u:ball.u, v:ball.v, vu:ball.vu, vv:ball.vv },
-    cam:    { near: cam.near },
+    cam:    { near: cam.near, userZoom: cam.userZoom },
     savedAt: Date.now(),
   };
 }
@@ -729,7 +763,11 @@ function applySnapshot(s){
   if(!s || state.scene!=='title') return;   // não sobrescreve se o usuário já começou
   if(s.player) Object.assign(player, s.player);
   if(s.ball)   Object.assign(ball, s.ball);
-  if(s.cam){ cam.near=!!s.cam.near; updateCamBtn(); }
+  if(s.cam){
+    cam.near=!!s.cam.near;
+    if(typeof s.cam.userZoom==='number') cam.userZoom=Math.max(USER_ZOOM_MIN, Math.min(USER_ZOOM_MAX, s.cam.userZoom));
+    updateCamBtn();
+  }
   if(s.scene==='game'){
     state.scene='game'; state.score=s.score||0;
     state.time=(typeof s.time==='number'?s.time:60); state.running=true;
