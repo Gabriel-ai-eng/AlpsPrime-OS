@@ -220,8 +220,8 @@ const RUN_SH = { FW:430, FH:608, cols:5, rows:4, frames:20 };
 // direita), alinhados pelo tronco (estavel) com os pes na base.
 const KICK_SH = { FW:273, FH:273, cols:12, rows:15, frames:180 };
 const KICK_FPS = 140;        // velocidade de reproducao da animacao de chute
-const KICK_CONTACT = 121;    // quadro em que o pe encosta na bola (lanca a bola)
-const KICK_FOOT_DX = 0.406;  // posicao do pe no contato: fracao da largura do sprite a frente do centro
+const KICK_CONTACT = 122;    // FRAME EXATO do contato: o pe encosta na bola (evento de animacao)
+const KICK_FOOT_DX = 0.406;  // posicao do pe NESSE frame: fracao da largura do sprite a frente do centro
 
 // ---------- Pitch (trapézio em perspectiva, normalizado na imagem) ----------
 const PITCH = {
@@ -258,6 +258,18 @@ let goalScored = false;                   // evita contar o mesmo gol várias ve
 let kickDir = { x:0, y:-1 };
 let kickBall = false;
 let kickFired = false;
+
+// EVENTOS DE ANIMACAO do chute (padrao "Animation Event"): cada evento dispara
+// UMA unica vez quando a reproducao (player.kickT, em frames) cruza o `frame`
+// indicado. O contato e um evento no FRAME EXATO em que o pe encosta na bola —
+// so entao a bola ganha velocidade e sai rolando, garantindo impacto perfeito.
+function onKickContact(){
+  if(kickBall){ ball.vu = kickDir.x*1.35; ball.vv = kickDir.y*1.35; }
+  kickFired = true;
+}
+const KICK_EVENTS = [
+  { frame: KICK_CONTACT, done:false, action: onKickContact },
+];
 
 // Câmera: 'near' liga o modo Perto; 'prog' (0..1) é a transição suave entre
 // Longe (estádio inteiro) e Perto (segue o personagem, centralizado).
@@ -407,6 +419,7 @@ function kick(){
   // PARADO: toca a animação de chute parado e gruda a bola no ponto do pé.
   if(!player.moving){
     player.kicking=true; player.kickT=0; kickFired=false;
+    for(const ev of KICK_EVENTS) ev.done=false;   // re-arma os eventos de animação
     kickDir={ x:ax, y:ay };
     if(ax>0.05) player.face=1; else if(ax<-0.05) player.face=-1;
     // Se a bola está por perto, posiciona-a exatamente onde o pé encosta no contato
@@ -439,10 +452,9 @@ function update(dt){
     player.moving=false; player.running=false;
     const prevT=player.kickT;
     player.kickT += dt*KICK_FPS;
-    // contato: o pé encosta na bola e a lança na direção escolhida
-    if(!kickFired && prevT < KICK_CONTACT && player.kickT >= KICK_CONTACT){
-      if(kickBall){ ball.vu=kickDir.x*1.35; ball.vv=kickDir.y*1.35; }
-      kickFired=true;
+    // dispara os EVENTOS DE ANIMACAO cruzados neste passo (ex.: contato com a bola)
+    for(const ev of KICK_EVENTS){
+      if(!ev.done && prevT < ev.frame && player.kickT >= ev.frame){ ev.done=true; ev.action(); }
     }
     // antes do contato, a bola fica parada grudada no ponto do pé
     if(kickBall && !kickFired){ ball.vu=0; ball.vv=0; }
