@@ -90,16 +90,20 @@ export default function Home() {
     }
   };
 
-  // Ao chegar num clone, salta sem animação para o slide real equivalente.
-  const handleEnd = () => {
-    if (pos === 0) {
+  // Wrap-around robusto: sempre que a posição sai do intervalo real [1..TOTAL]
+  // (chegou num clone OU passou do limite), salta sem animação para o slide real
+  // equivalente. Usa um timeout (logo após a transição de 500ms) em vez de
+  // depender só do onTransitionEnd — que pode não disparar (aba desacelerada,
+  // clique/timer no meio da transição) e deixar o carrossel "preso" no branco.
+  // A aritmética de módulo recupera qualquer desvio (ex.: pos virou 4, 5, -1…).
+  useEffect(() => {
+    if (pos >= 1 && pos <= TOTAL) return; // posição real: nada a fazer
+    const id = setTimeout(() => {
       setAnim(false);
-      setPos(TOTAL);
-    } else if (pos === EXT_LEN - 1) {
-      setAnim(false);
-      setPos(1);
-    }
-  };
+      setPos(((((pos - 1) % TOTAL) + TOTAL) % TOTAL) + 1);
+    }, 520);
+    return () => clearTimeout(id);
+  }, [pos]);
 
   // Reabilita a transição depois que o salto instantâneo é pintado.
   useEffect(() => {
@@ -133,7 +137,6 @@ export default function Home() {
                   transform: `translateX(calc(-${(pos * 100) / EXT_LEN}% + ${dragX}px))`,
                   transition: anim ? 'transform 500ms ease-out' : 'none',
                 }}
-                onTransitionEnd={handleEnd}
               >
                 {EXT.map((slide, i) => (
                   <div
