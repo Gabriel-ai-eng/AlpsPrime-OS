@@ -56,6 +56,15 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route element={<AppShell />}>
         <Route path="/" element={<Navigate to="/home" replace />} />
+        {/* Caminhos de entrada/cadastro (e retornos de link de e-mail do Supabase):
+            usuários já autenticados que caírem aqui vão direto pro /home, em vez
+            de ver um 404. */}
+        <Route path="/login" element={<Navigate to="/home" replace />} />
+        <Route path="/entrar" element={<Navigate to="/home" replace />} />
+        <Route path="/signup" element={<Navigate to="/home" replace />} />
+        <Route path="/cadastro" element={<Navigate to="/home" replace />} />
+        <Route path="/auth" element={<Navigate to="/home" replace />} />
+        <Route path="/callback" element={<Navigate to="/home" replace />} />
         <Route path="/todos" element={<Todos />} />
         <Route path="/categorias" element={<Categorias />} />
         

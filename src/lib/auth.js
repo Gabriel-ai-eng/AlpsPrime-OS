@@ -8,6 +8,19 @@ import { ADMIN_EMAILS } from '@/lib/branding';
 
 const clean = (email) => (email || '').trim().toLowerCase();
 
+// URL para onde os links dos e-mails de auth (confirmação de cadastro e
+// recuperação de senha) devem voltar. Aponta SEMPRE para uma rota que o app
+// serve (`/home`), evitando que o usuário caia num 404 ao clicar no link do
+// e-mail — antes o Supabase voltava para a "Site URL" do painel, que podia
+// cair numa rota inexistente (ex.: /login) e disparar o "Page Not Found".
+const appRedirectUrl = () => {
+  const origin =
+    typeof window !== 'undefined' && window.location?.origin
+      ? window.location.origin
+      : 'https://alpsprime.com.br';
+  return `${origin}/home`;
+};
+
 export const isAdminEmail = (email) =>
   ADMIN_EMAILS.map((x) => x.toLowerCase()).includes(clean(email));
 
@@ -79,7 +92,12 @@ export async function signUp(email, password, fullName) {
   const { data, error } = await supabase.auth.signUp({
     email: clean(email),
     password,
-    options: { data: { full_name: (fullName || '').trim() } },
+    options: {
+      data: { full_name: (fullName || '').trim() },
+      // Se o usuário confirmar pelo LINK do e-mail (em vez do código), ele volta
+      // para /home (rota servida) e não para uma página inexistente.
+      emailRedirectTo: appRedirectUrl(),
+    },
   });
   if (error) throw error;
   // Se "Confirm email" estiver desligado no Supabase, já vem uma session aqui.
@@ -104,7 +122,9 @@ export async function resendSignupOtp(email) {
 
 // --- Recuperação de senha (via código de recuperação) ---
 export async function requestPasswordReset(email) {
-  const { error } = await supabase.auth.resetPasswordForEmail(clean(email));
+  const { error } = await supabase.auth.resetPasswordForEmail(clean(email), {
+    redirectTo: appRedirectUrl(),
+  });
   if (error) throw error;
 }
 
