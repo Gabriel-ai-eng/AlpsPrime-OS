@@ -5,7 +5,7 @@ import CachedImage from '@/components/CachedImage';
 
 const Vivart = lazy(() => import('./Vivart'));
 const Sexta = lazy(() => import('./Sexta'));
-const Titan = lazy(() => import('./Titan'));
+const ProjetoArmor = lazy(() => import('./ProjetoArmor'));
 
 const LoadingScreen = () => (
   <div className="absolute inset-0 z-[200000] flex flex-col items-center justify-center bg-background/80 backdrop-blur-xl">
@@ -190,7 +190,7 @@ export default function Home() {
 
             {/* APP — Projeto Armor (bloco quadrado, largura total, sem cantos arredondados) */}
             <div
-              onClick={() => setTelaAtual('titan')}
+              onClick={() => setTelaAtual('armor')}
               className="w-full aspect-square overflow-hidden cursor-pointer active:scale-[0.99] transition-transform duration-300 group"
             >
               <img
@@ -208,7 +208,7 @@ export default function Home() {
       <Suspense fallback={<LoadingScreen />}>
         {telaAtual === 'vivart' && <Vivart onVoltar={() => setTelaAtual('hub')} />}
         {telaAtual === 'sexta' && <Sexta onVoltar={() => setTelaAtual('hub')} />}
-        {telaAtual === 'titan' && <Titan onVoltar={() => setTelaAtual('hub')} />}
+        {telaAtual === 'armor' && <ProjetoArmor onVoltar={() => setTelaAtual('hub')} />}
       </Suspense>
     </div>
   );

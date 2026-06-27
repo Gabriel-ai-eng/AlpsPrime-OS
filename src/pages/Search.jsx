@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useT } from '@/lib/i18n';
 
 // id = chave usada na navegação (openApp → telaAtual no Home). `status: 'soon'`
-// marca os apps ainda não lançados. Projeto Armor (id 'titan') vem primeiro.
+// marca os apps ainda não lançados. Projeto Armor (id 'armor') vem primeiro.
 const SUB_APPS = [
   {
-    id: 'titan',
+    id: 'armor',
     name: 'Projeto Armor',
     image: '/apps/armor-bg.webp',
     status: 'live',
