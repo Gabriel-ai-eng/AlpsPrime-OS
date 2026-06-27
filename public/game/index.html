@@ -206,11 +206,12 @@ const isPortrait = () => window.matchMedia('(orientation: portrait)').matches;
 // ---------- Assets ----------
 // O estádio NÃO é mais uma imagem única: é recriado proceduralmente (ver módulo
 // `Stadium` abaixo). Só os sprites do personagem são carregados como imagem.
-const A = { walk:new Image(), runner:new Image(), kick:new Image(), loaded:0, need:3 };
+const A = { walk:new Image(), runner:new Image(), kick:new Image(), jump:new Image(), loaded:0, need:4 };
 A.walk.src    = 'assets/player_walk.png';
 A.runner.src  = 'assets/player_run.png';
 A.kick.src    = 'assets/player_kick.png';
-A.walk.onload = A.runner.onload = A.kick.onload = ()=> A.loaded++;
+A.jump.src    = 'assets/player_jump.png';
+A.walk.onload = A.runner.onload = A.kick.onload = A.jump.onload = ()=> A.loaded++;
 
 // Sprite sheet de CAMINHADA: folha ORIGINAL, exatamente como desenhada.
 // 5 colunas x 9 linhas = 42 quadros (perfil p/ direita). Lidos da esquerda p/ a
@@ -225,6 +226,15 @@ const KICK_SH = { FW:273, FH:273, cols:12, rows:15, frames:180 };
 const KICK_FPS = 140;        // velocidade de reproducao da animacao de chute
 const KICK_CONTACT = 122;    // FRAME EXATO do contato: o pe encosta na bola (evento de animacao)
 const KICK_FOOT_DX = 0.406;  // posicao do pe NESSE frame: fracao da largura do sprite a frente do centro
+// Sprite sheet de PULO: 15 colunas x 14 linhas = 200 quadros (perfil p/ direita),
+// alinhados pelo tronco e pes na base. O arco vertical do pulo NAO esta embutido:
+// a altura (z) e gerada por codigo e sincronizada com a animacao (decolagem ->
+// aterrissagem) atraves de um EVENTO de animacao por frame.
+const JUMP_SH = { FW:172, FH:291, cols:15, rows:14, frames:200 };
+const JUMP_FPS = 185;        // velocidade de reproducao da animacao de pulo
+const JUMP_TO = 57;          // frame de DECOLAGEM (pes saem do chao)
+const JUMP_LD = 168;         // frame de ATERRISSAGEM (pes tocam o chao)
+const JUMP_Z = 0.6;          // altura do pulo: fracao da altura do personagem
 
 // ---------- Pitch (trapézio em perspectiva, normalizado na imagem) ----------
 const PITCH = {
@@ -535,7 +545,7 @@ const state = { scene:'title', score:0, time:60, running:false, mode:'quick', ha
 const HALF_SECONDS = 45*60;   // duração de cada tempo (45 min). Fácil de ajustar.
 // formata segundos como MM:SS para o cronômetro
 function fmtClock(sec){ const m=Math.floor(sec/60), s=sec%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
-const player = { u:0.5, v:0.72, face:1, anim:0, moving:false, running:false, z:0, vz:0, kicking:false, kickT:0 };  // z: altura do pulo (px) / face: 1 dir / -1 esq / kicking: tocando a animacao de chute parado
+const player = { u:0.5, v:0.72, face:1, anim:0, moving:false, running:false, z:0, vz:0, kicking:false, kickT:0, jumping:false, jumpT:0 };  // z: altura do pulo (px) / face: 1 dir / -1 esq / kicking: chute parado / jumping: animacao de pulo
 const ball   = { u:0.5, v:0.60, vu:0, vv:0 };
 const GOAL = { uMin:0.42, uMax:0.58 };   // boca do gol no fundo (v≈0)
 const GOAL_NET = 0.06;                    // profundidade da trave (atrás da linha de fundo)
@@ -636,6 +646,7 @@ function startMatch(mode){
 function resetPositions(){
   player.u=0.5; player.v=0.72; player.face=1; player.anim=0; player.running=false; player.z=0; player.vz=0;
   player.kicking=false; player.kickT=0; kickFired=false; kickBall=false;
+  player.jumping=false; player.jumpT=0;
   ball.u=0.5; ball.v=0.58; ball.vu=0; ball.vv=0;
   goalScored=false;   // libera a contagem do próximo gol
 }
@@ -757,7 +768,8 @@ function moveVec(){
 const JUMP_V=340, GRAV=980;     // velocidade inicial e gravidade do pulo (px/s)
 function jump(){
   if(state.scene!=='game'||!state.running) return;
-  if(player.z<=0.01) player.vz=JUMP_V;   // só pula quando está no chão
+  if(player.kicking || player.jumping) return;   // não interrompe chute/pulo em andamento
+  player.jumping=true; player.jumpT=0;            // toca a animação de pulo
 }
 function kick(){
   if(state.scene!=='game'||!state.running) return;
@@ -812,6 +824,23 @@ function update(dt){
     // gravidade (caso esteja no ar) e fim da animação
     player.vz -= GRAV*dt; player.z += player.vz*dt; if(player.z<0){ player.z=0; player.vz=0; }
     if(player.kickT >= KICK_SH.frames){ player.kicking=false; }
+    ballPhysics(dt);
+    return;
+  }
+
+  // ANIMAÇÃO DE PULO: toca a folha de pulo; a altura (z) é gerada por código e
+  // sincronizada com a animação — sobe na decolagem e zera na aterrissagem.
+  if(player.jumping){
+    player.moving=false; player.running=false;
+    player.jumpT += dt*JUMP_FPS;
+    const f=player.jumpT;
+    if(f>=JUMP_TO && f<=JUMP_LD){
+      const ph=(f-JUMP_TO)/(JUMP_LD-JUMP_TO);            // 0..1 do tempo no ar
+      player.z = depthScale(player.v)*JUMP_Z * Math.sin(Math.PI*ph);
+    } else {
+      player.z = 0;                                       // agachado/recuperando: no chão
+    }
+    if(player.jumpT >= JUMP_SH.frames){ player.jumping=false; player.z=0; }
     ballPhysics(dt);
     return;
   }
@@ -981,10 +1010,11 @@ function shadow(x,y,w){ ctx.imageSmoothingEnabled=true; ctx.fillStyle='rgba(0,0,
 function drawPlayer(){
   const p=uvToScreen(player.u,player.v);
   // Chutando parado usa a folha de CHUTE; andando a de CAMINHADA; correndo a de CORRIDA.
-  const kicking = player.kicking;
-  const run = !kicking && player.running && player.moving;
-  const sheet = kicking ? KICK_SH : (run ? RUN_SH : WALK_SH);
-  const sprite = kicking ? A.kick : (run ? A.runner : A.walk);
+  const jumping = player.jumping;
+  const kicking = player.kicking && !jumping;
+  const run = !kicking && !jumping && player.running && player.moving;
+  const sheet = jumping ? JUMP_SH : kicking ? KICK_SH : (run ? RUN_SH : WALK_SH);
+  const sprite = jumping ? A.jump : kicking ? A.kick : (run ? A.runner : A.walk);
   const h=depthScale(player.v), w=h*(sheet.FW/sheet.FH);
   // sombra fica menor quanto mais alto está o pulo
   const sj=1/(1+player.z/Math.max(20,h*0.6));
@@ -994,7 +1024,9 @@ function drawPlayer(){
   // jogador não anda. Andando, pulamos esse quadro (0) e também o penúltimo
   // (41), que é idêntico ao último (42), e ciclamos pelos demais.
   let f;
-  if(kicking){
+  if(jumping){
+    f = Math.min(sheet.frames-1, Math.max(0, Math.floor(player.jumpT)));
+  } else if(kicking){
     f = Math.min(sheet.frames-1, Math.max(0, Math.floor(player.kickT)));
   } else if(!player.moving){
     f = 0;
