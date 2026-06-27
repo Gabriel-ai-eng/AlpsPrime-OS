@@ -721,7 +721,10 @@ export default function Titan({ onVoltar }) {
         </div>
       )}
       {fase !== 'carregando' && fase !== 'erro' && !paisagem && (
-        <div style={es.overlay}><div style={es.telemovel} /><p style={es.txtGrande}>DEITE O CELULAR</p><p style={es.txtPeq}>O mundo do Titan é em paisagem</p></div>
+        <div style={es.overlay}>
+          <div className="titan-rotate-phone" />
+          <p style={es.txtRodar}>VIRE O CELULAR</p>
+        </div>
       )}
       {fase === 'pronto' && paisagem && (
         <div style={es.overlay}>
@@ -734,7 +737,19 @@ export default function Titan({ onVoltar }) {
 
       <style>{`
         .titan-canvas { image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; image-rendering: pixelated; }
-        @keyframes rodarTel { 0%,20%{transform:rotate(0)} 55%,80%{transform:rotate(90deg)} 100%{transform:rotate(90deg)} }
+        /* Animação "VIRE O CELULAR" — idêntica à do jogo Free Kick World */
+        .titan-rotate-phone { width:62px; height:110px; border:5px solid #7dd3fc; border-radius:14px;
+          position:relative; margin-bottom:30px; box-shadow:0 0 26px rgba(125,211,252,.5);
+          animation:rodarCelular 2.4s ease-in-out infinite; }
+        .titan-rotate-phone::before { content:''; position:absolute; left:50%; bottom:7px; width:20px; height:4px;
+          border-radius:3px; background:#7dd3fc; transform:translateX(-50%); }
+        .titan-rotate-phone::after { content:''; position:absolute; inset:7px; border-radius:7px;
+          background:rgba(125,211,252,.12); }
+        @keyframes rodarCelular {
+          0%,16%   { transform:rotate(0deg); }
+          46%,72%  { transform:rotate(-90deg); }
+          96%,100% { transform:rotate(0deg); }
+        }
         @keyframes pulsarReator { 0%,100%{box-shadow:0 0 18px 4px rgba(110,216,255,0.7)} 50%{box-shadow:0 0 34px 10px rgba(110,216,255,1)} }
       `}</style>
     </div>,
@@ -751,7 +766,7 @@ const es = {
   voltar: { position: 'absolute', top: 30, left: 16, background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 20, color: '#8E8E93', fontSize: 13, padding: '6px 13px', cursor: 'pointer', zIndex: 30 },
   overlay: { position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.88)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 20, backdropFilter: 'blur(4px)', fontFamily: 'monospace' },
   reator: { width: 26, height: 26, borderRadius: '50%', backgroundColor: '#6ED8FF', marginBottom: 22, animation: 'pulsarReator 1.2s ease-in-out infinite' },
-  telemovel: { width: 44, height: 76, border: '3px solid #6ED8FF', borderRadius: 10, marginBottom: 26, animation: 'rodarTel 2.2s ease-in-out infinite' },
+  txtRodar: { color: '#7dd3fc', fontSize: 'clamp(20px,6vw,30px)', fontWeight: 700, letterSpacing: '2px', textShadow: '2px 2px 0 #0a3d62', margin: 0 },
   titulo: { color: '#F0C040', fontSize: 42, fontWeight: 800, letterSpacing: '0.28em', margin: 0, textShadow: '0 0 24px rgba(240,192,64,0.5)' },
   txtGrande: { color: '#F0C040', fontSize: 19, fontWeight: 700, letterSpacing: '0.18em', margin: '0 0 8px' },
   txtPeq: { color: '#8E8E93', fontSize: 12, letterSpacing: '0.1em', margin: 0 },
