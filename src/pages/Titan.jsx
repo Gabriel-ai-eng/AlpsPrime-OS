@@ -712,7 +712,7 @@ export default function Titan({ onVoltar }) {
       <button onClick={onVoltar} style={es.voltar}>← Sair</button>
 
       {fase === 'carregando' && (
-        <div style={es.overlay}><div style={es.reator} /><p style={es.txtPeq}>INICIALIZANDO NANOTECNOLOGIA…</p></div>
+        <div style={es.overlay}><div style={es.reator} /></div>
       )}
       {fase === 'erro' && (
         <div style={es.overlay}>
