@@ -47,6 +47,7 @@
   #hud.on { display:flex; }
   #hud .chip { background:rgba(5,8,15,.6); padding:6px 12px; border-radius:8px; color:#fcd34d; }
   #hud .chip.time { color:#7dd3fc; }
+  #hud .chip.half { color:#fff; font-weight:700; letter-spacing:2px; border:1px solid rgba(255,255,255,.25); }
   #msg { position:fixed; top:30%; left:0; right:0; text-align:center; z-index:9;
     font-size:clamp(34px,10vw,80px); color:#fcd34d; letter-spacing:5px;
     text-shadow:3px 3px 0 #7c2d12; pointer-events:none; opacity:0; transition:opacity .18s; }
@@ -125,6 +126,7 @@
 <!-- HUD -->
 <div id="hud">
   <div class="chip">⚽ GOLS: <span id="score">0</span></div>
+  <div class="chip half" id="half" style="display:none">1º TEMPO</div>
   <div class="chip time">⏱ <span id="time">60</span></div>
 </div>
 <div id="msg"></div>
@@ -527,7 +529,12 @@ const Stadium = {
 };
 
 // ---------- Estado ----------
-const state = { scene:'title', score:0, time:60, running:false };
+// mode: 'quick' = Partida rápida (60s, contagem regressiva). 'full' = Jogar
+// (partida completa: 1º e 2º tempo de 45 min cada, cronômetro crescente).
+const state = { scene:'title', score:0, time:60, running:false, mode:'quick', half:1, clock:0 };
+const HALF_SECONDS = 45*60;   // duração de cada tempo (45 min). Fácil de ajustar.
+// formata segundos como MM:SS para o cronômetro
+function fmtClock(sec){ const m=Math.floor(sec/60), s=sec%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
 const player = { u:0.5, v:0.72, face:1, anim:0, moving:false, running:false, z:0, vz:0, kicking:false, kickT:0 };  // z: altura do pulo (px) / face: 1 dir / -1 esq / kicking: tocando a animacao de chute parado
 const ball   = { u:0.5, v:0.60, vu:0, vv:0 };
 const GOAL = { uMin:0.42, uMax:0.58 };   // boca do gol no fundo (v≈0)
@@ -584,9 +591,9 @@ document.getElementById('backBtn').onclick=()=>{
 const scr={title:document.getElementById('scrTitle'),end:document.getElementById('scrEnd'),tabela:document.getElementById('scrTabela')};
 const hud=document.getElementById('hud'), pad=document.getElementById('pad');
 function show(n){ for(const k in scr) scr[k].classList.add('hidden'); if(scr[n]) scr[n].classList.remove('hidden'); }
-document.getElementById('startGame').onclick=()=>startMatch();
-document.getElementById('startQuick').onclick=()=>startMatch();   // botão "INICIAR / partida rápida" da arte
-document.getElementById('playAgain').onclick=()=>startMatch();
+document.getElementById('startGame').onclick=()=>startMatch('full');    // "JOGAR" → partida completa (1º e 2º tempo)
+document.getElementById('startQuick').onclick=()=>startMatch('quick');  // "INICIAR / partida rápida" → 60s (como está)
+document.getElementById('playAgain').onclick=()=>startMatch(state.mode);// joga de novo no mesmo modo da partida anterior
 // Tela de TABELA (placeholder por enquanto)
 document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='title'; };
 
@@ -605,11 +612,24 @@ function goFullscreen(){
 document.addEventListener('fullscreenchange', resize);
 document.addEventListener('webkitfullscreenchange', resize);
 
-function startMatch(){
+function startMatch(mode){
+  state.mode = (mode==='full') ? 'full' : 'quick';
   goFullscreen();
-  show(null); state.scene='game'; state.score=0; state.time=60; state.running=true;
+  show(null); state.scene='game'; state.score=0; state.running=true;
   hud.classList.add('on'); pad.classList.add('on');
-  document.getElementById('score').textContent='0'; document.getElementById('time').textContent='60';
+  document.getElementById('score').textContent='0';
+  const halfEl=document.getElementById('half');
+  if(state.mode==='full'){
+    // Partida completa: 1º tempo, cronômetro em 00:00 subindo até 45:00.
+    state.half=1; state.clock=0;
+    halfEl.style.display=''; halfEl.textContent='1º TEMPO';
+    document.getElementById('time').textContent=fmtClock(0);
+  } else {
+    // Partida rápida: contagem regressiva de 60s (como antes).
+    state.time=60;
+    halfEl.style.display='none';
+    document.getElementById('time').textContent='60';
+  }
   resetPositions(); startTimer();
   scheduleSave();   // persiste a partida recém-iniciada
 }
@@ -621,8 +641,27 @@ function resetPositions(){
 }
 let timerId=null;
 function startTimer(){ clearInterval(timerId); timerId=setInterval(()=>{
-  if(!state.running || isPortrait()) return; state.time--; document.getElementById('time').textContent=state.time;
-  if(state.time<=0) endMatch();
+  if(!state.running || isPortrait()) return;
+  if(state.mode==='full'){
+    // cronômetro crescente; ao chegar a 45 min troca de tempo / encerra
+    state.clock++;
+    if(state.clock>=HALF_SECONDS){
+      if(state.half===1){
+        // FIM DO 1º TEMPO → recomeça no 2º tempo, zera o cronômetro
+        state.half=2; state.clock=0;
+        document.getElementById('half').textContent='2º TEMPO';
+        document.getElementById('time').textContent=fmtClock(0);
+        flashMsg('2º TEMPO'); resetPositions(); scheduleSave();
+      } else {
+        endMatch(); return;   // fim do 2º tempo → fim de jogo
+      }
+    } else {
+      document.getElementById('time').textContent=fmtClock(state.clock);
+    }
+  } else {
+    state.time--; document.getElementById('time').textContent=state.time;
+    if(state.time<=0) endMatch();
+  }
 },1000); }
 function endMatch(){ state.running=false; clearInterval(timerId);
   hud.classList.remove('on'); pad.classList.remove('on');
@@ -1000,6 +1039,7 @@ let sb=null, gameUser=null, saveQueued=false;
 function snapshot(){
   return {
     scene: state.scene, score: state.score, time: state.time,
+    mode: state.mode, half: state.half, clock: state.clock,
     player: { u:player.u, v:player.v, face:player.face, anim:player.anim, running:player.running },
     ball:   { u:ball.u, v:ball.v, vu:ball.vu, vv:ball.vv },
     cam:    { near: cam.near, userZoom: cam.userZoom },
@@ -1050,10 +1090,19 @@ function applySnapshot(s){
     updateCamBtn();
   }
   if(s.scene==='game'){
-    state.scene='game'; state.score=s.score||0;
-    state.time=(typeof s.time==='number'?s.time:60); state.running=true;
+    state.scene='game'; state.score=s.score||0; state.running=true;
+    state.mode = (s.mode==='full') ? 'full' : 'quick';
     document.getElementById('score').textContent=state.score;
-    document.getElementById('time').textContent=state.time;
+    const halfEl=document.getElementById('half');
+    if(state.mode==='full'){
+      state.half=s.half||1; state.clock=s.clock||0;
+      halfEl.style.display=''; halfEl.textContent=(state.half===2?'2º TEMPO':'1º TEMPO');
+      document.getElementById('time').textContent=fmtClock(state.clock);
+    } else {
+      state.time=(typeof s.time==='number'?s.time:60);
+      halfEl.style.display='none';
+      document.getElementById('time').textContent=state.time;
+    }
     show(null); hud.classList.add('on'); pad.classList.add('on');
     startTimer();
   } else if(s.scene==='end'){
