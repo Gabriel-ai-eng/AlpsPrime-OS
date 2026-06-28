@@ -115,7 +115,7 @@ export default function Notifications() {
       {/* =========================================
           CABEÇALHO FIXO
           ========================================= */}
-      <header className="w-full bg-background/80 backdrop-blur-3xl pt-14 pb-4 px-5 flex items-center justify-between z-20 sticky top-0 border-b border-border shadow-sm">
+      <header className="w-full bg-white backdrop-blur-3xl pt-14 pb-4 px-5 flex items-center justify-between z-20 sticky top-0 border-b border-border shadow-sm">
 
         <button
           onClick={() => navigate(-1)}

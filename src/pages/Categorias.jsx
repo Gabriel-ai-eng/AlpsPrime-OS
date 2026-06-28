@@ -37,7 +37,7 @@ export default function Categorias() {
     <div className="w-full min-h-screen bg-background text-foreground font-sans overflow-x-hidden flex flex-col">
 
       {/* HEADER */}
-      <div className="pt-12 pb-5 px-6 sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border">
+      <div className="pt-12 pb-5 px-6 sticky top-0 z-20 bg-white backdrop-blur-xl border-b border-border">
         <h1 className="text-2xl font-semibold tracking-tight">{t('Categorias')}</h1>
         <p className="text-muted-foreground text-[14px] mt-1">{t('Escolha uma categoria para explorar.')}</p>
 

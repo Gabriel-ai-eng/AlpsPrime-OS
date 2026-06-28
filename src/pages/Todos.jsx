@@ -20,7 +20,7 @@ export default function Todos() {
     <div className="w-full min-h-screen bg-background text-foreground font-sans overflow-x-hidden flex flex-col">
 
       {/* HEADER */}
-      <div className="pt-12 pb-6 px-6 sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border">
+      <div className="pt-12 pb-6 px-6 sticky top-0 z-20 bg-white backdrop-blur-xl border-b border-border">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center border border-border">
             <Grip className="w-5 h-5 text-foreground" />

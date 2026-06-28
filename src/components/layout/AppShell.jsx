@@ -180,7 +180,7 @@ export default function AppShell() {
           <div className="absolute inset-0" onClick={() => setMobileOpen(false)} />
 
           <div
-            className="relative z-10 w-full max-w-md rounded-[44px] flex flex-col overflow-hidden animate-menu-panel-in bg-popover/95 backdrop-blur-xl border border-border shadow-2xl"
+            className="relative z-10 w-full max-w-md rounded-[44px] flex flex-col overflow-hidden animate-menu-panel-in bg-white backdrop-blur-xl border border-border shadow-2xl"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-foreground/5 to-transparent" />
 
@@ -249,7 +249,7 @@ export default function AppShell() {
 
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
         {!hideHeader && (
-        <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-background/95 backdrop-blur-xl border-b border-border">
+        <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-white backdrop-blur-xl border-b border-border">
           <div>
             <Link
               to="/settings"
@@ -257,7 +257,7 @@ export default function AppShell() {
               aria-label={t('Configurações')}
               style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
             >
-              <Menu className="w-5 h-5 text-foreground" strokeWidth={2.6} />
+              <Menu className="w-5 h-5 text-black" strokeWidth={2.6} />
             </Link>
           </div>
 
@@ -269,7 +269,7 @@ export default function AppShell() {
 
           <div className="flex items-center gap-1">
             <Link to="/search" className="p-2 rounded-full hover:bg-muted transition-colors outline-none" aria-label={t('Buscar')}>
-              <SearchIcon className="w-5 h-5 text-foreground hover:text-foreground" strokeWidth={2.6} />
+              <SearchIcon className="w-5 h-5 text-black hover:text-black" strokeWidth={2.6} />
             </Link>
 
             <div>
@@ -280,7 +280,7 @@ export default function AppShell() {
         )}
 
         {!hideHeader && (
-        <header className="hidden lg:flex items-center justify-end px-6 h-12 border-b border-border bg-background/60 backdrop-blur-xl sticky top-0 z-20">
+        <header className="hidden lg:flex items-center justify-end px-6 h-12 border-b border-border bg-white backdrop-blur-xl sticky top-0 z-20">
           <NotificationsBell userEmail={user?.email} />
         </header>
         )}

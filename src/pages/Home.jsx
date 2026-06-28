@@ -8,7 +8,7 @@ const Sexta = lazy(() => import('./Sexta'));
 const ProjetoArmor = lazy(() => import('./ProjetoArmor'));
 
 const LoadingScreen = () => (
-  <div className="absolute inset-0 z-[200000] flex flex-col items-center justify-center bg-background/80 backdrop-blur-xl">
+  <div className="absolute inset-0 z-[200000] flex flex-col items-center justify-center bg-white backdrop-blur-xl">
     <Loader2 className="w-8 h-8 text-muted-foreground animate-spin mb-4" />
     <span className="text-muted-foreground text-xs tracking-[0.2em] uppercase font-medium">
       Iniciando
