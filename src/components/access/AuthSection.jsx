@@ -8,14 +8,23 @@ import {
   requestPasswordReset,
   resetPasswordWithCode,
 } from '@/lib/auth';
-import { Mail, Lock, User, ArrowLeft, Loader2, KeyRound, Eye, EyeOff, ShoppingBag } from 'lucide-react';
+import {
+  Mail,
+  Lock,
+  User,
+  ArrowLeft,
+  Loader2,
+  KeyRound,
+  Eye,
+  EyeOff,
+  ShoppingBag,
+  ChevronRight,
+} from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
 import { useT } from '@/lib/i18n';
 
-// Checkout da Hotmart (mesmo usado no Welcome/HotmartGate).
 const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
 
-// Extrai uma mensagem amigável do erro do Supabase Auth.
 function msgErro(e) {
   const raw = e?.message || e?.error_description || '';
   if (/invalid login|invalid cred|wrong password|incorrect|401/i.test(raw)) return 'E-mail ou senha incorretos.';
@@ -24,6 +33,30 @@ function msgErro(e) {
   if (/password.*(6|short|least)/i.test(raw)) return 'A senha precisa ter pelo menos 6 caracteres.';
   if (/email.*confirm|not confirmed/i.test(raw)) return 'Confirme seu e-mail antes de entrar.';
   return raw || 'Não foi possível concluir. Tente novamente.';
+}
+
+function Field({ icon: Icon, children }) {
+  return (
+    <div className="relative">
+      <div className="pointer-events-none absolute left-0 top-0 flex h-12 w-12 items-center justify-center text-black/45">
+        <Icon className="h-4.5 w-4.5" />
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function EyeToggle({ shown, onToggle, label }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={label}
+      className="absolute right-0 top-0 flex h-12 w-12 items-center justify-center text-black/45 transition hover:text-black focus:outline-none"
+    >
+      {shown ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
+    </button>
+  );
 }
 
 export default function AuthSection({ onClose }) {
@@ -45,72 +78,115 @@ export default function AuthSection({ onClose }) {
 
   const goFeed = () => window.location.assign('/home');
   const cleanEmail = () => email.trim().toLowerCase();
-  const reset = (m) => { setMode(m); setStep('form'); setError(''); setInfo(''); setNoAccess(false); };
+
+  const reset = (m) => {
+    setMode(m);
+    setStep('form');
+    setError('');
+    setInfo('');
+    setNoAccess(false);
+  };
 
   const ensureAccess = async () => {
     const ok = await hasPaidAccess(cleanEmail());
-    if (ok) { setNoAccess(false); return true; }
-    setError('Este e-mail ainda não tem acesso. Use o mesmo e-mail da compra na Hotmart — só ele libera o cadastro/login.');
+    if (ok) {
+      setNoAccess(false);
+      return true;
+    }
+    setError('Este e-mail ainda não tem acesso. Use o mesmo e-mail da compra na Hotmart.');
     setNoAccess(true);
     return false;
   };
 
   const handleLogin = async () => {
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
-      if (!(await ensureAccess())) { setLoading(false); return; }
+      if (!(await ensureAccess())) {
+        setLoading(false);
+        return;
+      }
       await signInWithPassword(cleanEmail(), password);
       goFeed();
-    } catch (e) { setError(msgErro(e)); setLoading(false); }
+    } catch (e) {
+      setError(msgErro(e));
+      setLoading(false);
+    }
   };
 
   const handleRegister = async () => {
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
-      if (!(await ensureAccess())) { setLoading(false); return; }
+      if (!(await ensureAccess())) {
+        setLoading(false);
+        return;
+      }
       const res = await signUp(cleanEmail(), password, fullName.trim());
-      // Se a confirmação de e-mail estiver desligada no Supabase, já vem sessão.
-      if (res?.session) { goFeed(); return; }
+      if (res?.session) {
+        goFeed();
+        return;
+      }
       setStep('otp');
       setInfo('Enviamos um código de confirmação para o seu e-mail.');
       setLoading(false);
-    } catch (e) { setError(msgErro(e)); setLoading(false); }
+    } catch (e) {
+      setError(msgErro(e));
+      setLoading(false);
+    }
   };
 
   const handleVerify = async () => {
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
       await verifySignupOtp(cleanEmail(), otpCode.trim());
       goFeed();
-    } catch (e) { setError(msgErro(e)); setLoading(false); }
+    } catch (e) {
+      setError(msgErro(e));
+      setLoading(false);
+    }
   };
 
   const handleResend = async () => {
-    setError(''); setInfo('');
+    setError('');
+    setInfo('');
     try {
       await resendSignupOtp(cleanEmail());
       setInfo('Código reenviado. Verifique seu e-mail.');
-    } catch (e) { setError(msgErro(e)); }
+    } catch (e) {
+      setError(msgErro(e));
+    }
   };
 
   const handleForgotRequest = async () => {
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
       await requestPasswordReset(cleanEmail());
       setStep('reset');
-      setInfo('Enviamos as instruções para o seu e-mail. Cole o código recebido e defina a nova senha.');
+      setInfo('Enviamos as instruções para o seu e-mail.');
       setLoading(false);
-    } catch (e) { setError(msgErro(e)); setLoading(false); }
+    } catch (e) {
+      setError(msgErro(e));
+      setLoading(false);
+    }
   };
 
   const handleResetPassword = async () => {
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
       await resetPasswordWithCode(cleanEmail(), resetToken.trim(), newPassword);
-      setPassword(''); setNewPassword(''); setResetToken('');
+      setPassword('');
+      setNewPassword('');
+      setResetToken('');
       reset('login');
-      setInfo('Senha redefinida! Agora é só entrar com a nova senha.');
-    } catch (e) { setError(msgErro(e)); setLoading(false); }
+      setInfo('Senha redefinida. Agora é só entrar com a nova senha.');
+    } catch (e) {
+      setError(msgErro(e));
+      setLoading(false);
+    }
   };
 
   const submit = (e) => {
@@ -123,211 +199,254 @@ export default function AuthSection({ onClose }) {
 
   const titulo =
     step === 'otp' ? 'Confirme seu e-mail'
-    : mode === 'forgot' ? 'Recuperar senha'
-    : mode === 'login' ? 'Entrar' : 'Criar conta';
+      : mode === 'forgot' ? 'Recuperar senha'
+        : mode === 'login' ? 'Entrar'
+          : 'Criar conta';
 
   const botao =
     step === 'otp' ? 'Confirmar código'
-    : mode === 'forgot' ? (step === 'reset' ? 'Redefinir senha' : 'Enviar instruções')
-    : mode === 'login' ? 'Entrar' : 'Criar conta';
+      : mode === 'forgot' ? (step === 'reset' ? 'Redefinir senha' : 'Enviar instruções')
+        : mode === 'login' ? 'Entrar'
+          : 'Criar conta';
 
-  // CORREÇÃO: Fundo cinza suave (#3f3f46) no preenchimento e cursor forçado na cor branca (caret-white)
   const inputBase =
-    'w-full h-12 pl-11 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 outline-none focus:border-gold/50 focus:bg-white/[0.07] transition-all relative z-10 caret-white [&:-webkit-autofill]:[box-shadow:0_0_0_40px_#3f3f46_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#ffffff]';
-  const inputCls = `${inputBase} pr-3`;
-  const inputPw = `${inputBase} pr-11`;
-
-  const EyeToggle = ({ shown, onToggle }) => (
-    <button
-      type="button"
-      onClick={onToggle}
-      tabIndex={-1}
-      aria-label={shown ? t('Ocultar senha') : t('Mostrar senha')}
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors z-20"
-    >
-      {shown ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-    </button>
-  );
+    'w-full h-12 bg-transparent border-b border-black/12 pl-12 pr-12 text-[15px] text-black placeholder:text-black/35 outline-none transition focus:border-black/60';
+  const inputPw = `${inputBase} pr-12`;
+  const inputCls = inputBase;
 
   return (
-    <div className="fixed inset-0 z-[100000] bg-[#0B0B0C] flex items-center justify-center px-4 py-8 overflow-y-auto overflow-x-hidden">
-      <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gold/8 rounded-full blur-[160px] pointer-events-none" />
+    <div className="fixed inset-0 z-[100000] bg-white text-black">
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 sm:px-8">
+        <header className="flex items-center justify-between py-5 sm:py-6">
+          <button
+            onClick={onClose}
+            className="inline-flex items-center gap-2 text-sm text-black/60 transition hover:text-black focus:outline-none"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t('Voltar')}
+          </button>
 
-      <div className="relative z-10 w-full max-w-md">
-        <button
-          onClick={onClose}
-          className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors outline-none"
-        >
-          <ArrowLeft className="w-4 h-4" /> {t('Voltar')}
-        </button>
+          <a
+            href={CHECKOUT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-black/60 transition hover:text-black"
+          >
+            {t('Comprar acesso')}
+            <ChevronRight className="h-4 w-4" />
+          </a>
+        </header>
 
-        <div className="bg-[#161618]/95 backdrop-blur-xl border border-gold/20 rounded-3xl p-7 shadow-2xl shadow-gold/10 relative z-20">
-          <div className="flex flex-col items-center mb-6">
-            <img src={LOGO_URL} alt="Sexta-feira" className="w-14 h-14 rounded-2xl object-cover shadow-lg shadow-gold/20" />
-            <h1 className="mt-4 text-xl font-semibold text-white">{t(titulo)}</h1>
-            <p className="text-xs text-muted-foreground mt-1 text-center">
-              {t('Use o mesmo e-mail da sua compra na Hotmart.')}
-            </p>
-          </div>
+        <main className="flex flex-1 items-center">
+          <section className="grid w-full gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+            <div className="max-w-2xl">
+              <img src={LOGO_URL} alt="Alps OS" className="h-12 w-12 rounded-2xl object-cover" />
 
-          {step === 'form' && mode !== 'forgot' && (
-            <div className="flex p-1 mb-5 rounded-xl bg-white/5 border border-white/10 relative z-10">
-              {['login', 'register'].map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => reset(m)}
-                  className={`flex-1 h-9 rounded-lg text-sm font-medium transition-colors outline-none ${
-                    mode === m ? 'bg-gold/20 text-gold' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {m === 'login' ? t('Entrar') : t('Criar conta')}
-                </button>
-              ))}
+              <p className="mt-8 text-sm font-medium tracking-wide text-black/45">
+                {t('Acesso privado')}
+              </p>
+
+              <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-6xl">
+                {t(titulo)}
+              </h1>
+
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-black/60 sm:text-lg">
+                {t('Use o mesmo e-mail da compra na Hotmart para entrar, criar conta ou redefinir sua senha.')}
+              </p>
+
+              <div className="mt-10 space-y-4 border-t border-black/8 pt-8">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 h-2 w-2 rounded-full bg-black" />
+                  <p className="text-sm leading-relaxed text-black/60">
+                    {t('Uma interface clara, sem distrações, com foco na ação principal.')}
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 h-2 w-2 rounded-full bg-black" />
+                  <p className="text-sm leading-relaxed text-black/60">
+                    {t('Acesso, confirmação e recuperação organizados em um único fluxo.')}
+                  </p>
+                </div>
+              </div>
             </div>
-          )}
 
-          <form onSubmit={submit} className="space-y-3 relative z-10">
-            {step === 'form' && mode === 'register' && (
-              <div className="relative">
-                <User className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
-                <input
-                  className={inputCls}
-                  placeholder={t('Seu nome')}
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  autoComplete="name"
-                />
+            <div className="lg:justify-self-end w-full max-w-xl">
+              <div className="border-t border-black/10 pt-0">
+                {step === 'form' && mode !== 'forgot' && (
+                  <div className="mb-10 flex gap-8 border-b border-black/10 pb-4">
+                    {['login', 'register'].map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => reset(m)}
+                        className={`pb-3 text-sm font-medium transition ${
+                          mode === m ? 'border-b-2 border-black text-black' : 'text-black/45 hover:text-black/70'
+                        }`}
+                      >
+                        {m === 'login' ? t('Entrar') : t('Criar conta')}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <form onSubmit={submit} className="space-y-6">
+                  {step === 'form' && mode === 'register' && (
+                    <Field icon={User}>
+                      <input
+                        className={inputCls}
+                        placeholder={t('Seu nome')}
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        autoComplete="name"
+                      />
+                    </Field>
+                  )}
+
+                  {step === 'form' && (
+                    <Field icon={Mail}>
+                      <input
+                        className={inputCls}
+                        type="email"
+                        placeholder={t('E-mail')}
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (noAccess) {
+                            setNoAccess(false);
+                            setError('');
+                          }
+                        }}
+                        autoComplete="email"
+                        required
+                      />
+                    </Field>
+                  )}
+
+                  {step === 'form' && mode !== 'forgot' && (
+                    <Field icon={Lock}>
+                      <input
+                        className={inputPw}
+                        type={showPw ? 'text' : 'password'}
+                        placeholder={t('Senha')}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                        required
+                      />
+                      <EyeToggle
+                        shown={showPw}
+                        onToggle={() => setShowPw((v) => !v)}
+                        label={showPw ? t('Ocultar senha') : t('Mostrar senha')}
+                      />
+                    </Field>
+                  )}
+
+                  {step === 'otp' && (
+                    <Field icon={KeyRound}>
+                      <input
+                        className={`${inputCls} tracking-[0.35em] text-center pl-12`}
+                        inputMode="numeric"
+                        placeholder={t('Código')}
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value)}
+                      />
+                    </Field>
+                  )}
+
+                  {mode === 'forgot' && step === 'reset' && (
+                    <>
+                      <Field icon={KeyRound}>
+                        <input
+                          className={inputCls}
+                          placeholder={t('Código recebido por e-mail')}
+                          value={resetToken}
+                          onChange={(e) => setResetToken(e.target.value)}
+                        />
+                      </Field>
+
+                      <Field icon={Lock}>
+                        <input
+                          className={inputPw}
+                          type={showNewPw ? 'text' : 'password'}
+                          placeholder={t('Nova senha')}
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          autoComplete="new-password"
+                          required
+                        />
+                        <EyeToggle
+                          shown={showNewPw}
+                          onToggle={() => setShowNewPw((v) => !v)}
+                          label={showNewPw ? t('Ocultar senha') : t('Mostrar senha')}
+                        />
+                      </Field>
+                    </>
+                  )}
+
+                  {error && <p className="text-sm text-red-600">{t(error)}</p>}
+                  {info && !error && <p className="text-sm text-emerald-600">{t(info)}</p>}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 border border-black bg-black px-6 text-sm font-medium text-white transition hover:bg-black/90 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {t(botao)}
+                  </button>
+
+                  {noAccess && (
+                    <a
+                      href={CHECKOUT_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-12 w-full items-center justify-center gap-2 border border-black/15 px-6 text-sm font-medium text-black transition hover:bg-black/[0.03]"
+                    >
+                      <ShoppingBag className="h-4 w-4" />
+                      {t('Comprar acesso')}
+                    </a>
+                  )}
+
+                  {step === 'form' && mode === 'login' && (
+                    <button
+                      type="button"
+                      onClick={() => reset('forgot')}
+                      className="block text-sm text-black/45 transition hover:text-black/70"
+                    >
+                      {t('Esqueci minha senha')}
+                    </button>
+                  )}
+
+                  {mode === 'forgot' && (
+                    <button
+                      type="button"
+                      onClick={() => reset('login')}
+                      className="block text-sm text-black/45 transition hover:text-black/70"
+                    >
+                      {t('Voltar para o login')}
+                    </button>
+                  )}
+
+                  {step === 'otp' && (
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      className="block text-sm text-black/45 transition hover:text-black/70"
+                    >
+                      {t('Reenviar código')}
+                    </button>
+                  )}
+                </form>
               </div>
-            )}
+            </div>
+          </section>
+        </main>
 
-            {step === 'form' && (
-              <div className="relative">
-                <Mail className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
-                <input
-                  className={inputCls}
-                  type="email"
-                  placeholder={t('E-mail')}
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); if (noAccess) { setNoAccess(false); setError(''); } }}
-                  autoComplete="email"
-                  required
-                />
-              </div>
-            )}
-
-            {step === 'form' && mode !== 'forgot' && (
-              <div className="relative">
-                <Lock className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
-                <input
-                  className={inputPw}
-                  type={showPw ? 'text' : 'password'}
-                  placeholder={t('Senha')}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                  required
-                />
-                <EyeToggle shown={showPw} onToggle={() => setShowPw((v) => !v)} />
-              </div>
-            )}
-
-            {step === 'otp' && (
-              <div className="relative">
-                <KeyRound className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
-                <input
-                  className={`${inputCls} tracking-[0.3em] text-center`}
-                  inputMode="numeric"
-                  placeholder={t('Código do e-mail')}
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value)}
-                />
-              </div>
-            )}
-
-            {mode === 'forgot' && step === 'reset' && (
-              <>
-                <div className="relative">
-                  <KeyRound className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
-                  <input
-                    className={inputCls}
-                    placeholder={t('Código recebido por e-mail')}
-                    value={resetToken}
-                    onChange={(e) => setResetToken(e.target.value)}
-                  />
-                </div>
-                <div className="relative">
-                  <Lock className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
-                  <input
-                    className={inputPw}
-                    type={showNewPw ? 'text' : 'password'}
-                    placeholder={t('Nova senha')}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    autoComplete="new-password"
-                    required
-                  />
-                  <EyeToggle shown={showNewPw} onToggle={() => setShowNewPw((v) => !v)} />
-                </div>
-              </>
-            )}
-
-            {error && <p className="text-xs text-red-400 px-1 pt-1">{t(error)}</p>}
-            {info && !error && <p className="text-xs text-emerald-400 px-1 pt-1">{t(info)}</p>}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60 relative z-20 mt-2 outline-none"
-              style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
-            >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {t(botao)}
-            </button>
-
-            {noAccess && (
-              <a
-                href={CHECKOUT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity relative z-20 outline-none"
-                style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
-              >
-                <ShoppingBag className="w-4 h-4" /> {t('Comprar acesso')}
-              </a>
-            )}
-
-            {step === 'form' && mode === 'login' && (
-              <button
-                type="button"
-                onClick={() => reset('forgot')}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none"
-              >
-                {t('Esqueci minha senha')}
-              </button>
-            )}
-
-            {mode === 'forgot' && (
-              <button
-                type="button"
-                onClick={() => reset('login')}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none"
-              >
-                {t('Voltar para o login')}
-              </button>
-            )}
-
-            {step === 'otp' && (
-              <button
-                type="button"
-                onClick={handleResend}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none"
-              >
-                {t('Reenviar código')}
-              </button>
-            )}
-          </form>
-        </div>
+        <footer className="border-t border-black/5 py-5 text-center">
+          <p className="text-[11px] leading-relaxed text-black/35">
+            {t('Versão Beta, ainda em aperfeiçoamento — podem ocorrer erros.')}
+          </p>
+        </footer>
       </div>
     </div>
   );
