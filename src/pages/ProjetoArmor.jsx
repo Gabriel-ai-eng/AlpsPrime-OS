@@ -803,24 +803,6 @@ export default function ProjetoArmor({ onVoltar }) {
               }}
             />
           ))}
-
-          {/* Bloco de perfil do usuário — ocupa o lugar dos marcadores do
-              vídeo (cubo verde = foto · retângulo branco = nome ·
-              retângulo vermelho = nível). Por enquanto é um placeholder:
-              silhueta + "Seu nome" + "Nível 0". Não captura toque, então um
-              toque aqui ainda entra em tela cheia como no resto do vídeo. */}
-          <div style={es.perfil}>
-            <div style={es.perfilFoto}>
-              <svg viewBox="0 0 24 24" width="62%" height="62%" fill="#9AA3B2" aria-hidden="true">
-                <circle cx="12" cy="8" r="4.2" />
-                <path d="M4 20.5c0-4.4 3.8-6.8 8-6.8s8 2.4 8 6.8z" />
-              </svg>
-            </div>
-            <div style={es.perfilInfo}>
-              <span style={es.perfilNome}>Seu nome</span>
-              <span style={es.perfilNivel}>Nível 0</span>
-            </div>
-          </div>
         </div>
       )}
 
@@ -860,11 +842,4 @@ const es = {
   txtGrande: { color: '#F0C040', fontSize: 19, fontWeight: 700, letterSpacing: '0.18em', margin: '0 0 8px' },
   txtPeq: { color: '#8E8E93', fontSize: 12, letterSpacing: '0.1em', margin: 0 },
   botaoEntrar: { background: '#F0C040', border: 'none', borderRadius: 14, color: '#16161C', fontWeight: 800, fontSize: 15, padding: '15px 32px', cursor: 'pointer', fontFamily: 'monospace', letterSpacing: '0.1em', boxShadow: '0 0 30px rgba(240,192,64,0.35)' },
-  // Perfil do usuário na tela inicial (canto superior direito):
-  // foto à esquerda, nome ao lado e nível bem abaixo do nome.
-  perfil: { position: 'absolute', top: '7%', right: '5%', display: 'flex', alignItems: 'flex-start', gap: 'clamp(8px,1.4vw,14px)', zIndex: 3, pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none', fontFamily: 'monospace' },
-  perfilFoto: { width: 'clamp(46px,8vw,78px)', aspectRatio: '1', borderRadius: '50%', background: 'rgba(0,0,0,0.45)', border: '2px solid rgba(110,216,255,0.7)', boxShadow: '0 0 16px rgba(110,216,255,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 },
-  perfilInfo: { display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', marginTop: 'clamp(2px,0.6vw,6px)' },
-  perfilNome: { color: '#FFFFFF', fontSize: 'clamp(13px,2vw,20px)', fontWeight: 700, letterSpacing: '0.04em', textShadow: '0 1px 4px rgba(0,0,0,0.85)', whiteSpace: 'nowrap' },
-  perfilNivel: { color: '#F0C040', fontSize: 'clamp(10px,1.5vw,15px)', fontWeight: 700, letterSpacing: '0.06em', marginTop: 'clamp(10px,2vw,18px)', textShadow: '0 1px 4px rgba(0,0,0,0.85)' },
 };
