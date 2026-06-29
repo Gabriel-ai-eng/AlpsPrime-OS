@@ -803,6 +803,18 @@ export default function ProjetoArmor({ onVoltar }) {
               }}
             />
           ))}
+
+          {/* Perfil do usuário — preenche o quadro vazio do menu (canto
+              superior direito do vídeo). Único asset é a silhueta branca
+              sem fundo; nome e nível são texto (fonte Rajdhani). Não captura
+              toque, então um toque aqui ainda entra em tela cheia. */}
+          <div style={es.perfilBox}>
+            <img src="/silhueta-usuario.png" alt="" style={es.perfilFoto} draggable={false} />
+            <div style={es.perfilTxt}>
+              <span style={es.perfilNome}>Seu nome</span>
+              <span style={es.perfilNivel}>Nível 0</span>
+            </div>
+          </div>
         </div>
       )}
 
@@ -842,4 +854,11 @@ const es = {
   txtGrande: { color: '#F0C040', fontSize: 19, fontWeight: 700, letterSpacing: '0.18em', margin: '0 0 8px' },
   txtPeq: { color: '#8E8E93', fontSize: 12, letterSpacing: '0.1em', margin: 0 },
   botaoEntrar: { background: '#F0C040', border: 'none', borderRadius: 14, color: '#16161C', fontWeight: 800, fontSize: 15, padding: '15px 32px', cursor: 'pointer', fontFamily: 'monospace', letterSpacing: '0.1em', boxShadow: '0 0 30px rgba(240,192,64,0.35)' },
+  // Perfil do usuário dentro do quadro do menu (canto superior direito do
+  // vídeo): silhueta à esquerda · nome em cima e nível logo abaixo.
+  perfilBox: { position: 'absolute', left: '72%', top: '3.6%', width: '20.5%', height: '17%', display: 'flex', alignItems: 'center', gap: '5%', padding: '0 2% 0 1.4%', boxSizing: 'border-box', zIndex: 3, pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none', fontFamily: "'Rajdhani', sans-serif" },
+  perfilFoto: { height: '82%', aspectRatio: '1', objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.55))' },
+  perfilTxt: { display: 'flex', flexDirection: 'column', justifyContent: 'center', lineHeight: 1.12, minWidth: 0 },
+  perfilNome: { color: '#FFFFFF', fontFamily: "'Rajdhani', sans-serif", fontWeight: 600, fontSize: 'clamp(12px,2.3vw,28px)', letterSpacing: '0.01em', whiteSpace: 'nowrap', textShadow: '0 1px 5px rgba(0,0,0,0.7)' },
+  perfilNivel: { color: '#FFFFFF', fontFamily: "'Rajdhani', sans-serif", fontWeight: 500, fontSize: 'clamp(11px,2.0vw,24px)', letterSpacing: '0.01em', whiteSpace: 'nowrap', textShadow: '0 1px 5px rgba(0,0,0,0.7)' },
 };
