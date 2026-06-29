@@ -106,6 +106,7 @@ export default function ProjetoArmor({ onVoltar }) {
   const [botaoPressionado, setBotaoPressionado] = useState(null); // 'jogar' | 'sair' | null
   const [knobOff, setKnobOff] = useState({ x: 0, y: 0 }); // deslocamento visual do knob do joystick
   const [voarAtivo, setVoarAtivo] = useState(false); // feedback visual do botão de voar
+  const [miraOff, setMiraOff] = useState({ x: 0, y: 0 }); // deslocamento visual do knob de mirar
   const [paisagem, setPaisagem] = useState(
     typeof window !== 'undefined' ? window.innerWidth > window.innerHeight : true
   );
@@ -114,6 +115,10 @@ export default function ProjetoArmor({ onVoltar }) {
   const moveRef = useRef({ x: 0, mag: 0 });
   const joyBaseRef = useRef(null);
   const joyPointerRef = useRef(null);
+  // Joystick de mirar (lado direito): direção da mira (e dispara enquanto ativo).
+  const aimRef = useRef({ active: false, ang: 0 });
+  const miraBaseRef = useRef(null);
+  const miraPointerRef = useRef(null);
 
   const canvasRef = useRef(null);
   const videoIntroRef = useRef(null);
@@ -412,10 +417,10 @@ export default function ProjetoArmor({ onVoltar }) {
       const hud = calcHUD(VW);
 
       // ===== INPUT =====
-      // Mover vem do joystick da esquerda (DOM). Mirar/voar/tiro ainda não
-      // têm controle (serão adicionados quando chegarem os componentes).
-      const mv = moveRef.current;
-      const mx = mv.x, intensidade = mv.mag, aimActive = false, aimAng = 0;
+      // Mover (joystick esq.) · Mirar (joystick dir.) · Voar (botão dir.).
+      // Vêm de elementos DOM via refs. Enquanto a mira está ativa, dispara.
+      const mv = moveRef.current, av = aimRef.current;
+      const mx = mv.x, intensidade = mv.mag, aimActive = av.active, aimAng = av.ang;
 
       // ===== FÍSICA HORIZONTAL =====
       const p = g.p;
@@ -595,7 +600,8 @@ export default function ProjetoArmor({ onVoltar }) {
       if (g.tiroCd > 0) g.tiroCd--;
       if (g.missilCd > 0) g.missilCd--;
       const dir = aimActive ? { x: Math.cos(aimAng), y: Math.sin(aimAng) } : { x: p.face, y: 0 };
-      if (g.tiroHeld && g.tiroCd <= 0) {
+      // Dispara em rajada contínua enquanto a mira estiver ativa.
+      if (aimActive && g.tiroCd <= 0) {
         g.projeteis.push({ tipo: 'tiro', x: ox + dir.x * 12, y: oy + dir.y * 12, vx: dir.x * VEL_TIRO, vy: dir.y * VEL_TIRO, vida: 90 });
         g.tiroCd = COOLDOWN_TIRO;
         if (g.projeteis.length > 90) g.projeteis.shift();
@@ -739,6 +745,40 @@ export default function ProjetoArmor({ onVoltar }) {
     setVoarAtivo(false);
   };
 
+  // ---------- JOYSTICK DE MIRAR (lado direito) ----------
+  // Direção da mira; enquanto empurrado além da zona-morta, o personagem
+  // dispara nessa direção. Solta → para de mirar/atirar.
+  const miraAtualizar = (clientX, clientY) => {
+    const el = miraBaseRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const maxR = (r.width / 2) * 0.58;
+    let dx = clientX - cx, dy = clientY - cy;
+    const d = Math.hypot(dx, dy);
+    let kx = dx, ky = dy;
+    if (d > maxR && d > 0) { kx = dx / d * maxR; ky = dy / d * maxR; }
+    setMiraOff({ x: kx, y: ky });
+    if (d > maxR * 0.28) aimRef.current = { active: true, ang: Math.atan2(dy, dx) };
+    else aimRef.current = { active: false, ang: 0 };
+  };
+  const miraInicio = (e) => {
+    e.preventDefault();
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+    miraPointerRef.current = e.pointerId;
+    miraAtualizar(e.clientX, e.clientY);
+  };
+  const miraMover = (e) => {
+    if (miraPointerRef.current !== e.pointerId) return;
+    miraAtualizar(e.clientX, e.clientY);
+  };
+  const miraFim = (e) => {
+    if (miraPointerRef.current !== e.pointerId) return;
+    miraPointerRef.current = null;
+    setMiraOff({ x: 0, y: 0 });
+    aimRef.current = { active: false, ang: 0 };
+  };
+
   return createPortal(
     <div style={es.fundo}>
       <canvas ref={canvasRef} className="armor-canvas" style={es.canvas} />
@@ -787,6 +827,24 @@ export default function ProjetoArmor({ onVoltar }) {
             onPointerLeave={voarRelease}
             onContextMenu={(e) => e.preventDefault()}
             style={{ ...es.botaoVoar, transform: `translate(-50%, -50%) scale(${voarAtivo ? 1.08 : 1})` }}
+          />
+
+          {/* Joystick de MIRAR (lado direito). Zona transparente captura o
+              toque (metade direita inferior); base e knob por cima. */}
+          <div
+            style={es.miraZona}
+            onPointerDown={miraInicio}
+            onPointerMove={miraMover}
+            onPointerUp={miraFim}
+            onPointerCancel={miraFim}
+            onContextMenu={(e) => e.preventDefault()}
+          />
+          <img ref={miraBaseRef} src="/mira-base.png" alt="" draggable={false} style={es.miraBase} />
+          <img
+            src="/mira-knob.png"
+            alt=""
+            draggable={false}
+            style={{ ...es.miraKnob, transform: `translate(calc(-50% + ${miraOff.x}px), calc(-50% + ${miraOff.y}px))` }}
           />
         </>
       )}
@@ -934,4 +992,8 @@ const es = {
   joyKnob: { position: 'absolute', left: '11%', top: '78.1%', width: 'clamp(38px,5.6vw,62px)', aspectRatio: '1', pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none', zIndex: 27, transition: 'transform 0.07s ease-out' },
   // Botão de voar (lado direito)
   botaoVoar: { position: 'absolute', left: '78.7%', top: '83.8%', width: 'clamp(54px,7.9vw,90px)', aspectRatio: '1', transformOrigin: 'center', transition: 'transform 0.1s ease', zIndex: 28, cursor: 'pointer', touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' },
+  // Joystick de mirar (lado direito)
+  miraZona: { position: 'absolute', left: '50%', top: '22%', right: 0, bottom: 0, zIndex: 25, touchAction: 'none', background: 'transparent' },
+  miraBase: { position: 'absolute', left: '91.3%', top: '80.9%', width: 'clamp(90px,13.5vw,150px)', aspectRatio: '1', transform: 'translate(-50%,-50%)', pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none', zIndex: 26 },
+  miraKnob: { position: 'absolute', left: '91.3%', top: '80.9%', width: 'clamp(48px,7.1vw,80px)', aspectRatio: '1', pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none', zIndex: 27, transition: 'transform 0.04s ease-out' },
 };
