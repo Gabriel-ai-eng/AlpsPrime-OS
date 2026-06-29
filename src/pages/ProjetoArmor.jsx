@@ -303,10 +303,8 @@ export default function ProjetoArmor({ onVoltar }) {
         delete g.toques[t.identifier];
       }
     };
-    canvas.addEventListener('touchstart', onTS, { passive: false });
-    canvas.addEventListener('touchmove', onTM, { passive: false });
-    canvas.addEventListener('touchend', endTouch);
-    canvas.addEventListener('touchcancel', endTouch);
+    // Controles removidos: os joysticks (mover/mirar) e os botões
+    // (tiro/míssil/voar) foram desativados — nenhum toque é capturado.
 
     // ===== ÍCONES DESENHADOS À MÃO =====
     const icone = (id, cx, cy, s, cor) => {
@@ -651,16 +649,8 @@ export default function ProjetoArmor({ onVoltar }) {
       vin.addColorStop(0, 'rgba(0,0,0,0)'); vin.addColorStop(1, `rgba(0,0,0,${0.42 * (1 - lum * 0.5)})`);
       ctx.fillStyle = vin; ctx.fillRect(0, 0, VW, ALT);
 
-      // ===== HUD (sticks + botões), translúcida e por cima =====
-      // home discreto dos sticks
-      if (!moverAtivo) desenharStick(hud.moverBase.x, hud.moverBase.y, hud.R, 0, 0, false, AZUL_RGB);
-      else desenharStick(moverAtivo.bx, moverAtivo.by, hud.R, moverAtivo.kx, moverAtivo.ky, true, correndo ? AZUL_RGB : [220, 230, 245]);
-      if (!mirarAtivo) desenharStick(hud.mirarBase.x, hud.mirarBase.y, hud.R, 0, 0, false, AZUL_RGB);
-      else desenharStick(mirarAtivo.bx, mirarAtivo.by, hud.R, mirarAtivo.kx, mirarAtivo.ky, true, AZUL_RGB);
-
-      const pressed = {};
-      for (const id in g.toques) { const tq = g.toques[id]; if (tq.tipo === 'btn') pressed[tq.botao] = true; }
-      for (const b of hud.botoes) desenharBotao(b, !!pressed[b.id] || (b.id === 'tiro' && g.tiroHeld) || (b.id === 'voar' && g.flying));
+      // HUD removida: joysticks (mover/mirar) e botões (tiro/míssil/voar)
+      // não são mais desenhados.
     };
 
     const clampKnob = (by, cy, R) => { const d = cy - by; return by + Math.max(-R, Math.min(R, d)); };
