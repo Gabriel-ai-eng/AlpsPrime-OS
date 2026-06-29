@@ -17,7 +17,7 @@
     /* ── LIGHT / WHITE PALETTE ── */
     --background:        0 0% 100%;
     --foreground:        240 10% 12%;
-    --card:              0 0% 91.4%; /* #E9E9E9 — cards/seções em cinza claro sobre o fundo branco */
+    --card:              0 0% 95.7%; /* #F4F4F4 — cards/seções em cinza bem suave sobre o fundo branco */
     --card-foreground:   240 10% 12%;
     --popover:           0 0% 100%;
     --popover-foreground:240 10% 12%;
