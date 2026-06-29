@@ -15,7 +15,7 @@
     --gold-dark:  168 133 46;
 
     /* ── LIGHT / WHITE PALETTE ── */
-    --background:        40 30% 98%;
+    --background:        0 0% 100%;
     --foreground:        240 10% 12%;
     --card:              0 0% 100%;
     --card-foreground:   240 10% 12%;
@@ -97,7 +97,7 @@
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
-    background-color: hsl(40, 30%, 98%);
+    background-color: #ffffff;
     background-image:
       radial-gradient(ellipse 70% 45% at 10% 0%,   rgba(201,162,79,0.06) 0%, transparent 60%),
       radial-gradient(ellipse 55% 40% at 90% 100%,  rgba(160,120,220,0.04) 0%, transparent 60%);
