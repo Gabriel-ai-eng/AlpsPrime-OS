@@ -789,7 +789,9 @@ export default function ProjetoArmor({ onVoltar }) {
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
                 transformOrigin: 'center',
-                transform: `translate(-50%, -50%) scale(${botaoPressionado === b.id ? 1.1 : 1})`,
+                // Ao pressionar, o botão apenas aparece (brilho) no tamanho
+                // exato do menu — sem estourar/crescer além dele (scale 1).
+                transform: 'translate(-50%, -50%) scale(1)',
                 opacity: botaoPressionado === b.id ? 1 : 0,
                 transition: 'transform 0.12s ease, opacity 0.12s ease',
                 zIndex: 3,
