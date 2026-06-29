@@ -914,9 +914,10 @@ export default function ProjetoArmor({ onVoltar }) {
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
                 transformOrigin: 'center',
-                // Ao pressionar, o botão apenas aparece (brilho) no tamanho
-                // exato do menu — sem estourar/crescer além dele (scale 1).
-                transform: 'translate(-50%, -50%) scale(1)',
+                // Ao pressionar, o botão "salta para frente": acende (brilho) e
+                // cresce ~1,3x a partir do centro, ficando um pouco maior que o
+                // tamanho de repouso do menu (efeito de pop pedido no design).
+                transform: `translate(-50%, -50%) scale(${botaoPressionado === b.id ? 1.3 : 1})`,
                 opacity: botaoPressionado === b.id ? 1 : 0,
                 transition: 'transform 0.12s ease, opacity 0.12s ease',
                 zIndex: 3,
