@@ -251,14 +251,17 @@ export default function AppShell() {
         {!hideHeader && (
         <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-white backdrop-blur-xl border-b border-border">
           <div>
-            <Link
-              to="/settings"
-              className="p-3 -ml-2 min-w-[48px] min-h-[48px] hover:bg-muted rounded-xl transition-colors outline-none inline-flex items-center justify-center"
-              aria-label={t('Configurações')}
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              className="p-3 -ml-2 min-w-[48px] min-h-[48px] hover:bg-muted active:bg-black/10 rounded-xl transition-colors outline-none inline-flex items-center justify-center"
+              aria-label={t('Menu')}
+              aria-haspopup="menu"
+              aria-expanded={mobileOpen}
               style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
             >
               <Menu className="w-5 h-5 text-black" strokeWidth={2.6} />
-            </Link>
+            </button>
           </div>
 
           <span className="flex-1 flex items-center justify-center px-2 select-none">
