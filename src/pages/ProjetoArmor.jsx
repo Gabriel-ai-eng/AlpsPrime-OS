@@ -104,9 +104,15 @@ export default function ProjetoArmor({ onVoltar }) {
   const [relogioAtivo, setRelogioAtivo] = useState(false);
   const [horaTexto, setHoraTexto] = useState('--:--');
   const [botaoPressionado, setBotaoPressionado] = useState(null); // 'jogar' | 'sair' | null
+  const [knobOff, setKnobOff] = useState({ x: 0, y: 0 }); // deslocamento visual do knob do joystick
   const [paisagem, setPaisagem] = useState(
     typeof window !== 'undefined' ? window.innerWidth > window.innerHeight : true
   );
+
+  // Joystick de mover (lado esquerdo): leitura entregue ao loop do jogo.
+  const moveRef = useRef({ x: 0, mag: 0 });
+  const joyBaseRef = useRef(null);
+  const joyPointerRef = useRef(null);
 
   const canvasRef = useRef(null);
   const videoIntroRef = useRef(null);
@@ -404,24 +410,11 @@ export default function ProjetoArmor({ onVoltar }) {
       if (window.innerWidth <= window.innerHeight) return;
       const hud = calcHUD(VW);
 
-      // ===== INPUT (mover + mirar) =====
-      let mx = 0, intensidade = 0, aimActive = false, aimAng = 0;
-      let moverAtivo = null, mirarAtivo = null;
-      for (const id in g.toques) {
-        const tq = g.toques[id];
-        if (tq.tipo === 'mover') {
-          let dx = tq.cx - tq.bx;
-          const mag = Math.min(Math.abs(dx), hud.R);
-          if (Math.abs(dx) > hud.R) dx = Math.sign(dx) * hud.R;
-          mx = dx / hud.R; intensidade = Math.max(intensidade, mag / hud.R);
-          moverAtivo = { bx: tq.bx, by: tq.by, kx: tq.bx + dx, ky: clampKnob(tq.by, tq.cy, hud.R) };
-        } else if (tq.tipo === 'mirar') {
-          const dx = tq.cx - tq.bx, dy = tq.cy - tq.by, mag = Math.hypot(dx, dy);
-          if (mag > 7) { aimActive = true; aimAng = Math.atan2(dy, dx); }
-          const cl = Math.min(mag, hud.R) / (mag || 1);
-          mirarAtivo = { bx: tq.bx, by: tq.by, kx: tq.bx + dx * cl, ky: tq.by + dy * cl };
-        }
-      }
+      // ===== INPUT =====
+      // Mover vem do joystick da esquerda (DOM). Mirar/voar/tiro ainda não
+      // têm controle (serão adicionados quando chegarem os componentes).
+      const mv = moveRef.current;
+      const mx = mv.x, intensidade = mv.mag, aimActive = false, aimAng = 0;
 
       // ===== FÍSICA HORIZONTAL =====
       const p = g.p;
@@ -693,6 +686,38 @@ export default function ProjetoArmor({ onVoltar }) {
     } else aplicar(null);
   };
 
+  // ---------- JOYSTICK DE MOVER (lado esquerdo) ----------
+  // Base fixa; o knob segue o dedo limitado ao raio da base. O componente x
+  // do deslocamento vira a velocidade horizontal do personagem.
+  const joyAtualizar = (clientX, clientY) => {
+    const el = joyBaseRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const maxR = (r.width / 2) * 0.58; // o knob não passa da borda da base
+    let dx = clientX - cx, dy = clientY - cy;
+    const d = Math.hypot(dx, dy);
+    if (d > maxR && d > 0) { dx = dx / d * maxR; dy = dy / d * maxR; }
+    setKnobOff({ x: dx, y: dy });
+    moveRef.current = { x: dx / maxR, mag: Math.min(Math.hypot(dx, dy) / maxR, 1) };
+  };
+  const joyInicio = (e) => {
+    e.preventDefault();
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+    joyPointerRef.current = e.pointerId;
+    joyAtualizar(e.clientX, e.clientY);
+  };
+  const joyMover = (e) => {
+    if (joyPointerRef.current !== e.pointerId) return;
+    joyAtualizar(e.clientX, e.clientY);
+  };
+  const joyFim = (e) => {
+    if (joyPointerRef.current !== e.pointerId) return;
+    joyPointerRef.current = null;
+    setKnobOff({ x: 0, y: 0 });
+    moveRef.current = { x: 0, mag: 0 };
+  };
+
   return createPortal(
     <div style={es.fundo}>
       <canvas ref={canvasRef} className="armor-canvas" style={es.canvas} />
@@ -711,6 +736,24 @@ export default function ProjetoArmor({ onVoltar }) {
               {relogioAtivo ? horaTexto : 'ATIVAR'}
             </span>
           </button>
+
+          {/* Joystick de MOVER (lado esquerdo). A zona transparente captura o
+              toque; base e knob são camadas por cima (sem capturar toque). */}
+          <div
+            style={es.joyZona}
+            onPointerDown={joyInicio}
+            onPointerMove={joyMover}
+            onPointerUp={joyFim}
+            onPointerCancel={joyFim}
+            onContextMenu={(e) => e.preventDefault()}
+          />
+          <img ref={joyBaseRef} src="/joystick-base.png" alt="" draggable={false} style={es.joyBase} />
+          <img
+            src="/joystick-knob.png"
+            alt=""
+            draggable={false}
+            style={{ ...es.joyKnob, transform: `translate(calc(-50% + ${knobOff.x}px), calc(-50% + ${knobOff.y}px))` }}
+          />
         </>
       )}
 
@@ -851,4 +894,8 @@ const es = {
   perfilTxt: { display: 'flex', flexDirection: 'column', justifyContent: 'center', lineHeight: 1.12, minWidth: 0 },
   perfilNome: { color: '#FFFFFF', fontFamily: "'Rajdhani', sans-serif", fontWeight: 600, fontSize: 'clamp(12px,2.3vw,28px)', letterSpacing: '0.01em', whiteSpace: 'nowrap', textShadow: '0 1px 5px rgba(0,0,0,0.7)' },
   perfilNivel: { color: '#FFFFFF', fontFamily: "'Rajdhani', sans-serif", fontWeight: 500, fontSize: 'clamp(11px,2.0vw,24px)', letterSpacing: '0.01em', whiteSpace: 'nowrap', textShadow: '0 1px 5px rgba(0,0,0,0.7)' },
+  // Joystick de mover (lado esquerdo)
+  joyZona: { position: 'absolute', left: 0, bottom: 0, width: '50%', top: '22%', zIndex: 25, touchAction: 'none', background: 'transparent' },
+  joyBase: { position: 'absolute', left: '11%', top: '78.1%', width: 'clamp(90px,13.5vw,150px)', aspectRatio: '1', transform: 'translate(-50%,-50%)', pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none', zIndex: 26 },
+  joyKnob: { position: 'absolute', left: '11%', top: '78.1%', width: 'clamp(38px,5.6vw,62px)', aspectRatio: '1', pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none', zIndex: 27, transition: 'transform 0.07s ease-out' },
 };
