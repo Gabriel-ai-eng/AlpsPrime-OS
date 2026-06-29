@@ -849,7 +849,9 @@ export default function ProjetoArmor({ onVoltar }) {
         </>
       )}
 
-      {fase === 'jogando' && <button onClick={() => setFase('pronto')} style={es.voltar}>← Voltar</button>}
+      {/* "Sair" do jogo: volta para a tela inicial do próprio game (fase 'pronto'),
+          nunca para a Home do Alps OS. */}
+      {fase === 'jogando' && <button onClick={() => setFase('pronto')} style={es.voltar}>← Sair</button>}
 
       {fase === 'erro' && (
         <div style={es.overlay}>
