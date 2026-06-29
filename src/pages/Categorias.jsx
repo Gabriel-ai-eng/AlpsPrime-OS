@@ -71,7 +71,7 @@ export default function Categorias() {
               onClick={() => { if (BLOQUEADOS.has(app.id)) return; navigate('/home'); }}
               className={`flex items-center gap-4 p-4 rounded-3xl bg-card border border-border transition-all ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
             >
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-[#e9e9e9] overflow-hidden">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white overflow-hidden">
                 <img src={app.logo} alt={app.nome} className="w-full h-full object-contain" decoding="async" fetchpriority="high" />
               </div>
               <div className="flex-1 min-w-0">
