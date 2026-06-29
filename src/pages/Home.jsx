@@ -193,8 +193,9 @@ export default function Home() {
               onClick={() => setTelaAtual('armor')}
               className="w-full aspect-square overflow-hidden cursor-pointer active:scale-[0.99] transition-transform duration-300 group"
             >
-              <img
+              <CachedImage
                 src="/apps/armor-bg.png"
+                cacheKey="armor_bg"
                 alt="Projeto Armor"
                 decoding="async"
                 fetchpriority="high"

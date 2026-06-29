@@ -9,8 +9,11 @@ import { useAuth } from '@/lib/AuthContext';
 import { useT } from '@/lib/i18n';
 import { getPrefs } from '@/lib/appPrefs';
 import CachedImage from '@/components/CachedImage';
-import homeFilledUrl from '@/assets/icons/home-filled.png';
-import homeOutlineUrl from '@/assets/icons/home-outline.png';
+// `?inline` embute o PNG como data URI base64 no bundle (em vez de virar um
+// arquivo separado que exige ida à rede). Assim a casinha pinta na hora, junto
+// com o JS, sem o "carregar" que aparecia ao abrir/recarregar a página.
+import homeFilledUrl from '@/assets/icons/home-filled.png?inline';
+import homeOutlineUrl from '@/assets/icons/home-outline.png?inline';
 
 // Ícone da casinha = as artes oficiais (PNG) renderizadas como máscara CSS.
 // Assim a silhueta é exatamente a das imagens, mas a cor vem de `currentColor`
