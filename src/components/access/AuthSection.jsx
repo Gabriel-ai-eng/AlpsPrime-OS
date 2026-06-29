@@ -131,9 +131,9 @@ export default function AuthSection({ onClose }) {
     : mode === 'forgot' ? (step === 'reset' ? 'Redefinir senha' : 'Enviar instruções')
     : mode === 'login' ? 'Entrar' : 'Criar conta';
 
-  // CORREÇÃO: Fundo cinza suave (#3f3f46) no preenchimento e cursor forçado na cor branca (caret-white)
+  // Inputs claros: fundo cinza bem suave, texto escuro, foco em dourado.
   const inputBase =
-    'w-full h-12 pl-11 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 outline-none focus:border-gold/50 focus:bg-white/[0.07] transition-all relative z-10 caret-white [&:-webkit-autofill]:[box-shadow:0_0_0_40px_#3f3f46_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#ffffff]';
+    'w-full h-12 pl-11 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 outline-none focus:border-gold focus:bg-white focus:ring-2 focus:ring-gold/20 transition-all relative z-10 caret-gray-900 [&:-webkit-autofill]:[box-shadow:0_0_0_40px_#f9fafb_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]';
   const inputCls = `${inputBase} pr-3`;
   const inputPw = `${inputBase} pr-11`;
 
@@ -143,42 +143,40 @@ export default function AuthSection({ onClose }) {
       onClick={onToggle}
       tabIndex={-1}
       aria-label={shown ? t('Ocultar senha') : t('Mostrar senha')}
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors z-20"
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors z-20"
     >
       {shown ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
     </button>
   );
 
   return (
-    <div className="fixed inset-0 z-[100000] bg-[#0B0B0C] flex items-center justify-center px-4 py-8 overflow-y-auto overflow-x-hidden">
-      <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gold/8 rounded-full blur-[160px] pointer-events-none" />
+    <div className="fixed inset-0 z-[100000] bg-white flex flex-col px-6 pt-6 pb-10 overflow-y-auto overflow-x-hidden">
+      <button
+        onClick={onClose}
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors outline-none self-start"
+      >
+        <ArrowLeft className="w-4 h-4" /> {t('Voltar')}
+      </button>
 
-      <div className="relative z-10 w-full max-w-md">
-        <button
-          onClick={onClose}
-          className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors outline-none"
-        >
-          <ArrowLeft className="w-4 h-4" /> {t('Voltar')}
-        </button>
-
-        <div className="bg-[#161618]/95 backdrop-blur-xl border border-gold/20 rounded-3xl p-7 shadow-2xl shadow-gold/10 relative z-20">
-          <div className="flex flex-col items-center mb-6">
-            <img src={LOGO_URL} alt="Sexta-feira" className="w-14 h-14 rounded-2xl object-cover shadow-lg shadow-gold/20" />
-            <h1 className="mt-4 text-xl font-semibold text-white">{t(titulo)}</h1>
-            <p className="text-xs text-muted-foreground mt-1 text-center">
+      <div className="flex-1 flex flex-col justify-center w-full max-w-sm mx-auto">
+        <div className="relative z-20">
+          <div className="flex flex-col items-center mb-8">
+            <img src={LOGO_URL} alt="Alps Prime" className="w-16 h-16 rounded-2xl object-cover shadow-md" />
+            <h1 className="mt-5 text-2xl font-semibold text-gray-900">{t(titulo)}</h1>
+            <p className="text-sm text-gray-500 mt-1.5 text-center">
               {t('Use o mesmo e-mail da sua compra na Hotmart.')}
             </p>
           </div>
 
           {step === 'form' && mode !== 'forgot' && (
-            <div className="flex p-1 mb-5 rounded-xl bg-white/5 border border-white/10 relative z-10">
+            <div className="flex p-1 mb-5 rounded-xl bg-gray-100 border border-gray-200 relative z-10">
               {['login', 'register'].map((m) => (
                 <button
                   key={m}
                   type="button"
                   onClick={() => reset(m)}
-                  className={`flex-1 h-9 rounded-lg text-sm font-medium transition-colors outline-none ${
-                    mode === m ? 'bg-gold/20 text-gold' : 'text-muted-foreground hover:text-foreground'
+                  className={`flex-1 h-9 rounded-lg text-sm font-medium transition-all outline-none ${
+                    mode === m ? 'bg-white text-gold shadow-sm' : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
                   {m === 'login' ? t('Entrar') : t('Criar conta')}
@@ -190,7 +188,7 @@ export default function AuthSection({ onClose }) {
           <form onSubmit={submit} className="space-y-3 relative z-10">
             {step === 'form' && mode === 'register' && (
               <div className="relative">
-                <User className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
+                <User className="w-5 h-5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                 <input
                   className={inputCls}
                   placeholder={t('Seu nome')}
@@ -203,7 +201,7 @@ export default function AuthSection({ onClose }) {
 
             {step === 'form' && (
               <div className="relative">
-                <Mail className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
+                <Mail className="w-5 h-5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                 <input
                   className={inputCls}
                   type="email"
@@ -218,7 +216,7 @@ export default function AuthSection({ onClose }) {
 
             {step === 'form' && mode !== 'forgot' && (
               <div className="relative">
-                <Lock className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
+                <Lock className="w-5 h-5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                 <input
                   className={inputPw}
                   type={showPw ? 'text' : 'password'}
@@ -234,7 +232,7 @@ export default function AuthSection({ onClose }) {
 
             {step === 'otp' && (
               <div className="relative">
-                <KeyRound className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
+                <KeyRound className="w-5 h-5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                 <input
                   className={`${inputCls} tracking-[0.3em] text-center`}
                   inputMode="numeric"
@@ -248,7 +246,7 @@ export default function AuthSection({ onClose }) {
             {mode === 'forgot' && step === 'reset' && (
               <>
                 <div className="relative">
-                  <KeyRound className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
+                  <KeyRound className="w-5 h-5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                   <input
                     className={inputCls}
                     placeholder={t('Código recebido por e-mail')}
@@ -257,7 +255,7 @@ export default function AuthSection({ onClose }) {
                   />
                 </div>
                 <div className="relative">
-                  <Lock className="w-5 h-5 text-white/60 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
+                  <Lock className="w-5 h-5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 z-20 pointer-events-none" />
                   <input
                     className={inputPw}
                     type={showNewPw ? 'text' : 'password'}
@@ -272,13 +270,13 @@ export default function AuthSection({ onClose }) {
               </>
             )}
 
-            {error && <p className="text-xs text-red-400 px-1 pt-1">{t(error)}</p>}
-            {info && !error && <p className="text-xs text-emerald-400 px-1 pt-1">{t(info)}</p>}
+            {error && <p className="text-xs text-red-500 px-1 pt-1">{t(error)}</p>}
+            {info && !error && <p className="text-xs text-emerald-600 px-1 pt-1">{t(info)}</p>}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60 relative z-20 mt-2 outline-none"
+              className="w-full h-12 rounded-xl text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60 relative z-20 mt-2 outline-none"
               style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -290,7 +288,7 @@ export default function AuthSection({ onClose }) {
                 href={CHECKOUT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full h-12 rounded-xl text-background font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity relative z-20 outline-none"
+                className="w-full h-12 rounded-xl text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity relative z-20 outline-none"
                 style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
               >
                 <ShoppingBag className="w-4 h-4" /> {t('Comprar acesso')}
@@ -301,7 +299,7 @@ export default function AuthSection({ onClose }) {
               <button
                 type="button"
                 onClick={() => reset('forgot')}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none"
+                className="w-full text-xs text-gray-500 hover:text-gray-900 transition-colors pt-2 relative z-20 outline-none"
               >
                 {t('Esqueci minha senha')}
               </button>
@@ -311,7 +309,7 @@ export default function AuthSection({ onClose }) {
               <button
                 type="button"
                 onClick={() => reset('login')}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none"
+                className="w-full text-xs text-gray-500 hover:text-gray-900 transition-colors pt-2 relative z-20 outline-none"
               >
                 {t('Voltar para o login')}
               </button>
@@ -321,7 +319,7 @@ export default function AuthSection({ onClose }) {
               <button
                 type="button"
                 onClick={handleResend}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors pt-2 relative z-20 outline-none"
+                className="w-full text-xs text-gray-500 hover:text-gray-900 transition-colors pt-2 relative z-20 outline-none"
               >
                 {t('Reenviar código')}
               </button>
