@@ -105,6 +105,7 @@ export default function ProjetoArmor({ onVoltar }) {
   const [horaTexto, setHoraTexto] = useState('--:--');
   const [botaoPressionado, setBotaoPressionado] = useState(null); // 'jogar' | 'sair' | null
   const [knobOff, setKnobOff] = useState({ x: 0, y: 0 }); // deslocamento visual do knob do joystick
+  const [voarAtivo, setVoarAtivo] = useState(false); // feedback visual do botão de voar
   const [paisagem, setPaisagem] = useState(
     typeof window !== 'undefined' ? window.innerWidth > window.innerHeight : true
   );
@@ -718,6 +719,26 @@ export default function ProjetoArmor({ onVoltar }) {
     moveRef.current = { x: 0, mag: 0 };
   };
 
+  // ---------- BOTÃO DE VOAR (lado direito) ----------
+  // 1 toque = pulo · 2 toques rápidos + segurar = voar (igual ao original).
+  const voarPress = (e) => {
+    e.preventDefault();
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+    const g = G.current;
+    if (g) {
+      const now = performance.now();
+      if (now - g.lastFlyDown < 320) g.flying = true;   // 2º toque rápido → voa
+      else if (g.p.y <= 2) g.p.vy = JUMP_V;             // toque único no chão → pulo
+      g.lastFlyDown = now;
+    }
+    setVoarAtivo(true);
+  };
+  const voarRelease = () => {
+    const g = G.current;
+    if (g) g.flying = false;   // soltar → cai
+    setVoarAtivo(false);
+  };
+
   return createPortal(
     <div style={es.fundo}>
       <canvas ref={canvasRef} className="armor-canvas" style={es.canvas} />
@@ -753,6 +774,19 @@ export default function ProjetoArmor({ onVoltar }) {
             alt=""
             draggable={false}
             style={{ ...es.joyKnob, transform: `translate(calc(-50% + ${knobOff.x}px), calc(-50% + ${knobOff.y}px))` }}
+          />
+
+          {/* Botão de VOAR (lado direito) */}
+          <img
+            src="/botao-voar.png"
+            alt="Voar"
+            draggable={false}
+            onPointerDown={voarPress}
+            onPointerUp={voarRelease}
+            onPointerCancel={voarRelease}
+            onPointerLeave={voarRelease}
+            onContextMenu={(e) => e.preventDefault()}
+            style={{ ...es.botaoVoar, transform: `translate(-50%, -50%) scale(${voarAtivo ? 1.08 : 1})` }}
           />
         </>
       )}
@@ -898,4 +932,6 @@ const es = {
   joyZona: { position: 'absolute', left: 0, bottom: 0, width: '50%', top: '22%', zIndex: 25, touchAction: 'none', background: 'transparent' },
   joyBase: { position: 'absolute', left: '11%', top: '78.1%', width: 'clamp(90px,13.5vw,150px)', aspectRatio: '1', transform: 'translate(-50%,-50%)', pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none', zIndex: 26 },
   joyKnob: { position: 'absolute', left: '11%', top: '78.1%', width: 'clamp(38px,5.6vw,62px)', aspectRatio: '1', pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none', zIndex: 27, transition: 'transform 0.07s ease-out' },
+  // Botão de voar (lado direito)
+  botaoVoar: { position: 'absolute', left: '78.7%', top: '83.8%', width: 'clamp(54px,7.9vw,90px)', aspectRatio: '1', transformOrigin: 'center', transition: 'transform 0.1s ease', zIndex: 28, cursor: 'pointer', touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' },
 };
