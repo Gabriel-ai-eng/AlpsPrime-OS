@@ -292,15 +292,6 @@ export default function Welcome() {
         <div className="mx-auto max-w-6xl px-5 py-8 text-center sm:px-8">
           <p className="mx-auto max-w-xl text-[11px] leading-relaxed text-black/40">
             {t('Versão Beta, ainda em aperfeiçoamento — podem ocorrer erros.')}
-            {' '}
-            <a
-              href="https://alpsprime.com.br/sexta-feira-10"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-black/60 underline underline-offset-2 hover:text-black"
-            >
-              {t('Saiba mais')}
-            </a>
           </p>
 
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-black/40">
