@@ -122,6 +122,10 @@ export default function ProjetoArmor({ onVoltar }) {
 
   const canvasRef = useRef(null);
   const videoIntroRef = useRef(null);
+  // Marca que a animação de intro já foi tocada nesta "sessão" do app. Sobrevive
+  // ao ir e voltar do jogo (jogando ↔ pronto), mas zera quando o componente é
+  // desmontado (usuário sai para a Home do Alps OS) e entra de novo.
+  const introTocadaRef = useRef(false);
   const G = useRef(null);
   const zoomAlvoRef = useRef(1);
   const relogioAtivoRef = useRef(false);
@@ -672,6 +676,7 @@ export default function ProjetoArmor({ onVoltar }) {
   };
   // Entrar de fato no jogo (usado pelo botão "Jogar").
   const entrar = async () => {
+    introTocadaRef.current = true; // ao voltar do jogo, a intro não recomeça
     await entrarTelaCheia();
     setFase('jogando');
   };
@@ -875,12 +880,26 @@ export default function ProjetoArmor({ onVoltar }) {
             ref={videoIntroRef}
             style={es.videoIntro}
             src="/armor-intro.mp4"
-            autoPlay
             muted
             playsInline
             preload="auto"
+            onLoadedMetadata={(e) => {
+              const v = e.currentTarget;
+              if (introTocadaRef.current) {
+                // Voltou do jogo: não reinicia a animação, mostra direto o
+                // último quadro (personagem de frente).
+                try {
+                  if (isFinite(v.duration)) v.currentTime = Math.max(0, v.duration - 0.05);
+                  v.pause();
+                } catch (err) {}
+              } else {
+                // Primeira vez (acabou de entrar no app): toca do começo.
+                v.play().catch(() => {});
+              }
+            }}
             onEnded={(e) => {
               const v = e.currentTarget;
+              introTocadaRef.current = true;
               try {
                 v.pause();
                 // garante o último quadro (personagem de frente) sem reiniciar
