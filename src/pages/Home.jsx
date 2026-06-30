@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import CachedImage from '@/components/CachedImage';
 
-const Vivart = lazy(() => import('./Vivart'));
 const Sexta = lazy(() => import('./Sexta'));
 const ProjetoArmor = lazy(() => import('./ProjetoArmor'));
 
@@ -40,9 +39,9 @@ export default function Home() {
 
   useEffect(() => {
     const app = location.state?.openApp;
-    // Sexta-feira e Vivart estão indisponíveis: nunca abrir, mesmo que algum
+    // Sexta-feira está indisponível: nunca abrir, mesmo que algum
     // fluxo tente navegar com esse openApp.
-    if (app && app !== 'sexta' && app !== 'vivart') {
+    if (app && app !== 'sexta') {
       setTelaAtual(app);
       window.history.replaceState({}, document.title);
     }
@@ -207,7 +206,6 @@ export default function Home() {
       )}
 
       <Suspense fallback={<LoadingScreen />}>
-        {telaAtual === 'vivart' && <Vivart onVoltar={() => setTelaAtual('hub')} />}
         {telaAtual === 'sexta' && <Sexta onVoltar={() => setTelaAtual('hub')} />}
         {telaAtual === 'armor' && <ProjetoArmor onVoltar={() => setTelaAtual('hub')} />}
       </Suspense>

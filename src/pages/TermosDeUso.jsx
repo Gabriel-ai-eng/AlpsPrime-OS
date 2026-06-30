@@ -34,7 +34,7 @@ export default function TermosDeUso() {
           <p>
             O Alps OS ("Alps", "Plataforma", "nós") é um ecossistema digital que
             reúne, sob um único login, diversos aplicativos e jogos
-            ("Sub-apps"), entre eles Projeto Armor, Sexta-feira e Vivart. O
+            ("Sub-apps"), entre eles Projeto Armor e Sexta-feira. O
             serviço é disponibilizado no endereço https://alpsprime.com.br e
             operado por Apex Prime Studios / Alps Prime.
           </p>
@@ -134,8 +134,8 @@ export default function TermosDeUso() {
         <Section n="7" title="Conteúdo gerado pelo usuário (UGC)">
           <p>
             7.1. Alguns Sub-apps permitem que você crie, envie ou salve
-            conteúdos (por exemplo, nome de perfil, imagens criadas no Vivart,
-            mensagens na Sexta-feira) ("Conteúdo do Usuário").
+            conteúdos (por exemplo, nome de perfil e mensagens na
+            Sexta-feira) ("Conteúdo do Usuário").
           </p>
           <p>
             7.2. Você declara ser titular ou ter os direitos necessários sobre o
@@ -178,7 +178,7 @@ export default function TermosDeUso() {
         <Section n="9" title="Inteligência Artificial">
           <p>
             9.1. Alguns recursos utilizam inteligência artificial (por exemplo,
-            a assistente Sexta-feira e a geração de imagens do Vivart). As
+            a assistente Sexta-feira). As
             respostas e resultados são gerados automaticamente e podem conter
             imprecisões; não constituem aconselhamento profissional (jurídico,
             médico, financeiro etc.).

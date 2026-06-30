@@ -30,7 +30,6 @@ const APP_VERSION = '1.0.0 · Beta';
 const SUB_APPS = [
   { id: 'sexta',  nome: 'Sexta-feira',   prefKey: 'notif_sexta',  dados: ['Conversas e mensagens com a IA', 'Suas preferências de uso'] },
   { id: 'armor',  nome: 'Projeto Armor', prefKey: 'notif_armor',  dados: ['Progresso e pontuação no jogo'] },
-  { id: 'vivart', nome: 'Vivart',        prefKey: 'notif_vivart', dados: ['Imagens e criações que você salva'] },
 ];
 
 const CHANGELOG = [

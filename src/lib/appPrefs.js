@@ -9,7 +9,6 @@ export const DEFAULT_PREFS = {
   // Notificações por sub-app
   notif_sexta: true,
   notif_armor: true,
-  notif_vivart: true,
   // Não perturbe
   dnd_enabled: false,
   dnd_from: '22:00',

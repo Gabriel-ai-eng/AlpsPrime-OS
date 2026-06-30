@@ -8,7 +8,6 @@ const FILTROS = [
   { id: 'todos', label: 'Todos' },
   { id: 'ia', label: 'IA' },
   { id: 'jogos', label: 'Jogos' },
-  { id: 'design', label: 'Design' },
   { id: 'embreve', label: 'Em breve' },
 ];
 
@@ -17,11 +16,10 @@ const FILTROS = [
 const APPS = [
   { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', logo: '/apps/armor-logo.webp', status: 'live' },
   { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', cat: 'ia', logo: '/apps/sexta-logo.webp', status: 'soon' },
-  { id: 'vivart', nome: 'Vivart', desc: 'Estúdio de criação e galeria visual.', cat: 'design', logo: '/apps/vivart-logo.webp', status: 'soon' },
 ];
 
 // Apps indisponíveis: aparecem na lista, mas clicar neles NÃO faz nada.
-const BLOQUEADOS = new Set(['sexta', 'vivart']);
+const BLOQUEADOS = new Set(['sexta']);
 
 export default function Categorias() {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 // Dicionário de tradução EN do Alps OS (a casca do sistema).
 // Chave = texto-fonte em português exatamente como aparece no código.
-// Sub-apps (Sexta-feira, Vivart, Projeto Armor, FKW) NÃO são traduzidos.
-// Nomes próprios (Alps OS, Sexta-feira, Vivart, Projeto Armor, Hotmart) ficam iguais.
+// Sub-apps (Sexta-feira, Projeto Armor, FKW) NÃO são traduzidos.
+// Nomes próprios (Alps OS, Sexta-feira, Projeto Armor, Hotmart) ficam iguais.
 
 export const EN = {
   // ── Comuns ──

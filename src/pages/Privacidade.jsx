@@ -68,8 +68,7 @@ export default function Privacidade() {
             </li>
             <li>
               Conteúdo do usuário: mensagens enviadas à assistente de IA
-              (Sexta-feira), imagens e criações salvas (Vivart), nome de perfil
-              e preferências.
+              (Sexta-feira), nome de perfil e preferências.
             </li>
           </ul>
 
@@ -101,11 +100,6 @@ export default function Privacidade() {
               uso.
             </li>
             <li>Projeto Armor: progresso e pontuação no jogo.</li>
-            <li>
-              Vivart: imagens e criações que você salva. As fotos podem ser
-              processadas localmente no seu dispositivo, quando a tecnologia
-              permitir.
-            </li>
           </ul>
         </Section>
 

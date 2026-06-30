@@ -1,16 +1,15 @@
 import React from 'react';
-import { Sparkles, Gamepad2, Palette, Grip } from 'lucide-react';
+import { Sparkles, Gamepad2, Grip } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useT } from '@/lib/i18n';
 
 const APPS = [
   { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', icon: Sparkles, corIcone: 'text-[#C9A24F]', bgIcone: 'bg-[#C9A24F]/10' },
   { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', icon: Gamepad2, corIcone: 'text-blue-400', bgIcone: 'bg-blue-500/10' },
-  { id: 'vivart', nome: 'Vivart', desc: 'Estúdio de criação e galeria visual.', icon: Palette, corIcone: 'text-purple-400', bgIcone: 'bg-purple-500/10' },
 ];
 
 // Apps indisponíveis: aparecem na lista, mas clicar neles NÃO faz nada.
-const BLOQUEADOS = new Set(['sexta', 'vivart']);
+const BLOQUEADOS = new Set(['sexta']);
 
 export default function Todos() {
   const navigate = useNavigate();

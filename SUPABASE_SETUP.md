@@ -177,7 +177,7 @@ fotos de perfil/banner e mídias dos posts.
 > em cascata, ~120 componentes/hooks que só elas usavam — tudo confirmado sem
 > uso pelo `npm run build`. O `likeComment` também saiu (a UI de curtir
 > comentário foi removida junto). As 16 páginas que restam são exatamente as que
-> têm rota na plataforma (mais Sexta/Titan/Vivart, carregadas pelo Feed).
+> têm rota na plataforma (mais Sexta/Titan, carregadas pelo Feed).
 > A pasta `base44/functions/` (código Deno antigo) foi mantida só como
 > referência histórica — não roda em lugar nenhum.
 

@@ -32,7 +32,7 @@ pessoais.**
 - **Compra:** dados necessários para validar seu acesso, vinculados ao e-mail
   utilizado na compra (processada pela Hotmart).
 - **Conteúdo do usuário:** mensagens enviadas à assistente de IA (Sexta-feira),
-  imagens e criações salvas (Vivart), nome de perfil e preferências.
+  nome de perfil e preferências.
 
 ### 3.2. Dados coletados automaticamente
 - **Uso e desempenho:** progresso e pontuação em jogos (Projeto Armor), tempo de
@@ -46,8 +46,6 @@ pessoais.**
 ### 3.3. O que cada Sub-app acessa
 - **Sexta-feira:** conversas e mensagens com a IA; suas preferências de uso.
 - **Projeto Armor:** progresso e pontuação no jogo.
-- **Vivart:** imagens e criações que você salva. **As fotos podem ser
-  processadas localmente no seu dispositivo**, quando a tecnologia permitir.
 
 ## 4. Para que usamos os dados (finalidades)
 
