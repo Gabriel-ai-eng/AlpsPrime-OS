@@ -6,7 +6,7 @@ import { createPortal } from 'react-dom';
 // HUD dupla: joystick mover (esq) + mirar (dir) · tiro · míssil · voar
 // ============================================================
 
-const SPRITE_ANDAR = 'https://i.ibb.co/mCV6kshs/1-1-20260612-185706-0000.png';
+const SPRITE_ANDAR = '/armor-andar.png';
 const SPRITE_CORRER = 'https://i.ibb.co/tTxmyXws/titan-correr-tira.png';
 const IMG_CHAO = 'https://i.ibb.co/KzVkz7dS/11-20260612-202236-0000.png';
 
@@ -21,7 +21,7 @@ const ZOOM_PERTO = 1.7;
 const ALTURA_IMG_CHAO = 230;
 const LINHA_PES = 0.18;
 
-const FRAMES_ANDAR = 7;
+const FRAMES_ANDAR = 36;   // frame 0 = parado; frames 1..35 = ciclo de caminhada (do GIF, em ordem)
 const FRAMES_CORRER = 15;
 const FRAME_PARADO = 0;
 
@@ -483,7 +483,10 @@ export default function ProjetoArmor({ onVoltar }) {
         p.animT += vAbs * 0.07; frameAtual = Math.floor(p.animT) % nFrames;
       } else if (modo === 'andar') {
         sprite = andar; calib = calibAndar; nFrames = FRAMES_ANDAR;
-        p.animT += vAbs * 0.085; frameAtual = 1 + (Math.floor(p.animT) % (FRAMES_ANDAR - 1));
+        // 0.33 = cadência sincronizada com o passo (35 frames de caminhada): os pés
+        // "agarram" o chão. Como o avanço é proporcional a vAbs, andar devagar deixa
+        // a animação lenta e vice-versa.
+        p.animT += vAbs * 0.33; frameAtual = 1 + (Math.floor(p.animT) % (FRAMES_ANDAR - 1));
       } else { sprite = andar; calib = calibAndar; nFrames = FRAMES_ANDAR; frameAtual = FRAME_PARADO; }
 
       // ===== CÂMERA (segue também na vertical ao voar) =====
