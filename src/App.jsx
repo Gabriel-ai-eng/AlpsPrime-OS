@@ -36,6 +36,12 @@ const AuthenticatedApp = () => {
           <img src={LOGO_URL} alt="Sexta-feira" className="w-12 h-12 rounded-xl shadow-xl shadow-gold/20 object-cover" />
           <div className="w-6 h-6 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
         </div>
+        {/* Assinatura no rodapé, no estilo discreto da Meta ("from Meta"). */}
+        <div className="absolute inset-x-0 bottom-9 flex items-center justify-center">
+          <span className="text-[11px] tracking-wide text-muted-foreground/70">
+            By <span className="font-semibold text-muted-foreground">Alps Prime</span>
+          </span>
+        </div>
       </div>
     );
   }
