@@ -2,10 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
-// Seção institucional (Termos de Uso, Privacidade, Pagamento). Por enquanto o
-// conteúdo fica intencionalmente vazio — só o cabeçalho com título e o botão de
-// voltar. O conteúdo de cada seção será preenchido depois.
-export default function LegalSection({ title }) {
+// Seção institucional (Termos de Uso, Privacidade, Pagamento). O cabeçalho traz
+// o título e o botão de voltar; o conteúdo de cada seção é passado via children.
+export default function LegalSection({ title, children }) {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[#f5f5f7] text-black">
@@ -22,8 +21,7 @@ export default function LegalSection({ title }) {
         </div>
       </header>
 
-      {/* Conteúdo da seção — vazio por enquanto. */}
-      <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8" />
+      <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8">{children}</main>
     </div>
   );
 }
