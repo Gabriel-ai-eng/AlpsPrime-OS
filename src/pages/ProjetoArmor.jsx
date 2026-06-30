@@ -221,7 +221,16 @@ export default function ProjetoArmor({ onVoltar }) {
     const mqLandscape = window.matchMedia('(orientation: landscape)');
     const redimensionar = () => {
       const ww = window.innerWidth, wh = window.innerHeight;
-      setPaisagem(mqLandscape.matches || ww > wh);
+      const landscape = mqLandscape.matches || ww > wh;
+      setPaisagem(landscape);
+      // Ao virar para horizontal, tenta entrar em tela cheia automaticamente.
+      // Obs.: a maioria dos navegadores só permite tela cheia a partir de um
+      // gesto do usuário; quando a rotação não conta como gesto, isto falha em
+      // silêncio e o toque na tela (entrarTelaCheia) continua valendo.
+      if (landscape && !document.fullscreenElement) {
+        try { document.documentElement.requestFullscreen?.().catch(() => {}); } catch (e) {}
+        try { window.screen.orientation.lock('landscape').catch(() => {}); } catch (e) {}
+      }
       const c = canvasRef.current;
       if (c) { c.height = ALT * RENDER_SCALE; c.width = Math.max(480, Math.round(ALT * ww / wh)) * RENDER_SCALE; }
     };
@@ -1015,9 +1024,11 @@ const es = {
   botaoEntrar: { background: '#F0C040', border: 'none', borderRadius: 14, color: '#16161C', fontWeight: 800, fontSize: 15, padding: '15px 32px', cursor: 'pointer', fontFamily: 'monospace', letterSpacing: '0.1em', boxShadow: '0 0 30px rgba(240,192,64,0.35)' },
   // Perfil do usuário dentro do quadro do menu (canto superior direito do
   // vídeo): silhueta à esquerda · nome em cima e nível logo abaixo.
-  perfilBox: { position: 'absolute', left: '72%', top: '3.6%', width: '20.5%', height: '17%', display: 'flex', alignItems: 'center', gap: '5%', padding: '0 2% 0 1.4%', boxSizing: 'border-box', zIndex: 3, pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none', fontFamily: "'Rajdhani', sans-serif" },
-  perfilFoto: { height: '82%', aspectRatio: '1', objectFit: 'contain', flexShrink: 0, transform: 'translateX(-5vw)', filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.55))' },
-  perfilTxt: { display: 'flex', flexDirection: 'column', justifyContent: 'center', lineHeight: 1.12, minWidth: 0 },
+  perfilBox: { position: 'absolute', left: '72%', top: '3.6%', width: '20.5%', height: '17%', display: 'flex', alignItems: 'center', boxSizing: 'border-box', zIndex: 3, pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none', fontFamily: "'Rajdhani', sans-serif" },
+  // Silhueta posicionada no centro exato do "cubo" do avatar (≈20% da largura
+  // e 50% da altura do perfilBox), independente da proporção da tela.
+  perfilFoto: { position: 'absolute', left: '20%', top: '50%', transform: 'translate(-50%, -50%)', height: '82%', aspectRatio: '1', objectFit: 'contain', filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.55))' },
+  perfilTxt: { display: 'flex', flexDirection: 'column', justifyContent: 'center', lineHeight: 1.12, minWidth: 0, marginLeft: '40%' },
   perfilNome: { color: '#FFFFFF', fontFamily: "'Rajdhani', sans-serif", fontWeight: 600, fontSize: 'clamp(12px,2.3vw,28px)', letterSpacing: '0.01em', whiteSpace: 'nowrap', textShadow: '0 1px 5px rgba(0,0,0,0.7)' },
   perfilNivel: { color: '#FFFFFF', fontFamily: "'Rajdhani', sans-serif", fontWeight: 500, fontSize: 'clamp(11px,2.0vw,24px)', letterSpacing: '0.01em', whiteSpace: 'nowrap', textShadow: '0 1px 5px rgba(0,0,0,0.7)' },
   // Joystick de mover (lado esquerdo)
