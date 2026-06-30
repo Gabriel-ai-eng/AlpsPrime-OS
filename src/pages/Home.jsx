@@ -4,7 +4,9 @@ import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import CachedImage from '@/components/CachedImage';
 
 const Sexta = lazy(() => import('./Sexta'));
-const ProjetoArmor = lazy(() => import('./ProjetoArmor'));
+// Projeto Armor é um app standalone (repo/deploy próprio). O Alps OS não embute
+// mais o jogo: o card apenas redireciona para o jogo publicado.
+const PROJETO_ARMOR_URL = 'https://projeto-armor.vercel.app/';
 
 const LoadingScreen = () => (
   <div className="absolute inset-0 z-[200000] flex flex-col items-center justify-center bg-white backdrop-blur-xl">
@@ -41,7 +43,10 @@ export default function Home() {
     const app = location.state?.openApp;
     // Sexta-feira está indisponível: nunca abrir, mesmo que algum
     // fluxo tente navegar com esse openApp.
-    if (app && app !== 'sexta') {
+    if (app === 'armor') {
+      // jogo externo: redireciona na mesma aba
+      window.location.href = PROJETO_ARMOR_URL;
+    } else if (app && app !== 'sexta') {
       setTelaAtual(app);
       window.history.replaceState({}, document.title);
     }
@@ -189,7 +194,7 @@ export default function Home() {
 
             {/* APP — Projeto Armor (bloco quadrado, largura total, sem cantos arredondados) */}
             <div
-              onClick={() => setTelaAtual('armor')}
+              onClick={() => { window.location.href = PROJETO_ARMOR_URL; }}
               className="w-full aspect-square overflow-hidden cursor-pointer active:scale-[0.99] transition-transform duration-300 group"
             >
               <CachedImage
@@ -207,7 +212,6 @@ export default function Home() {
 
       <Suspense fallback={<LoadingScreen />}>
         {telaAtual === 'sexta' && <Sexta onVoltar={() => setTelaAtual('hub')} />}
-        {telaAtual === 'armor' && <ProjetoArmor onVoltar={() => setTelaAtual('hub')} />}
       </Suspense>
     </div>
   );
