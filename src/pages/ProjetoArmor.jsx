@@ -1004,7 +1004,7 @@ const es = {
   // Perfil do usuário dentro do quadro do menu (canto superior direito do
   // vídeo): silhueta à esquerda · nome em cima e nível logo abaixo.
   perfilBox: { position: 'absolute', left: '72%', top: '3.6%', width: '20.5%', height: '17%', display: 'flex', alignItems: 'center', gap: '5%', padding: '0 2% 0 1.4%', boxSizing: 'border-box', zIndex: 3, pointerEvents: 'none', userSelect: 'none', WebkitUserSelect: 'none', fontFamily: "'Rajdhani', sans-serif" },
-  perfilFoto: { height: '82%', aspectRatio: '1', objectFit: 'contain', flexShrink: 0, transform: 'translateX(-1vw)', filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.55))' },
+  perfilFoto: { height: '82%', aspectRatio: '1', objectFit: 'contain', flexShrink: 0, transform: 'translateX(-5vw)', filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.55))' },
   perfilTxt: { display: 'flex', flexDirection: 'column', justifyContent: 'center', lineHeight: 1.12, minWidth: 0 },
   perfilNome: { color: '#FFFFFF', fontFamily: "'Rajdhani', sans-serif", fontWeight: 600, fontSize: 'clamp(12px,2.3vw,28px)', letterSpacing: '0.01em', whiteSpace: 'nowrap', textShadow: '0 1px 5px rgba(0,0,0,0.7)' },
   perfilNivel: { color: '#FFFFFF', fontFamily: "'Rajdhani', sans-serif", fontWeight: 500, fontSize: 'clamp(11px,2.0vw,24px)', letterSpacing: '0.01em', whiteSpace: 'nowrap', textShadow: '0 1px 5px rgba(0,0,0,0.7)' },
