@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import AuthSection from '@/components/access/AuthSection';
 import { motion } from 'framer-motion';
@@ -303,15 +304,15 @@ export default function Welcome() {
           </p>
 
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] text-black/40">
-            <a href="https://alpsprime.com.br/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-black/70">
+            <Link to="/termos-de-uso" className="underline underline-offset-2 hover:text-black/70">
               {t('Termos de Uso')}
-            </a>
-            <a href="https://alpsprime.com.br/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-black/70">
+            </Link>
+            <Link to="/privacidade" className="underline underline-offset-2 hover:text-black/70">
               {t('Privacidade')}
-            </a>
-            <a href="https://alpsprime.com.br/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-black/70">
+            </Link>
+            <Link to="/pagamento" className="underline underline-offset-2 hover:text-black/70">
               {t('Pagamento')}
-            </a>
+            </Link>
           </div>
 
           <p className="mt-4 text-[11px] text-black/30">© {new Date().getFullYear()} Alps OS</p>

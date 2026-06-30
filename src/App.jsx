@@ -22,6 +22,9 @@ import { LOGO_URL } from '@/lib/branding';
 import Todos from '@/pages/Todos';
 import Categorias from '@/pages/Categorias';
 import Suporte from '@/pages/Suporte';
+import TermosDeUso from '@/pages/TermosDeUso';
+import Privacidade from '@/pages/Privacidade';
+import Pagamento from '@/pages/Pagamento';
 
 // Import da nova página de Favoritos
 import Favoritos from '@/pages/Favoritos';
@@ -46,13 +49,24 @@ const AuthenticatedApp = () => {
     );
   }
 
+  // Páginas institucionais públicas: acessíveis com ou sem login. Para o
+  // visitante não autenticado, qualquer outro caminho cai na tela de Welcome.
+  const rotasPublicas = (
+    <Routes>
+      <Route path="/termos-de-uso" element={<TermosDeUso />} />
+      <Route path="/privacidade" element={<Privacidade />} />
+      <Route path="/pagamento" element={<Pagamento />} />
+      <Route path="*" element={<Welcome />} />
+    </Routes>
+  );
+
   if (authError) {
     if (authError.type === 'user_not_registered') return <UserNotRegisteredError />;
-    if (authError.type === 'auth_required') return <Welcome />;
+    if (authError.type === 'auth_required') return rotasPublicas;
   }
 
   if (!isAuthenticated && !isLoadingAuth) {
-    return <Welcome />;
+    return rotasPublicas;
   }
 
   // Fluxo único de acesso pela Hotmart: usuários logados são verificados pelo HotmartGate
@@ -89,6 +103,10 @@ const AuthenticatedApp = () => {
         <Route path="/suporte" element={<Suporte />} />
         <Route path="/notifications" element={<Notifications />} />
       </Route>
+      {/* Seções institucionais (também acessíveis sem login, ver rotasPublicas). */}
+      <Route path="/termos-de-uso" element={<TermosDeUso />} />
+      <Route path="/privacidade" element={<Privacidade />} />
+      <Route path="/pagamento" element={<Pagamento />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
     </HotmartGate>
