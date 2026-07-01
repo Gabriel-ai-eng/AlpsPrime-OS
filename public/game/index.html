@@ -222,6 +222,18 @@ pitchImg.src = 'assets/pitch-grass.png';
 const PITCH_IMG = { topY:0.266, botY:0.668, topL:0.289, topR:0.711, botL:0.046, botR:0.954 };
 pitchImg.onload = ()=>{ if (Stadium && Stadium.built) Stadium.rebuild(); };
 
+// Imagens dos gols (frames em perspectiva, fundo transparente). Carregadas à
+// parte; se faltarem, os gols caem no desenho procedural (fallback em Goals()).
+// Âncoras = posição das BASES das traves DENTRO da imagem (frações da imagem):
+// near = trave da frente (mais baixa), far = trave do fundo (mais alta).
+const goalLeftImg = new Image();  goalLeftImg.src  = 'assets/goal-left.png';
+const goalRightImg = new Image(); goalRightImg.src = 'assets/goal-right.png';
+const GOAL_ANCH = {
+  left:  { nearX:0.022, nearY:1.000, farX:0.975, farY:0.662 },
+  right: { nearX:0.976, nearY:1.000, farX:0.024, farY:0.662 },
+};
+goalLeftImg.onload = goalRightImg.onload = ()=>{ if (Stadium && Stadium.built) Stadium.rebuild(); };
+
 // Sprite sheet de CAMINHADA: folha ORIGINAL, exatamente como desenhada.
 // 5 colunas x 9 linhas = 42 quadros (perfil p/ direita). Lidos da esquerda p/ a
 // direita; ao fim da linha, segue na linha de baixo. Sem reorganizar/cortar/inverter.
@@ -300,7 +312,8 @@ const Stadium = {
     grass:  { light:'#52b657', dark:'#3b9444', stripes:18, mow:'vertical',
               pool:'#dcf4b4', poolA:0.13, noise:0.5, wear:0, mud:0, snow:0 },
     lines:  { color:'#f3faf5', width:2.6, inset_u:0.03, inset_v:0.045 },
-    goals:  { post:'#f5f9fd', net:'190,202,222', depth:0.05, vH:0.072, gh:0.06 },
+    goals:  { post:'#f5f9fd', net:'190,202,222', depth:0.05, vH:0.072, gh:0.06,
+              imgScale:1.4, imgLift:0.0 },  // imgScale: tamanho do gol-imagem; imgLift: sobe/desce a base (fração da altura do gol)
     lights: { intensity:0.55, color:'#e6f0ff', pools:5,
               towerL:[0.06,0.06], towerR:[0.94,0.06], strip:[0.17,0.83,0.15] },
     shadows:{ vignette:0.5, rim:0.45 },
@@ -493,6 +506,25 @@ const Stadium = {
       const k=S.cfg.goals, iu=S.cfg.lines.inset_u, vh=k.vH, gh=S.H*k.gh;
       const goal=(side)=>{ const sgn=side?-1:1, gl=side?1-iu:iu, back=gl - sgn*k.depth, v0=0.5-vh, v1=0.5+vh;
         const fb1=S.uv(gl,v0), fb2=S.uv(gl,v1), bb1=S.uv(back,v0), bb2=S.uv(back,v1);
+        const im = side? goalRightImg : goalLeftImg;
+        // ---- Gol por IMAGEM (frame em perspectiva) ----
+        if(im && im.complete && im.naturalWidth>0){
+          const A = side? GOAL_ANCH.right : GOAL_ANCH.left;
+          const near=fb2, far=fb1;               // near = trave da frente (baixa), far = fundo (alta)
+          // largura-base: distância entre as bases das traves no campo × escala
+          const mouth = Math.hypot(far.x-near.x, far.y-near.y);
+          const iw=im.naturalWidth, ih=im.naturalHeight;
+          const imgMouth = Math.hypot((A.farX-A.nearX)*iw, (A.farY-A.nearY)*ih);
+          const s = (mouth/imgMouth) * (k.imgScale||1);
+          const dw=iw*s, dh=ih*s;
+          // ancora a base da trave da frente (near) no ponto near do campo
+          const dx = near.x - A.nearX*dw;
+          const dy = near.y - A.nearY*dh - dh*(k.imgLift||0);
+          c.imageSmoothingEnabled=true;
+          c.drawImage(im, dx, dy, dw, dh);
+          return;
+        }
+        // ---- Fallback procedural (traves + rede) ----
         const ft1={x:fb1.x,y:fb1.y-gh}, ft2={x:fb2.x,y:fb2.y-gh}, bt1={x:bb1.x,y:bb1.y-gh*0.9}, bt2={x:bb2.x,y:bb2.y-gh*0.9};
         S.L.Nets(S,c,{fb1,fb2,bb1,bb2,ft1,ft2,bt1,bt2});
         c.strokeStyle=k.post; c.lineWidth=Math.max(2.5,S.H*0.005); c.lineCap='round'; c.lineJoin='round';
