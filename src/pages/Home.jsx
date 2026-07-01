@@ -74,22 +74,33 @@ export default function Home() {
   const abrirJogoFKW = () => {
     if (touchRef.current.moved) return; // foi swipe, não clique
     const irParaJogo = () => { window.location.href = '/game/'; };
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (!req) { irParaJogo(); return; }
+
+    let feito = false;
+    const go = () => { if (!feito) { feito = true; irParaJogo(); } };
     try {
-      const el = document.documentElement;
-      const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-      try { screen.orientation?.lock?.('landscape').catch(() => {}); } catch (_) {}
-      const r = req && req.call(el);
-      if (r && r.then) {
-        // Navega assim que a tela cheia estiver ativa (com um limite de segurança
-        // para não travar a abertura caso a promise não resolva).
-        let feito = false;
-        const go = () => { if (!feito) { feito = true; irParaJogo(); } };
-        r.then(go).catch(go);
-        setTimeout(go, 400);
-        return;
+      const r = req.call(el);
+      if (r && typeof r.then === 'function') {
+        // IMPORTANTE: só navega DEPOIS que a tela cheia realmente engatou. A
+        // transição no celular pode levar algumas centenas de ms; se navegarmos
+        // antes, o Chrome não leva a tela cheia para o /game/ e o jogador teria
+        // que tocar na tela inicial do jogo para ativá-la. Ao esperar a promise,
+        // o jogo já abre em tela cheia sozinho. Trava a paisagem só depois de
+        // ativa (a maioria dos navegadores exige tela cheia para travar).
+        r.then(() => {
+          try { screen.orientation?.lock?.('landscape').catch(() => {}); } catch (_) {}
+          go();
+        }).catch(go);
+        // Rede de segurança generosa só para navegadores que nunca resolvem a
+        // promise — não navega cedo demais no caso normal.
+        setTimeout(go, 1500);
+      } else {
+        // Navegadores antigos (sem promise): dá um tempo para a tela cheia engatar.
+        setTimeout(go, 300);
       }
-    } catch (_) {}
-    irParaJogo();
+    } catch (_) { go(); }
   };
 
   // Arrastar com o dedo (swipe) para trocar de slide.
