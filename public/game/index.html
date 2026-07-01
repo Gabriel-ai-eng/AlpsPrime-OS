@@ -637,31 +637,22 @@ document.getElementById('playAgain').onclick=()=>startMatch(state.mode);// joga 
 // Tela de TABELA (placeholder por enquanto)
 document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='title'; };
 
-// Tocar em QUALQUER lugar da tela inicial entra em tela cheia (preenche o celular
-// inteiro). Precisa ser num gesto do usuário — o toque/clique cumpre esse requisito.
-document.getElementById('scrTitle').addEventListener('pointerdown', goFullscreen);
+// Entra em tela cheia SOMENTE quando o celular está DEITADO (paisagem) E o
+// usuário TOCA na tela. Não entra sozinho ao girar, nem com o celular em pé.
+// O toque em qualquer lugar da tela cumpre o gesto exigido pelo navegador.
+document.addEventListener('pointerdown', ()=>{ if(!isPortrait() && !isFullscreen()) goFullscreen(); });
 
-// Entra em tela cheia (e tenta travar em paisagem). Chamado a partir de um
-// gesto do usuário (clique em "Jogar bola"), que é o exigido pelos navegadores.
+// Pede tela cheia (e tenta travar em paisagem). Nunca age com o celular em pé.
 function goFullscreen(){
+  if(isPortrait()) return;
   const el=document.documentElement;
   const req=el.requestFullscreen||el.webkitRequestFullscreen||el.msRequestFullscreen;
   try { const r=req&&req.call(el); if(r&&r.catch) r.catch(()=>{}); } catch(_){}
   try { if(screen.orientation&&screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{}); } catch(_){}
 }
+function isFullscreen(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
 document.addEventListener('fullscreenchange', resize);
 document.addEventListener('webkitfullscreenchange', resize);
-
-// Ao DEITAR o celular (girar para paisagem), entra em tela cheia na hora — é
-// exatamente quando o jogo passa a ser jogável (sai o aviso "vire o celular").
-// Assim o fluxo fica: clicar no card na Home → girar o celular → jogo já cheio,
-// sem precisar tocar em lugar nenhum. (Se o navegador exigir um gesto e recusar,
-// o toque na tela inicial ainda ativa, via handler acima.)
-function isFullscreen(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
-function enterFullscreenIfLandscape(){ if(!isPortrait() && !isFullscreen()) goFullscreen(); }
-window.addEventListener('orientationchange', ()=> setTimeout(enterFullscreenIfLandscape, 80));
-// Alguns aparelhos só disparam 'resize' (não 'orientationchange') ao girar.
-window.matchMedia('(orientation: landscape)').addEventListener('change', e=>{ if(e.matches) enterFullscreenIfLandscape(); });
 
 function startMatch(mode){
   state.mode = (mode==='full') ? 'full' : 'quick';
