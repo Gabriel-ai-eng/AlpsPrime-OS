@@ -67,12 +67,34 @@ export default function Home() {
     resetTimer();
   };
 
-  // Abre o jogo FKW. A tela cheia NÃO é pedida aqui: ela deve ativar somente
-  // quando o usuário deitar o celular (paisagem), já dentro do jogo. Ver o
-  // gatilho de orientação em public/game/index.html.
+  // Abre o jogo FKW já em TELA CHEIA. O clique no card é o gesto do usuário que
+  // o navegador exige para liberar a tela cheia (girar o celular sozinho NÃO é
+  // aceito). Pedimos a tela cheia aqui e esperamos ela engatar antes de navegar;
+  // o Chrome a mantém na navegação same-origin, então o /game/ já abre cheio e,
+  // ao deitar o celular, o jogo aparece em tela cheia sem tocar em nada.
   const abrirJogoFKW = () => {
     if (touchRef.current.moved) return; // foi swipe, não clique
-    window.location.href = '/game/';
+    const irParaJogo = () => { window.location.href = '/game/'; };
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (!req) { irParaJogo(); return; }
+
+    let feito = false;
+    const go = () => { if (!feito) { feito = true; irParaJogo(); } };
+    try {
+      const r = req.call(el);
+      if (r && typeof r.then === 'function') {
+        // Só navega DEPOIS que a tela cheia engatou (a transição pode levar
+        // algumas centenas de ms); assim o Chrome a leva junto para o jogo.
+        r.then(() => {
+          try { screen.orientation?.lock?.('landscape').catch(() => {}); } catch (_) {}
+          go();
+        }).catch(go);
+        setTimeout(go, 1500); // rede de segurança se a promise nunca resolver
+      } else {
+        setTimeout(go, 300);
+      }
+    } catch (_) { go(); }
   };
 
   // Arrastar com o dedo (swipe) para trocar de slide.
