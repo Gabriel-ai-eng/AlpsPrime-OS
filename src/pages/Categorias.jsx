@@ -14,7 +14,7 @@ const FILTROS = [
 // Serviços disponíveis, cada um marcado com a sua categoria. `status: 'soon'`
 // marca os que ainda não foram lançados.
 const APPS = [
-  { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', logo: '/apps/armor-logo.webp', status: 'live' },
+  { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', logo: '/apps/armor-logo.webp', status: 'live', url: 'https://projeto-armor.vercel.app/' },
   { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', cat: 'ia', logo: '/apps/sexta-logo.webp', status: 'soon' },
 ];
 
@@ -66,7 +66,11 @@ export default function Categorias() {
           return (
             <div
               key={app.id}
-              onClick={() => { if (BLOQUEADOS.has(app.id)) return; navigate('/home'); }}
+              onClick={() => {
+                if (BLOQUEADOS.has(app.id)) return;
+                if (app.url) { window.location.href = app.url; return; }
+                navigate('/home');
+              }}
               className={`flex items-center gap-4 p-4 rounded-3xl bg-card border border-border transition-all ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
             >
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white overflow-hidden">
