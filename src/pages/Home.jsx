@@ -4,6 +4,8 @@ import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import CachedImage from '@/components/CachedImage';
 
 const Sexta = lazy(() => import('./Sexta'));
+// Projeto Armor é um app standalone (repo/deploy próprio). O Alps OS não embute
+// mais o jogo: o card apenas redireciona para o jogo publicado.
 const PROJETO_ARMOR_URL = 'https://projeto-armor.vercel.app/';
 
 const LoadingScreen = () => (
@@ -21,16 +23,17 @@ const SLIDES = [
 ];
 
 const TOTAL = SLIDES.length;
+
+// Clones nas pontas para um carrossel infinito sem "pulo" visual:
+// [último, ...slides, primeiro]
 const EXT = [SLIDES[TOTAL - 1], ...SLIDES, SLIDES[0]];
-const EXT_LEN = EXT.length;
+const EXT_LEN = EXT.length; // TOTAL + 2
 
 export default function Home() {
   const [telaAtual, setTelaAtual] = useState('hub');
-  const [pos, setPos] = useState(1);
+  const [pos, setPos] = useState(1); // 1 = primeiro slide real (índice 0 é o clone)
   const [anim, setAnim] = useState(true);
-  const [dragX, setDragX] = useState(0);
-  const [esperandoRotacao, setEsperandoRotacao] = useState(false); 
-
+  const [dragX, setDragX] = useState(0); // deslocamento (px) enquanto arrasta com o dedo
   const timerRef = useRef(null);
   const sliderRef = useRef(null);
   const touchRef = useRef({ startX: 0, dragging: false, moved: false });
@@ -38,34 +41,16 @@ export default function Home() {
 
   useEffect(() => {
     const app = location.state?.openApp;
+    // Sexta-feira está indisponível: nunca abrir, mesmo que algum
+    // fluxo tente navegar com esse openApp.
     if (app === 'armor') {
+      // jogo externo: redireciona na mesma aba
       window.location.href = PROJETO_ARMOR_URL;
     } else if (app && app !== 'sexta') {
       setTelaAtual(app);
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
-
-  // Escuta a rotação do celular
-  useEffect(() => {
-    if (!esperandoRotacao) return;
-
-    const checkRotation = () => {
-      if (window.innerWidth > window.innerHeight) {
-        setEsperandoRotacao(false);
-        window.location.href = '/game/'; // Vai para o jogo mantendo a tela cheia ativada
-      }
-    };
-
-    window.addEventListener('resize', checkRotation);
-    window.addEventListener('orientationchange', checkRotation);
-    checkRotation();
-
-    return () => {
-      window.removeEventListener('resize', checkRotation);
-      window.removeEventListener('orientationchange', checkRotation);
-    };
-  }, [esperandoRotacao]);
 
   const resetTimer = () => {
     clearInterval(timerRef.current);
@@ -82,38 +67,37 @@ export default function Home() {
     resetTimer();
   };
 
+  // Abre o jogo FKW já em TELA CHEIA. O clique no card é o gesto do usuário que
+  // o navegador exige para liberar a tela cheia (girar o celular sozinho NÃO é
+  // aceito). Pedimos a tela cheia aqui e esperamos ela engatar antes de navegar;
+  // o Chrome a mantém na navegação same-origin, então o /game/ já abre cheio e,
+  // ao deitar o celular, o jogo aparece em tela cheia sem tocar em nada.
   const abrirJogoFKW = () => {
-    if (touchRef.current.moved) return;
-    
-    // 1. SOLICITA TELA CHEIA IMEDIATAMENTE (No exato momento do clique)
+    if (touchRef.current.moved) return; // foi swipe, não clique
+    const irParaJogo = () => { window.location.href = '/game/'; };
     const el = document.documentElement;
     const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-    if (req) {
-      try { req.call(el).catch(() => {}); } catch (e) {}
-    }
+    if (!req) { irParaJogo(); return; }
 
-    // 2. VERIFICA A POSIÇÃO DO APARELHO
-    const isPortrait = window.innerHeight > window.innerWidth;
-    
-    if (isPortrait) {
-      // Pede para girar (já em tela cheia)
-      setEsperandoRotacao(true);
-    } else {
-      // Se já estiver deitado, vai pro jogo direto
-      window.location.href = '/game/';
-    }
+    let feito = false;
+    const go = () => { if (!feito) { feito = true; irParaJogo(); } };
+    try {
+      const r = req.call(el);
+      if (r && typeof r.then === 'function') {
+        // Só navega DEPOIS que a tela cheia engatou (a transição pode levar
+        // algumas centenas de ms); assim o Chrome a leva junto para o jogo.
+        r.then(() => {
+          try { screen.orientation?.lock?.('landscape').catch(() => {}); } catch (_) {}
+          go();
+        }).catch(go);
+        setTimeout(go, 1500); // rede de segurança se a promise nunca resolver
+      } else {
+        setTimeout(go, 300);
+      }
+    } catch (_) { go(); }
   };
 
-  const cancelarAbertura = () => {
-    setEsperandoRotacao(false);
-    // Sai da tela cheia caso o usuário desista de jogar
-    if (document.exitFullscreen) {
-      document.exitFullscreen().catch(() => {});
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    }
-  };
-
+  // Arrastar com o dedo (swipe) para trocar de slide.
   const onTouchStart = (e) => {
     clearInterval(timerRef.current);
     touchRef.current = { startX: e.touches[0].clientX, dragging: true, moved: false };
@@ -131,6 +115,7 @@ export default function Home() {
     if (!touchRef.current.dragging) return;
     const delta = dragX;
     const largura = sliderRef.current?.offsetWidth || window.innerWidth;
+    // Troca de slide se arrastou mais de 20% da largura (ou pelo menos 50px).
     const limiar = Math.min(largura * 0.2, 80);
     touchRef.current.dragging = false;
     setDragX(0);
@@ -142,8 +127,14 @@ export default function Home() {
     }
   };
 
+  // Wrap-around robusto: sempre que a posição sai do intervalo real [1..TOTAL]
+  // (chegou num clone OU passou do limite), salta sem animação para o slide real
+  // equivalente. Usa um timeout (logo após a transição de 500ms) em vez de
+  // depender só do onTransitionEnd — que pode não disparar (aba desacelerada,
+  // clique/timer no meio da transição) e deixar o carrossel "preso" no branco.
+  // A aritmética de módulo recupera qualquer desvio (ex.: pos virou 4, 5, -1…).
   useEffect(() => {
-    if (pos >= 1 && pos <= TOTAL) return;
+    if (pos >= 1 && pos <= TOTAL) return; // posição real: nada a fazer
     const id = setTimeout(() => {
       setAnim(false);
       setPos(((((pos - 1) % TOTAL) + TOTAL) % TOTAL) + 1);
@@ -151,6 +142,7 @@ export default function Home() {
     return () => clearTimeout(id);
   }, [pos]);
 
+  // Reabilita a transição depois que o salto instantâneo é pintado.
   useEffect(() => {
     if (anim) return;
     const id = requestAnimationFrame(() =>
@@ -161,71 +153,10 @@ export default function Home() {
 
   return (
     <div className="w-full h-full bg-background text-foreground relative overflow-hidden flex flex-col">
-      
-      {/* OVERLAY: VIRE O CELULAR */}
-      {esperandoRotacao && (
-        <div 
-          className="absolute inset-0 z-[300000] flex flex-col items-center justify-center text-center p-8" 
-          style={{ background: 'radial-gradient(circle at 50% 38%, #0b1424, #05080f)' }}
-        >
-          <style>
-            {`
-              @keyframes tiltPhone {
-                0%,16%   { transform:rotate(0deg); }
-                46%,72%  { transform:rotate(-90deg); }
-                96%,100% { transform:rotate(0deg); }
-              }
-              .phone-anim {
-                width: 62px;
-                height: 110px;
-                border: 5px solid #7dd3fc;
-                border-radius: 14px;
-                position: relative;
-                box-shadow: 0 0 26px rgba(125,211,252,.5);
-                animation: tiltPhone 2.4s ease-in-out infinite;
-                margin-bottom: 30px;
-              }
-              .phone-anim::before {
-                content: '';
-                position: absolute;
-                left: 50%;
-                bottom: 7px;
-                width: 20px;
-                height: 4px;
-                border-radius: 3px;
-                background: #7dd3fc;
-                transform: translateX(-50%);
-              }
-              .phone-anim::after {
-                content: '';
-                position: absolute;
-                inset: 7px;
-                border-radius: 7px;
-                background: rgba(125,211,252,.12);
-              }
-            `}
-          </style>
-          
-          <div className="phone-anim"></div>
-          <h2 
-            className="text-[#7dd3fc] text-[clamp(20px,6vw,30px)] tracking-[2px] font-bold" 
-            style={{ textShadow: '2px 2px 0 #0a3d62' }}
-          >
-            VIRE O CELULAR
-          </h2>
-          
-          <button
-            onClick={cancelarAbertura}
-            className="mt-8 px-6 py-3 text-sm text-white/50 underline active:text-white"
-          >
-            Cancelar
-          </button>
-        </div>
-      )}
-
       {telaAtual === 'hub' && (
         <>
           <div className="flex-1 w-full bg-background overflow-hidden flex flex-col min-h-0">
+
             {/* SLIDER */}
             <div
               ref={sliderRef}
@@ -291,7 +222,7 @@ export default function Home() {
               </button>
             </div>
 
-            {/* APP — Projeto Armor */}
+            {/* APP — Projeto Armor (bloco quadrado, largura total, sem cantos arredondados) */}
             <div
               onClick={() => { window.location.href = PROJETO_ARMOR_URL; }}
               className="w-full aspect-square overflow-hidden cursor-pointer active:scale-[0.99] transition-transform duration-300 group"
