@@ -67,6 +67,31 @@ export default function Home() {
     resetTimer();
   };
 
+  // Abre o jogo FKW já em TELA CHEIA. O clique no card é o gesto do usuário
+  // exigido pelos navegadores para entrar em tela cheia; o Chrome mantém a tela
+  // cheia através da navegação same-origin, então o /game/ já abre preenchendo a
+  // tela inteira (sem precisar de um toque extra na tela inicial do jogo).
+  const abrirJogoFKW = () => {
+    if (touchRef.current.moved) return; // foi swipe, não clique
+    const irParaJogo = () => { window.location.href = '/game/'; };
+    try {
+      const el = document.documentElement;
+      const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+      try { screen.orientation?.lock?.('landscape').catch(() => {}); } catch (_) {}
+      const r = req && req.call(el);
+      if (r && r.then) {
+        // Navega assim que a tela cheia estiver ativa (com um limite de segurança
+        // para não travar a abertura caso a promise não resolva).
+        let feito = false;
+        const go = () => { if (!feito) { feito = true; irParaJogo(); } };
+        r.then(go).catch(go);
+        setTimeout(go, 400);
+        return;
+      }
+    } catch (_) {}
+    irParaJogo();
+  };
+
   // Arrastar com o dedo (swipe) para trocar de slide.
   const onTouchStart = (e) => {
     clearInterval(timerRef.current);
@@ -148,7 +173,7 @@ export default function Home() {
                 {EXT.map((slide, i) => (
                   <div
                     key={i}
-                    onClick={slide.id === 'branco' ? () => { if (!touchRef.current.moved) window.location.href = '/game/'; } : undefined}
+                    onClick={slide.id === 'branco' ? abrirJogoFKW : undefined}
                     className={`h-full flex items-center justify-center${slide.id === 'branco' ? ' cursor-pointer' : ''}`}
                     style={{
                       width: `${100 / EXT_LEN}%`,
