@@ -213,6 +213,15 @@ A.kick.src    = 'assets/player_kick.png';
 A.jump.src    = 'assets/player_jump.png';
 A.walk.onload = A.runner.onload = A.kick.onload = A.jump.onload = ()=> A.loaded++;
 
+// Imagem do gramado (foto em perspectiva). Carregada à parte, SEM travar o loop:
+// se falhar, o gramado cai no desenho procedural (fallback em GrassTileMap).
+// Geometria do trapézio verde DENTRO da imagem (frações da imagem), medida da
+// própria foto — usada para mapear a grama no campo com a perspectiva certa.
+const pitchImg = new Image();
+pitchImg.src = 'assets/pitch-grass.png';
+const PITCH_IMG = { topY:0.266, botY:0.668, topL:0.289, topR:0.711, botL:0.046, botR:0.954 };
+pitchImg.onload = ()=>{ if (Stadium && Stadium.built) Stadium.rebuild(); };
+
 // Sprite sheet de CAMINHADA: folha ORIGINAL, exatamente como desenhada.
 // 5 colunas x 9 linhas = 42 quadros (perfil p/ direita). Lidos da esquerda p/ a
 // direita; ao fim da linha, segue na linha de baixo. Sem reorganizar/cortar/inverter.
@@ -422,15 +431,36 @@ const Stadium = {
     GrassTileMap(S,c){
       const g=S.cfg.grass; c.save(); S.pitchPath(c,0); c.clip();
       c.fillStyle=g.dark; c.fillRect(0,0,S.W,S.H);
-      const band=(u0,u1,v0,v1,col)=>{ const a=S.uv(u0,v0),b=S.uv(u1,v0),d=S.uv(u1,v1),e=S.uv(u0,v1);
-        c.fillStyle=col; c.beginPath(); c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.lineTo(d.x,d.y);c.lineTo(e.x,e.y);c.closePath();c.fill(); };
-      // faixas de corte (mow)
-      if(g.mow==='horizontal'){ for(let i=0;i<g.stripes;i++) if(i%2===0) band(0,1,i/g.stripes,(i+1)/g.stripes,g.light); }
-      else if(g.mow==='checker'){ for(let i=0;i<g.stripes;i++)for(let j=0;j<g.stripes;j++) if((i+j)%2===0) band(i/g.stripes,(i+1)/g.stripes,j/g.stripes,(j+1)/g.stripes,g.light); }
-      else { for(let i=0;i<g.stripes;i++) if(i%2===0) band(i/g.stripes,(i+1)/g.stripes,0,1,g.light); }
-      // variação de tiles (textura de grama) — pontinhos claros/escuros
-      if(g.noise>0){ for(let n=0;n<5000;n++){ const u=Math.random(),v=Math.random(),p=S.uv(u,v);
-        c.globalAlpha=Math.random()*g.noise*0.22; c.fillStyle=Math.random()<0.5?'#bdea96':'#236a2c'; c.fillRect(p.x,p.y,2,2); } c.globalAlpha=1; }
+      const im = (typeof pitchImg!=='undefined') ? pitchImg : null;
+      if(im && im.complete && im.naturalWidth>0){
+        // ---- Gramado por FOTO (mapeada no trapézio do campo, com perspectiva) ----
+        // Faixas horizontais: cada faixa amostra a linha correspondente do campo
+        // verde da imagem e a estica para a largura do campo naquela profundidade.
+        const iw=im.naturalWidth, ih=im.naturalHeight, K=PITCH_IMG;
+        const sTopY=K.topY*ih, sBotY=K.botY*ih;
+        const sTopL=K.topL*iw, sTopR=K.topR*iw, sBotL=K.botL*iw, sBotR=K.botR*iw;
+        const N=72; c.imageSmoothingEnabled=true;
+        for(let i=0;i<N;i++){
+          const t0=i/N, t1=(i+1)/N, tm=(t0+t1)/2;
+          const sy0=lerp(sTopY,sBotY,t0), sy1=lerp(sTopY,sBotY,t1);
+          const sl=lerp(sTopL,sBotL,tm),  sr=lerp(sTopR,sBotR,tm);
+          const dL0=S.uv(0,t0), dR0=S.uv(1,t0), dL1=S.uv(0,t1);
+          const dx=dL0.x, dw=dR0.x-dL0.x, dy=dL0.y, dh=(dL1.y-dL0.y);
+          // -0.5/+1: leve sobreposição p/ não deixar costura entre as faixas
+          c.drawImage(im, sl, sy0, sr-sl, Math.max(1,sy1-sy0), dx, dy-0.5, dw, dh+1);
+        }
+      } else {
+        // ---- Fallback procedural (caso a foto não carregue) ----
+        const band=(u0,u1,v0,v1,col)=>{ const a=S.uv(u0,v0),b=S.uv(u1,v0),d=S.uv(u1,v1),e=S.uv(u0,v1);
+          c.fillStyle=col; c.beginPath(); c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.lineTo(d.x,d.y);c.lineTo(e.x,e.y);c.closePath();c.fill(); };
+        // faixas de corte (mow)
+        if(g.mow==='horizontal'){ for(let i=0;i<g.stripes;i++) if(i%2===0) band(0,1,i/g.stripes,(i+1)/g.stripes,g.light); }
+        else if(g.mow==='checker'){ for(let i=0;i<g.stripes;i++)for(let j=0;j<g.stripes;j++) if((i+j)%2===0) band(i/g.stripes,(i+1)/g.stripes,j/g.stripes,(j+1)/g.stripes,g.light); }
+        else { for(let i=0;i<g.stripes;i++) if(i%2===0) band(i/g.stripes,(i+1)/g.stripes,0,1,g.light); }
+        // variação de tiles (textura de grama) — pontinhos claros/escuros
+        if(g.noise>0){ for(let n=0;n<5000;n++){ const u=Math.random(),v=Math.random(),p=S.uv(u,v);
+          c.globalAlpha=Math.random()*g.noise*0.22; c.fillStyle=Math.random()<0.5?'#bdea96':'#236a2c'; c.fillRect(p.x,p.y,2,2); } c.globalAlpha=1; }
+      }
       // poça de luz dos refletores
       const ctr=S.uv(0.5,0.5), lp=c.createRadialGradient(ctr.x,ctr.y,S.H*0.04,ctr.x,ctr.y,S.W*0.5);
       lp.addColorStop(0,g.pool); lp.addColorStop(1,'rgba(0,0,0,0)'); c.globalAlpha=g.poolA; c.fillStyle=lp; c.fillRect(0,0,S.W,S.H); c.globalAlpha=1;
