@@ -74,7 +74,7 @@ export default function Home() {
   // ao deitar o celular, o jogo aparece em tela cheia sem tocar em nada.
   const abrirJogoFKW = () => {
     if (touchRef.current.moved) return; // foi swipe, não clique
-    const irParaJogo = () => { window.location.href = '/game/'; };
+    const irParaJogo = () => { window.location.href = 'https://free-kick-world-mqyme2mb2.vercel.app'; };
     const el = document.documentElement;
     const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
     if (!req) { irParaJogo(); return; }
