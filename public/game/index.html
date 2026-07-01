@@ -229,8 +229,8 @@ pitchImg.onload = ()=>{ if (Stadium && Stadium.built) Stadium.rebuild(); };
 const goalLeftImg = new Image();  goalLeftImg.src  = 'assets/goal-left.png';
 const goalRightImg = new Image(); goalRightImg.src = 'assets/goal-right.png';
 const GOAL_ANCH = {
-  left:  { nearX:0.022, nearY:1.000, farX:0.975, farY:0.662 },
-  right: { nearX:0.976, nearY:1.000, farX:0.024, farY:0.662 },
+  left:  { nearX:0.049, nearY:0.998, farX:0.920, farY:0.493 },
+  right: { nearX:0.938, nearY:0.998, farX:0.049, farY:0.493 },
 };
 goalLeftImg.onload = goalRightImg.onload = ()=>{ if (Stadium && Stadium.built) Stadium.rebuild(); };
 
@@ -313,7 +313,7 @@ const Stadium = {
               pool:'#dcf4b4', poolA:0.13, noise:0.5, wear:0, mud:0, snow:0 },
     lines:  { color:'#f3faf5', width:2.6, inset_u:0.03, inset_v:0.045 },
     goals:  { post:'#f5f9fd', net:'190,202,222', depth:0.05, vH:0.072, gh:0.06,
-              imgScale:1.4, imgLift:0.0 },  // imgScale: tamanho do gol-imagem; imgLift: sobe/desce a base (fração da altura do gol)
+              imgScale:2.4, imgLift:0.0 },  // imgScale: ajuste fino de tamanho (1=encaixe exato nas traves); imgLift: sobe/desce a base
     lights: { intensity:0.55, color:'#e6f0ff', pools:5,
               towerL:[0.06,0.06], towerR:[0.94,0.06], strip:[0.17,0.83,0.15] },
     shadows:{ vignette:0.5, rim:0.45 },
@@ -510,14 +510,12 @@ const Stadium = {
         // ---- Gol por IMAGEM (frame em perspectiva) ----
         if(im && im.complete && im.naturalWidth>0){
           const A = side? GOAL_ANCH.right : GOAL_ANCH.left;
-          const near=fb2, far=fb1;               // near = trave da frente (baixa), far = fundo (alta)
-          // largura-base: distância entre as bases das traves no campo × escala
-          const mouth = Math.hypot(far.x-near.x, far.y-near.y);
-          const iw=im.naturalWidth, ih=im.naturalHeight;
-          const imgMouth = Math.hypot((A.farX-A.nearX)*iw, (A.farY-A.nearY)*ih);
-          const s = (mouth/imgMouth) * (k.imgScale||1);
-          const dw=iw*s, dh=ih*s;
-          // ancora a base da trave da frente (near) no ponto near do campo
+          const near=fb2, far=fb1;   // bases das traves no campo: near (frente/baixa), far (fundo/alta)
+          const sc = k.imgScale||1;
+          // resolve dw/dh para as âncoras near/far caírem EXATAMENTE nas bases das
+          // traves do campo (a imagem já está no ângulo certo → sem distorção).
+          const dw=((far.x-near.x)/(A.farX-A.nearX))*sc;
+          const dh=((far.y-near.y)/(A.farY-A.nearY))*sc;
           const dx = near.x - A.nearX*dw;
           const dy = near.y - A.nearY*dh - dh*(k.imgLift||0);
           c.imageSmoothingEnabled=true;
