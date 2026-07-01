@@ -4,8 +4,6 @@ import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import CachedImage from '@/components/CachedImage';
 
 const Sexta = lazy(() => import('./Sexta'));
-// Projeto Armor é um app standalone (repo/deploy próprio). O Alps OS não embute
-// mais o jogo: o card apenas redireciona para o jogo publicado.
 const PROJETO_ARMOR_URL = 'https://projeto-armor.vercel.app/';
 
 const LoadingScreen = () => (
@@ -23,19 +21,14 @@ const SLIDES = [
 ];
 
 const TOTAL = SLIDES.length;
-
-// Clones nas pontas para um carrossel infinito sem "pulo" visual:
-// [último, ...slides, primeiro]
 const EXT = [SLIDES[TOTAL - 1], ...SLIDES, SLIDES[0]];
-const EXT_LEN = EXT.length; // TOTAL + 2
+const EXT_LEN = EXT.length;
 
 export default function Home() {
   const [telaAtual, setTelaAtual] = useState('hub');
-  const [pos, setPos] = useState(1); // 1 = primeiro slide real (índice 0 é o clone)
+  const [pos, setPos] = useState(1);
   const [anim, setAnim] = useState(true);
-  const [dragX, setDragX] = useState(0); // deslocamento (px) enquanto arrasta com o dedo
-  
-  // ESTADO NOVO: Controla a exibição da tela pedindo para girar o celular
+  const [dragX, setDragX] = useState(0);
   const [esperandoRotacao, setEsperandoRotacao] = useState(false); 
 
   const timerRef = useRef(null);
@@ -45,10 +38,7 @@ export default function Home() {
 
   useEffect(() => {
     const app = location.state?.openApp;
-    // Sexta-feira está indisponível: nunca abrir, mesmo que algum
-    // fluxo tente navegar com esse openApp.
     if (app === 'armor') {
-      // jogo externo: redireciona na mesma aba
       window.location.href = PROJETO_ARMOR_URL;
     } else if (app && app !== 'sexta') {
       setTelaAtual(app);
@@ -56,22 +46,19 @@ export default function Home() {
     }
   }, [location.state]);
 
-  // LÓGICA NOVA: Fica escutando quando o usuário deita o celular
+  // Escuta a rotação do celular
   useEffect(() => {
     if (!esperandoRotacao) return;
 
     const checkRotation = () => {
-      // Verifica se a largura ficou maior que a altura (celular deitado)
       if (window.innerWidth > window.innerHeight) {
         setEsperandoRotacao(false);
-        window.location.href = '/game/'; // Vai para o jogo imediatamente
+        window.location.href = '/game/'; // Vai para o jogo mantendo a tela cheia ativada
       }
     };
 
     window.addEventListener('resize', checkRotation);
     window.addEventListener('orientationchange', checkRotation);
-
-    // Checa logo de cara, vai que ele virou antes de o React processar
     checkRotation();
 
     return () => {
@@ -95,18 +82,35 @@ export default function Home() {
     resetTimer();
   };
 
-  // LÓGICA NOVA: Clique no FKW
   const abrirJogoFKW = () => {
-    if (touchRef.current.moved) return; // foi swipe, não clique
+    if (touchRef.current.moved) return;
     
+    // 1. SOLICITA TELA CHEIA IMEDIATAMENTE (No exato momento do clique)
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+    if (req) {
+      try { req.call(el).catch(() => {}); } catch (e) {}
+    }
+
+    // 2. VERIFICA A POSIÇÃO DO APARELHO
     const isPortrait = window.innerHeight > window.innerWidth;
     
     if (isPortrait) {
-      // Se estiver em pé, mostra a tela pedindo para virar e NÃO faz mais nada
+      // Pede para girar (já em tela cheia)
       setEsperandoRotacao(true);
     } else {
-      // Se já estiver deitado, vai direto pro jogo
+      // Se já estiver deitado, vai pro jogo direto
       window.location.href = '/game/';
+    }
+  };
+
+  const cancelarAbertura = () => {
+    setEsperandoRotacao(false);
+    // Sai da tela cheia caso o usuário desista de jogar
+    if (document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
     }
   };
 
@@ -127,7 +131,6 @@ export default function Home() {
     if (!touchRef.current.dragging) return;
     const delta = dragX;
     const largura = sliderRef.current?.offsetWidth || window.innerWidth;
-    // Troca de slide se arrastou mais de 20% da largura (ou pelo menos 50px).
     const limiar = Math.min(largura * 0.2, 80);
     touchRef.current.dragging = false;
     setDragX(0);
@@ -139,9 +142,8 @@ export default function Home() {
     }
   };
 
-  // Wrap-around robusto
   useEffect(() => {
-    if (pos >= 1 && pos <= TOTAL) return; // posição real: nada a fazer
+    if (pos >= 1 && pos <= TOTAL) return;
     const id = setTimeout(() => {
       setAnim(false);
       setPos(((((pos - 1) % TOTAL) + TOTAL) % TOTAL) + 1);
@@ -149,7 +151,6 @@ export default function Home() {
     return () => clearTimeout(id);
   }, [pos]);
 
-  // Reabilita a transição
   useEffect(() => {
     if (anim) return;
     const id = requestAnimationFrame(() =>
@@ -161,7 +162,7 @@ export default function Home() {
   return (
     <div className="w-full h-full bg-background text-foreground relative overflow-hidden flex flex-col">
       
-      {/* --- OVERLAY DE TELA CHEIA: VIRE O CELULAR --- */}
+      {/* OVERLAY: VIRE O CELULAR */}
       {esperandoRotacao && (
         <div 
           className="absolute inset-0 z-[300000] flex flex-col items-center justify-center text-center p-8" 
@@ -214,7 +215,7 @@ export default function Home() {
           </h2>
           
           <button
-            onClick={() => setEsperandoRotacao(false)}
+            onClick={cancelarAbertura}
             className="mt-8 px-6 py-3 text-sm text-white/50 underline active:text-white"
           >
             Cancelar
