@@ -622,6 +622,17 @@ function goFullscreen(){
 document.addEventListener('fullscreenchange', resize);
 document.addEventListener('webkitfullscreenchange', resize);
 
+// Ao DEITAR o celular (girar para paisagem), entra em tela cheia na hora — é
+// exatamente quando o jogo passa a ser jogável (sai o aviso "vire o celular").
+// Assim o fluxo fica: clicar no card na Home → girar o celular → jogo já cheio,
+// sem precisar tocar em lugar nenhum. (Se o navegador exigir um gesto e recusar,
+// o toque na tela inicial ainda ativa, via handler acima.)
+function isFullscreen(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+function enterFullscreenIfLandscape(){ if(!isPortrait() && !isFullscreen()) goFullscreen(); }
+window.addEventListener('orientationchange', ()=> setTimeout(enterFullscreenIfLandscape, 80));
+// Alguns aparelhos só disparam 'resize' (não 'orientationchange') ao girar.
+window.matchMedia('(orientation: landscape)').addEventListener('change', e=>{ if(e.matches) enterFullscreenIfLandscape(); });
+
 function startMatch(mode){
   state.mode = (mode==='full') ? 'full' : 'quick';
   goFullscreen();
