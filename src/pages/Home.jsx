@@ -69,12 +69,16 @@ export default function Home() {
     resetTimer();
   };
 
-  // Abre o jogo FKW indo direto para ele. Não pedimos tela cheia nem tentamos
-  // travar o celular em paisagem: o próprio jogo cuida disso e mostra a animação
-  // de "vire o celular" quando o aparelho está na vertical.
+  // Abre o jogo FKW na MESMA ORIGEM (alpsprime.com.br/fkw), via rewrite/proxy da
+  // Vercel (ver vercel.json). Por ser a mesma origem, o jogo reaproveita a sessão
+  // de login já feita aqui (o supabase-js guarda a sessão no localStorage por
+  // origem), então o jogador NÃO precisa logar de novo e o progresso é salvo na
+  // mesma conta. A barra final "/" é importante: mantém os assets do jogo sob
+  // /fkw/ para o proxy encontrá-los. Não pedimos tela cheia nem giramos o
+  // celular — o próprio jogo mostra a animação de "vire o celular".
   const abrirJogoFKW = () => {
     if (touchRef.current.moved) return; // foi swipe, não clique
-    window.location.href = 'https://free-kick-world-mqyme2mb2.vercel.app';
+    window.location.href = '/fkw/';
   };
 
   // Arrastar com o dedo (swipe) para trocar de slide.
