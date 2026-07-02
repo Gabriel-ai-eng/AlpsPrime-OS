@@ -4,9 +4,11 @@ import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import CachedImage from '@/components/CachedImage';
 
 const Sexta = lazy(() => import('./Sexta'));
-// Projeto Armor é um app standalone (repo/deploy próprio). O Alps OS não embute
-// mais o jogo: o card apenas redireciona para o jogo publicado.
-const PROJETO_ARMOR_URL = 'https://projeto-armor.vercel.app/';
+// Projeto Armor continua num repositório/deploy próprio, mas é servido SOB o
+// domínio da plataforma (rewrite/proxy da Vercel em /jogo). Por ser a mesma
+// origem, o jogo reaproveita a sessão de login já feita aqui — o jogador não
+// precisa logar/cadastrar de novo e o progresso fica salvo na mesma conta.
+const PROJETO_ARMOR_URL = '/jogo';
 
 const LoadingScreen = () => (
   <div className="absolute inset-0 z-[200000] flex flex-col items-center justify-center bg-white backdrop-blur-xl">

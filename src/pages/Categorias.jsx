@@ -14,7 +14,7 @@ const FILTROS = [
 // Serviços disponíveis, cada um marcado com a sua categoria. `status: 'soon'`
 // marca os que ainda não foram lançados.
 const APPS = [
-  { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', logo: '/apps/armor-logo.webp', status: 'live', url: 'https://projeto-armor.vercel.app/' },
+  { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', logo: '/apps/armor-logo.webp', status: 'live', url: '/jogo' },
   { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', cat: 'ia', logo: '/apps/sexta-logo.webp', status: 'soon' },
 ];
 
