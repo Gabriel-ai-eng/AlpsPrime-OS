@@ -20,15 +20,35 @@
   /* ---------- Tela de TÍTULO: imagem cheia (arte do FKW) + hotspots ---------- */
   #scrTitle { padding:0; gap:0; background:#05080f; }
   #titleWrap { position:relative; line-height:0; }
-  #titleImg { display:block; max-width:100vw; max-height:100vh; width:auto; height:auto; }
+  #titleImg { display:block; width:100vw; height:100vh; object-fit:cover; object-position:center; }
   /* Áreas clicáveis transparentes sobre os botões desenhados na arte.
      Posições em % casam com os botões pintados na imagem fkw-title.jpg
-     (proporção 6400×2900). Um leve realce ao tocar dá retorno visual. */
+     (proporção 6400×2900). */
   .hotspot { position:absolute; background:transparent; border:none; padding:0; margin:0;
     cursor:pointer; border-radius:12px; -webkit-tap-highlight-color:transparent;
-    transition:background .08s, box-shadow .08s; }
-  .hotspot:active { background:rgba(255,255,255,.12);
-    box-shadow:0 0 0 2px rgba(255,255,255,.25) inset; }
+    overflow:hidden; }
+  /* Janela espelhada: cópia da arte dentro do hotspot, alinhada pixel a pixel
+     com o #titleImg de fundo (mesmas regras: 100vw×100vh + object-fit cover).
+     Parada é invisível; ao saltar (.pop) é ela que dá o efeito do botão crescer. */
+  .hotspot .mirror { position:absolute; width:100vw; height:100vh;
+    object-fit:cover; object-position:center; pointer-events:none; }
+  #startGame      .mirror { left:-4.4vw;  top:-43.5vh; }
+  #btnPersonaliza .mirror { left:-4.4vw;  top:-54.5vh; }
+  #btnRanking     .mirror { left:-4.4vw;  top:-67.5vh; }
+  #btnVoltar      .mirror { left:-4.4vw;  top:-77.5vh; }
+  #btnEvento      .mirror { left:-75.8vw; top:-16vh; }
+  #btnEstadio     .mirror { left:-75.8vw; top:-46.5vh; }
+  #startQuick     .mirror { left:-75.8vw; top:-70vh; }
+  #btnSettings    .mirror { left:-96.5vw; top:-2vh; }
+  #btnChat        .mirror { left:-88vw;   top:-85.5vh; }
+  /* Pop do clique: o botão salta e aumenta um pouco, depois assenta de volta. */
+  .hotspot.pop { animation:btnpop .3s ease-out; z-index:2; }
+  @keyframes btnpop {
+    0%   { transform:scale(1); }
+    35%  { transform:scale(1.12) translateY(-1.5%); }
+    70%  { transform:scale(1.04); }
+    100% { transform:scale(1); }
+  }
   /* Menu à esquerda */
   #startGame      { left:4.4%; top:43.5%; width:22%; height:11%; }
   #btnPersonaliza { left:4.4%; top:54.5%; width:22%; height:9%; }
@@ -168,18 +188,21 @@
 <div id="scrTitle" class="screen">
   <div id="titleWrap">
     <img id="titleImg" src="assets/fkw-title.jpg" alt="Free Kick World" decoding="async" fetchpriority="high" />
+    <!-- Cada hotspot carrega uma cópia da arte (janela espelhada, .mirror):
+         parada é invisível (pixels idênticos ao fundo); ao clicar, o botão
+         salta/aumenta (animação .pop) dando retorno visual do toque. -->
     <!-- Menu à esquerda -->
-    <button class="hotspot" id="startGame"      aria-label="Jogar"></button>
-    <button class="hotspot" id="btnPersonaliza" aria-label="Personalizar"></button>
-    <button class="hotspot" id="btnRanking"     aria-label="Ranking"></button>
-    <button class="hotspot" id="btnVoltar"      aria-label="Voltar"></button>
+    <button class="hotspot" id="startGame"      aria-label="Jogar"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <button class="hotspot" id="btnPersonaliza" aria-label="Personalizar"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <button class="hotspot" id="btnRanking"     aria-label="Ranking"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <button class="hotspot" id="btnVoltar"      aria-label="Voltar"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
     <!-- Cartões / ações à direita -->
-    <button class="hotspot" id="btnEvento"      aria-label="Evento especial"></button>
-    <button class="hotspot" id="btnEstadio"     aria-label="Estádio"></button>
-    <button class="hotspot" id="startQuick"     aria-label="Iniciar partida rápida"></button>
+    <button class="hotspot" id="btnEvento"      aria-label="Evento especial"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <button class="hotspot" id="btnEstadio"     aria-label="Estádio"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <button class="hotspot" id="startQuick"     aria-label="Iniciar partida rápida"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
     <!-- Topo / rodapé -->
-    <button class="hotspot" id="btnSettings"    aria-label="Configurações"></button>
-    <button class="hotspot" id="btnChat"        aria-label="Chat"></button>
+    <button class="hotspot" id="btnSettings"    aria-label="Configurações"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <button class="hotspot" id="btnChat"        aria-label="Chat"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
   </div>
   <!-- Aviso rápido "em breve" para as áreas ainda não implementadas -->
   <div id="toast"></div>
@@ -707,21 +730,28 @@ const toastEl=document.getElementById('toast'); let toastId=null;
 function toast(t){ if(!toastEl) return; toastEl.textContent=t; toastEl.classList.add('on');
   clearTimeout(toastId); toastId=setTimeout(()=>toastEl.classList.remove('on'),1400); }
 
-document.getElementById('startGame').onclick=()=>startMatch('full');    // "JOGAR" → partida completa (1º e 2º tempo)
-document.getElementById('startQuick').onclick=()=>startMatch('quick');  // "INICIAR / partida rápida" → 60s (como está)
+// Clique com "pulinho": o botão salta/aumenta (classe .pop no hotspot) e a
+// ação roda 170ms depois — tempo de ver o retorno visual antes da tela mudar.
+// (A tela cheia não quebra: o pointerdown global já pede fullscreen no toque.)
+function popGo(id, fn){
+  const el=document.getElementById(id); if(!el) return;
+  el.onclick=()=>{ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); setTimeout(fn,170); };
+}
+popGo('startGame', ()=>startMatch('full'));    // "JOGAR" → partida completa (1º e 2º tempo)
+popGo('startQuick', ()=>startMatch('quick'));  // "INICIAR / partida rápida" → 60s (como está)
 // "RANKING": abre a tela de classificação (placeholder por enquanto).
-document.getElementById('btnRanking').onclick=()=>{ show('tabela'); state.scene='tabela'; };
+popGo('btnRanking', ()=>{ show('tabela'); state.scene='tabela'; });
 // "VOLTAR" (menu da home): sai para a Home do Alps OS (salva antes).
-document.getElementById('btnVoltar').onclick=()=>{
+popGo('btnVoltar', ()=>{
   const go=()=>{ window.location.href='/home'; };
   Promise.race([ saveNow(), new Promise(r=>setTimeout(r,600)) ]).finally(go);
-};
+});
 // Áreas ainda não implementadas: só avisam "em breve".
-document.getElementById('btnPersonaliza').onclick=()=>toast('Personalização em breve 👕');
-document.getElementById('btnEvento').onclick   =()=>toast('Evento especial em breve ✨');
-document.getElementById('btnEstadio').onclick  =()=>toast('Mais estádios em breve 🏟️');
-document.getElementById('btnSettings').onclick =()=>toast('Configurações em breve ⚙️');
-document.getElementById('btnChat').onclick     =()=>toast('Chat em breve 💬');
+popGo('btnPersonaliza', ()=>toast('Personalização em breve 👕'));
+popGo('btnEvento',      ()=>toast('Evento especial em breve ✨'));
+popGo('btnEstadio',     ()=>toast('Mais estádios em breve 🏟️'));
+popGo('btnSettings',    ()=>toast('Configurações em breve ⚙️'));
+popGo('btnChat',        ()=>toast('Chat em breve 💬'));
 document.getElementById('playAgain').onclick=()=>startMatch(state.mode);// joga de novo no mesmo modo da partida anterior
 // Tela de RANKING (placeholder por enquanto)
 document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='title'; };
