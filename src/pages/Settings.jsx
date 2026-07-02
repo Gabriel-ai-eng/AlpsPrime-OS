@@ -51,7 +51,7 @@ function Group({ label, children }) {
   return (
     <div>
       <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2 ml-1">{label}</p>
-      <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">{children}</div>
+      <div className="bg-[#F1F2F6] border border-border rounded-2xl overflow-hidden divide-y divide-border">{children}</div>
     </div>
   );
 }
