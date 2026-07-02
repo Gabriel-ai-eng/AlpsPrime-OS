@@ -69,34 +69,12 @@ export default function Home() {
     resetTimer();
   };
 
-  // Abre o jogo FKW já em TELA CHEIA. O clique no card é o gesto do usuário que
-  // o navegador exige para liberar a tela cheia (girar o celular sozinho NÃO é
-  // aceito). Pedimos a tela cheia aqui e esperamos ela engatar antes de navegar;
-  // o Chrome a mantém na navegação same-origin, então o /game/ já abre cheio e,
-  // ao deitar o celular, o jogo aparece em tela cheia sem tocar em nada.
+  // Abre o jogo FKW indo direto para ele. Não pedimos tela cheia nem tentamos
+  // travar o celular em paisagem: o próprio jogo cuida disso e mostra a animação
+  // de "vire o celular" quando o aparelho está na vertical.
   const abrirJogoFKW = () => {
     if (touchRef.current.moved) return; // foi swipe, não clique
-    const irParaJogo = () => { window.location.href = 'https://free-kick-world-mqyme2mb2.vercel.app'; };
-    const el = document.documentElement;
-    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-    if (!req) { irParaJogo(); return; }
-
-    let feito = false;
-    const go = () => { if (!feito) { feito = true; irParaJogo(); } };
-    try {
-      const r = req.call(el);
-      if (r && typeof r.then === 'function') {
-        // Só navega DEPOIS que a tela cheia engatou (a transição pode levar
-        // algumas centenas de ms); assim o Chrome a leva junto para o jogo.
-        r.then(() => {
-          try { screen.orientation?.lock?.('landscape').catch(() => {}); } catch (_) {}
-          go();
-        }).catch(go);
-        setTimeout(go, 1500); // rede de segurança se a promise nunca resolver
-      } else {
-        setTimeout(go, 300);
-      }
-    } catch (_) { go(); }
+    window.location.href = 'https://free-kick-world-mqyme2mb2.vercel.app';
   };
 
   // Arrastar com o dedo (swipe) para trocar de slide.
