@@ -11,10 +11,13 @@ if ('serviceWorker' in navigator) {
       reg.unregister();
     }
   });
-  // Also clear all caches so stale chunks are evicted
+  // Also clear stale SW caches — MAS preserva o cache de imagens do
+  // CachedImage (sf-img-cache-v1): apagá-lo forçava rebaixar da rede, em
+  // toda visita, as imagens grandes do Home (era isso que deixava o
+  // carregamento lento).
   if (window.caches) {
     caches.keys().then((keys) => {
-      keys.forEach((key) => caches.delete(key));
+      keys.filter((key) => key !== 'sf-img-cache-v1').forEach((key) => caches.delete(key));
     });
   }
 }

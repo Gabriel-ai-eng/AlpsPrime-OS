@@ -25,11 +25,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- Pré-carregamento das imagens (assets locais em WebP) para aparecerem na hora -->
+    <!-- Pré-carregamento das imagens que pintam primeiro (tela de loading e Home).
+         Só arquivos que EXISTEM: preload de arquivo inexistente desperdiça rede. -->
+    <link rel="preload" as="image" href="/icon-192.png" />
     <link rel="preload" as="image" href="/brand/alps-prime-black.webp" />
     <link rel="preload" as="image" href="/brand/alps-prime-white.webp" />
     <link rel="preload" as="image" href="/apps/armor-bg.webp" />
-    <link rel="preload" as="image" href="/apps/titan-bg.webp" />
     <link rel="preload" as="image" href="/apps/sexta-bg.webp" />
     <link rel="preload" as="image" href="/apps/armor-logo.webp" />
     <link rel="preload" as="image" href="/apps/sexta-logo.webp" />

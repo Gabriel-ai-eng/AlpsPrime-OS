@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -8,26 +9,35 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { LanguageProvider } from '@/lib/i18n';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
+// Sempre no bundle inicial: casca do app, tela de entrada e o Home (destino
+// principal). As demais páginas carregam SOB DEMANDA (React.lazy) — o JS
+// inicial fica bem menor e a tela de loading some mais rápido.
 import AppShell from '@/components/layout/AppShell';
 import Welcome from '@/pages/Welcome';
-import ImageGen from '@/pages/ImageGen';
-import Profile from '@/pages/Profile';
 import Home from '@/pages/Home';
-import Search from '@/pages/Search';
-import Verified from '@/pages/Verified';
-import Settings from '@/pages/Settings';
-import Notifications from '@/pages/Notifications';
 import HotmartGate from '@/components/access/HotmartGate';
 import { LOGO_URL } from '@/lib/branding';
-import Todos from '@/pages/Todos';
-import Categorias from '@/pages/Categorias';
-import Suporte from '@/pages/Suporte';
-import TermosDeUso from '@/pages/TermosDeUso';
-import Privacidade from '@/pages/Privacidade';
-import Pagamento from '@/pages/Pagamento';
 
-// Import da nova página de Favoritos
-import Favoritos from '@/pages/Favoritos';
+const ImageGen = lazy(() => import('@/pages/ImageGen'));
+const Profile = lazy(() => import('@/pages/Profile'));
+const Search = lazy(() => import('@/pages/Search'));
+const Verified = lazy(() => import('@/pages/Verified'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const Notifications = lazy(() => import('@/pages/Notifications'));
+const Todos = lazy(() => import('@/pages/Todos'));
+const Categorias = lazy(() => import('@/pages/Categorias'));
+const Suporte = lazy(() => import('@/pages/Suporte'));
+const TermosDeUso = lazy(() => import('@/pages/TermosDeUso'));
+const Privacidade = lazy(() => import('@/pages/Privacidade'));
+const Pagamento = lazy(() => import('@/pages/Pagamento'));
+const Favoritos = lazy(() => import('@/pages/Favoritos'));
+
+// Fallback das rotas preguiçosas: mesmo spinner da tela de carregamento.
+const RouteFallback = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-background">
+    <div className="w-6 h-6 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+  </div>
+);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, isAuthenticated, user } = useAuth();
@@ -52,12 +62,14 @@ const AuthenticatedApp = () => {
   // Páginas institucionais públicas: acessíveis com ou sem login. Para o
   // visitante não autenticado, qualquer outro caminho cai na tela de Welcome.
   const rotasPublicas = (
-    <Routes>
-      <Route path="/termos-de-uso" element={<TermosDeUso />} />
-      <Route path="/privacidade" element={<Privacidade />} />
-      <Route path="/pagamento" element={<Pagamento />} />
-      <Route path="*" element={<Welcome />} />
-    </Routes>
+    <Suspense fallback={<RouteFallback />}>
+      <Routes>
+        <Route path="/termos-de-uso" element={<TermosDeUso />} />
+        <Route path="/privacidade" element={<Privacidade />} />
+        <Route path="/pagamento" element={<Pagamento />} />
+        <Route path="*" element={<Welcome />} />
+      </Routes>
+    </Suspense>
   );
 
   if (authError) {
@@ -73,6 +85,7 @@ const AuthenticatedApp = () => {
   // (checkMyAccess → AuthorizedAccess). Quem não comprou vê a tela "Acesso restrito".
   return (
     <HotmartGate userEmail={user?.email}>
+    <Suspense fallback={<RouteFallback />}>
     <Routes>
       <Route element={<AppShell />}>
         <Route path="/" element={<Navigate to="/home" replace />} />
@@ -109,6 +122,7 @@ const AuthenticatedApp = () => {
       <Route path="/pagamento" element={<Pagamento />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    </Suspense>
     </HotmartGate>
   );
 };

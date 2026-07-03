@@ -6,7 +6,7 @@
  * Logo do app (montanha). Usa o ícone local — antes apontava para uma imagem
  * no servidor do Base44 (que era o "S" antigo e dependia de um serviço externo).
  */
-export const LOGO_URL = '/icon-512.png';
+export const LOGO_URL = '/icon-192.png';
 
 /**
  * E-mails de ADMIN — entram sempre, sem precisar de compra na Hotmart.

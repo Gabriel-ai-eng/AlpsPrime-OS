@@ -212,7 +212,7 @@ export default function Home() {
               className="w-full aspect-square overflow-hidden cursor-pointer active:scale-[0.99] transition-transform duration-300 group"
             >
               <CachedImage
-                src="/apps/armor-bg.png"
+                src="/apps/armor-bg.webp"
                 cacheKey="armor_bg"
                 alt="Projeto Armor"
                 decoding="async"

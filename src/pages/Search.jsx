@@ -10,7 +10,7 @@ const SUB_APPS = [
   {
     id: 'armor',
     name: 'Projeto Armor',
-    image: '/apps/armor-bg.png',
+    image: '/apps/armor-bg.webp',
     status: 'live',
   },
   {
