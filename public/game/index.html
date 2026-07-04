@@ -287,6 +287,12 @@ A.runner.src  = 'assets/player_run.png';
 A.kick.src    = 'assets/player_kick.png';
 A.jump.src    = 'assets/player_jump.png';
 A.walk.onload = A.runner.onload = A.kick.onload = A.jump.onload = ()=> A.loaded++;
+// Folha do jogador PARADO (idle). Carregada à parte (não conta em A.need): se
+// faltar, o "parado" cai no quadro 0 da caminhada. Enquadrada igual à caminhada.
+A.idle = new Image();
+A.idle.src = 'assets/player_idle.png';
+const IDLE_SH = { FW:114, FH:184, cols:10, rows:6, frames:60 };
+const IDLE_MS = 60;   // ms por quadro (~3.6s de loop calmo)
 
 // Imagem do gramado (foto em perspectiva). Carregada à parte, SEM travar o loop:
 // se falhar, o gramado cai no desenho procedural (fallback em GrassTileMap).
@@ -1238,8 +1244,11 @@ function drawPlayer(){
   const jumping = player.jumping;
   const kicking = player.kicking && !jumping;
   const run = !kicking && !jumping && player.running && player.moving;
-  const sheet = jumping ? JUMP_SH : kicking ? KICK_SH : (run ? RUN_SH : WALK_SH);
-  const sprite = jumping ? A.jump : kicking ? A.kick : (run ? A.runner : A.walk);
+  // PARADO com idle animado (se a folha carregou); senão, quadro 0 da caminhada.
+  const idleReady = (typeof A.idle!=='undefined') && A.idle.complete && A.idle.naturalWidth>0 && typeof IDLE_SH!=='undefined';
+  const idle = !jumping && !kicking && !player.moving && idleReady;
+  const sheet = jumping ? JUMP_SH : kicking ? KICK_SH : idle ? IDLE_SH : (run ? RUN_SH : WALK_SH);
+  const sprite = jumping ? A.jump : kicking ? A.kick : idle ? A.idle : (run ? A.runner : A.walk);
   const h=depthScale(player.v), w=h*(sheet.FW/sheet.FH);
   // sombra fica menor quanto mais alto está o pulo
   const sj=1/(1+player.z/Math.max(20,h*0.6));
@@ -1253,8 +1262,10 @@ function drawPlayer(){
     f = Math.min(sheet.frames-1, Math.max(0, Math.floor(player.jumpT)));
   } else if(kicking){
     f = Math.min(sheet.frames-1, Math.max(0, Math.floor(player.kickT)));
+  } else if(idle){
+    f = Math.floor(performance.now()/IDLE_MS) % IDLE_SH.frames;   // loop por tempo
   } else if(!player.moving){
-    f = 0;
+    f = 0;   // fallback: idle não carregou → quadro parado da caminhada
   } else if(sheet === WALK_SH){
     const last = sheet.frames - 1;            // 42 (último quadro)
     const n = sheet.frames - 2;               // 41 quadros úteis (sem o 0 e o 41)
