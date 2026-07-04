@@ -6,7 +6,9 @@
 <title>Free Kick World ⚽</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent;
-      user-select:none; -webkit-user-select:none; touch-action:none; }
+      user-select:none; -webkit-user-select:none; touch-action:none;
+      /* long-press NÃO abre o menu de imagem do navegador (Google Lens / salvar…) */
+      -webkit-touch-callout:none; }
   html,body { width:100%; height:100%; background:#05080f; overflow:hidden;
     font-family:'Courier New', ui-monospace, monospace; color:#e2e8f0; }
   #cv { position:fixed; inset:0; width:100%; height:100%; display:block; background:#05080f; }
@@ -194,7 +196,7 @@
 <!-- TÍTULO / HOME (arte cheia do FKW + hotspots sobre os botões da tela) -->
 <div id="scrTitle" class="screen">
   <div id="titleWrap">
-    <img id="titleImg" src="assets/fkw-title.jpg" alt="Free Kick World" decoding="async" fetchpriority="high" />
+    <img id="titleImg" src="assets/fkw-title.jpg" alt="Free Kick World" decoding="async" fetchpriority="high" draggable="false" />
     <!-- Cada hotspot carrega uma cópia da arte (janela espelhada, .mirror):
          parada é invisível (pixels idênticos ao fundo); ao clicar, o botão
          salta/aumenta (animação .pop) dando retorno visual do toque. -->
@@ -815,6 +817,11 @@ document.getElementById('tabelaBack').onclick=()=>{ show('title'); state.scene='
 // usuário TOCA na tela. Não entra sozinho ao girar, nem com o celular em pé.
 // O toque em qualquer lugar da tela cumpre o gesto exigido pelo navegador.
 document.addEventListener('pointerdown', ()=>{ if(!isPortrait() && !isFullscreen()) goFullscreen(); });
+
+// Segurar o dedo (long-press) sobre a arte da tela inicial abria o menu do
+// navegador (Google Lens / salvar imagem / compartilhar…). Como é um jogo,
+// bloqueamos esse menu de contexto em qualquer lugar.
+document.addEventListener('contextmenu', e=>e.preventDefault());
 
 // Pede tela cheia (e tenta travar em paisagem). Nunca age com o celular em pé.
 function goFullscreen(){
