@@ -36,7 +36,9 @@
     object-fit:cover; object-position:center; pointer-events:none; }
   /* JOGAR: imagem própria do botão (assets/btn-jogar.png) sobre o frame dourado
      desenhado. Sem espelho, sem recorte da arte. object-fit:fill casa 1:1. */
-  #startGame .jogarbtn { position:absolute; inset:0; width:100%; height:100%;
+  /* JOGAR / PERSONALIZAR / RANKING: imagem própria de cada botão preenchendo o
+     hotspot, exatamente sobre o botão desenhado. object-fit:fill casa 1:1. */
+  .btnimg { position:absolute; inset:0; width:100%; height:100%;
     object-fit:fill; pointer-events:none; }
   #btnPersonaliza .mirror { left:-4.4vw;  top:-54.5vh; }
   #btnRanking     .mirror { left:-4.4vw;  top:-67.5vh; }
@@ -54,17 +56,18 @@
     70%  { transform:scale(1.04); }
     100% { transform:scale(1); }
   }
-  /* JOGAR — microanimação "bounce press": SÓ escala + glow, pivot no centro.
-     A ESCALA é conduzida por JS (transform inline); o GLOW dourado abaixo
-     intensifica enquanto o botão está pressionado (+~20%). */
-  #startGame { transform-origin:50% 50%; will-change:transform;
-    transition:box-shadow .09s ease-out; }
+  /* Microanimação "bounce press": SÓ escala + glow, pivot no centro. Escala via
+     JS (transform inline); o GLOW abaixo intensifica enquanto pressionado. */
+  #startGame, #btnPersonaliza, #btnRanking {
+    transform-origin:50% 50%; will-change:transform; transition:box-shadow .09s ease-out; }
   #startGame.pressed {
     box-shadow:0 0 22px 6px rgba(255,193,38,.5), 0 0 7px 1px rgba(255,214,92,.65); }
-  /* Menu à esquerda */
-  #startGame      { left:5%;   top:40.86%; width:21.25%; height:11.38%; }
-  #btnPersonaliza { left:4.4%; top:54.5%; width:22%; height:9%; }
-  #btnRanking     { left:4.4%; top:67.5%; width:22%; height:9.5%; }
+  #btnPersonaliza.pressed, #btnRanking.pressed {
+    box-shadow:0 0 20px 5px rgba(170,200,255,.4), 0 0 6px 1px rgba(220,235,255,.5); }
+  /* Menu à esquerda (posição = frame real desenhado na arte) */
+  #startGame      { left:5%; top:40.86%; width:21.25%; height:11.38%; }
+  #btnPersonaliza { left:5%; top:53.94%; width:21.25%; height:10.33%; }
+  #btnRanking     { left:5%; top:64.87%; width:21.25%; height:10.33%; }
   #btnVoltar      { left:4.4%; top:77.5%; width:22%; height:9.5%; }
   /* Cartões / ações à direita */
   #btnEvento      { left:75.8%; top:16%;  width:22.4%; height:27%; }
@@ -206,9 +209,9 @@
     <!-- Menu à esquerda -->
     <!-- JOGAR: imagem própria do botão (transparente) sobre o botão desenhado;
          é este <img> que salta na animação de toque. Nada da arte é recortado. -->
-    <button class="hotspot" id="startGame"      aria-label="Jogar"><img class="jogarbtn" src="assets/btn-jogar.png" alt="" draggable="false" /></button>
-    <button class="hotspot" id="btnPersonaliza" aria-label="Personalizar"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
-    <button class="hotspot" id="btnRanking"     aria-label="Ranking"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
+    <button class="hotspot" id="startGame"      aria-label="Jogar"><img class="btnimg" src="assets/btn-jogar.png" alt="" draggable="false" /></button>
+    <button class="hotspot" id="btnPersonaliza" aria-label="Personalizar"><img class="btnimg" src="assets/btn-personalizar.png" alt="" draggable="false" /></button>
+    <button class="hotspot" id="btnRanking"     aria-label="Ranking"><img class="btnimg" src="assets/btn-ranking.png" alt="" draggable="false" /></button>
     <button class="hotspot" id="btnVoltar"      aria-label="Voltar"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
     <!-- Cartões / ações à direita -->
     <button class="hotspot" id="btnEvento"      aria-label="Evento especial"><img class="mirror" src="assets/fkw-title.jpg" alt="" draggable="false" /></button>
@@ -801,15 +804,16 @@ function pressGo(id, fn){
 
 pressGo('startGame', ()=>startMatch('full'));  // "JOGAR" → bounce press → partida completa
 popGo('startQuick', ()=>startMatch('quick'));  // "INICIAR / partida rápida" → 60s (como está)
-// "RANKING": abre a tela de classificação (placeholder por enquanto).
-popGo('btnRanking', ()=>{ show('tabela'); state.scene='tabela'; });
+// "RANKING": bounce press → abre a tela de classificação (placeholder).
+pressGo('btnRanking', ()=>{ show('tabela'); state.scene='tabela'; });
 // "VOLTAR" (menu da home): sai para a Home do Alps OS (salva antes).
 popGo('btnVoltar', ()=>{
   const go=()=>{ window.location.href='/home'; };
   Promise.race([ saveNow(), new Promise(r=>setTimeout(r,600)) ]).finally(go);
 });
+// "PERSONALIZAR": bounce press → aviso "em breve".
+pressGo('btnPersonaliza', ()=>toast('Personalização em breve 👕'));
 // Áreas ainda não implementadas: só avisam "em breve".
-popGo('btnPersonaliza', ()=>toast('Personalização em breve 👕'));
 popGo('btnEvento',      ()=>toast('Evento especial em breve ✨'));
 popGo('btnEstadio',     ()=>toast('Mais estádios em breve 🏟️'));
 popGo('btnSettings',    ()=>toast('Configurações em breve ⚙️'));
