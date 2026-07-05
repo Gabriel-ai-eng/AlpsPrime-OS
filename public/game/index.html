@@ -150,21 +150,26 @@
   /* ---------- Overlay: gire o celular para a horizontal ---------- */
   #rotate { position:fixed; inset:0; z-index:50; display:none;
     flex-direction:column; align-items:center; justify-content:center; gap:30px; padding:34px;
-    background:radial-gradient(circle at 50% 38%, #0b1424, #05080f); text-align:center; }
+    background:radial-gradient(circle at 50% 38%, #0b2018, #05080f); text-align:center; }
   @media (orientation:portrait) { #rotate { display:flex; }
     /* Na tela "VIRE O CELULAR" (retrato) não mostra o "← Voltar" do topo — ele
        ficava piscando por cima do overlay. A própria tela já tem o "Cancelar". */
     #backBtn { display:none !important; } }
-  #rotate h2 { color:#7dd3fc; font-size:clamp(20px,6vw,30px); letter-spacing:2px;
-    text-shadow:2px 2px 0 #0a3d62; }
+  #rotate h2 { color:#a7f3d0; font-size:clamp(20px,6vw,30px); letter-spacing:2px;
+    text-shadow:2px 2px 0 #14532d; }
   #rotate p { color:#cbd5e1; font-size:15px; max-width:380px; line-height:1.55; }
-  .phone { width:62px; height:110px; border:5px solid #7dd3fc; border-radius:14px;
-    position:relative; box-shadow:0 0 26px rgba(125,211,252,.5);
+  .phone { width:62px; height:110px; border:5px solid #a7f3d0; border-radius:14px;
+    position:relative; box-shadow:0 0 26px rgba(134,239,172,.45);
     animation:tilt 2.4s ease-in-out infinite; }
   .phone::before { content:''; position:absolute; left:50%; bottom:7px; width:20px; height:4px;
-    border-radius:3px; background:#7dd3fc; transform:translateX(-50%); }
+    border-radius:3px; background:#a7f3d0; transform:translateX(-50%); }
   .phone::after { content:''; position:absolute; inset:7px; border-radius:7px;
-    background:rgba(125,211,252,.12); }
+    background:rgba(134,239,172,.12); }
+  /* Botão "Cancelar" na tela de girar: volta para a Home do Alps. */
+  #rotateCancel { font-family:inherit; cursor:pointer; padding:11px 34px; font-size:15px;
+    letter-spacing:1px; color:#a7f3d0; background:transparent;
+    border:1px solid rgba(167,243,208,.5); border-radius:999px; transition:transform .08s; }
+  #rotateCancel:active { transform:scale(.94); }
   @keyframes tilt {
     0%,16%   { transform:rotate(0deg); }
     46%,72%  { transform:rotate(-90deg); }
@@ -182,6 +187,7 @@
 <div id="rotate">
   <div class="phone"></div>
   <h2>VIRE O CELULAR</h2>
+  <button id="rotateCancel" type="button">Cancelar</button>
 </div>
 
 <!-- HUD -->
@@ -278,6 +284,14 @@ window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', resize);
 resize();
 
+// Android/Chrome pode DESCARTAR o contexto 2D do canvas sob pressão de memória
+// (canvas preto, página viva). Quando o contexto volta, refaz tamanho e estádio.
+cv.addEventListener('contextlost', e=>{ e.preventDefault(); });
+cv.addEventListener('contextrestored', ()=>{
+  resize();
+  try { if(typeof Stadium!=='undefined' && Stadium.built) Stadium.rebuild(); } catch(_){}
+});
+
 // Em retrato mostramos o aviso "vire o celular" e pausamos a partida.
 const isPortrait = () => window.matchMedia('(orientation: portrait)').matches;
 
@@ -324,13 +338,13 @@ goalLeftImg.onload = goalRightImg.onload = ()=>{ if (Stadium && Stadium.built) S
 // Sprite sheet de CAMINHADA: folha ORIGINAL, exatamente como desenhada.
 // 5 colunas x 9 linhas = 42 quadros (perfil p/ direita). Lidos da esquerda p/ a
 // direita; ao fim da linha, segue na linha de baixo. Sem reorganizar/cortar/inverter.
-const WALK_SH = { FW:340, FH:664, cols:9, rows:5, frames:43 };
+const WALK_SH = { FW:170, FH:332, cols:9, rows:5, frames:43 };
 // Sprite sheet de CORRIDA: 5 colunas x 4 linhas = 20 quadros (perfil p/ direita)
 // Alta resolução (quadro 430x608) → personagem nítido e suave, sem serrilhado.
-const RUN_SH = { FW:430, FH:608, cols:5, rows:4, frames:20 };
+const RUN_SH = { FW:215, FH:304, cols:5, rows:4, frames:20 };
 // Sprite sheet de CHUTE PARADO: 12 colunas x 15 linhas = 180 quadros (perfil p/
 // direita), alinhados pelo tronco (estavel) com os pes na base.
-const KICK_SH = { FW:273, FH:273, cols:12, rows:15, frames:180 };
+const KICK_SH = { FW:136, FH:136, cols:12, rows:15, frames:180 };
 const KICK_FPS = 140;        // velocidade de reproducao da animacao de chute
 const KICK_CONTACT = 122;    // FRAME EXATO do contato: o pe encosta na bola (evento de animacao)
 const KICK_FOOT_DX = 0.406;  // posicao do pe NESSE frame: fracao da largura do sprite a frente do centro
@@ -338,7 +352,7 @@ const KICK_FOOT_DX = 0.406;  // posicao do pe NESSE frame: fracao da largura do 
 // alinhados pelo tronco e pes na base. O arco vertical do pulo NAO esta embutido:
 // a altura (z) e gerada por codigo e sincronizada com a animacao (decolagem ->
 // aterrissagem) atraves de um EVENTO de animacao por frame.
-const JUMP_SH = { FW:172, FH:291, cols:15, rows:14, frames:200 };
+const JUMP_SH = { FW:86, FH:145, cols:15, rows:14, frames:200 };
 const JUMP_FPS = 185;        // velocidade de reproducao da animacao de pulo
 const JUMP_TO = 57;          // frame de DECOLAGEM (pes saem do chao)
 const JUMP_LD = 168;         // frame de ATERRISSAGEM (pes tocam o chao)
@@ -823,6 +837,12 @@ pressGo('btnVoltar', ()=>{
   const go=()=>{ window.location.href='/home'; };
   Promise.race([ saveNow(), new Promise(r=>setTimeout(r,600)) ]).finally(go);
 });
+// "Cancelar" na tela "VIRE O CELULAR": volta direto para a Home do Alps.
+const rotateCancel=document.getElementById('rotateCancel');
+if(rotateCancel) rotateCancel.onclick=()=>{
+  const go=()=>{ window.location.href='/home'; };
+  Promise.race([ saveNow(), new Promise(r=>setTimeout(r,600)) ]).finally(go);
+};
 // "PERSONALIZAR": bounce press → aviso "em breve".
 pressGo('btnPersonaliza', ()=>toast('Personalização em breve 👕'));
 // Áreas ainda não implementadas: só avisam "em breve".
@@ -1421,7 +1441,13 @@ initPersistence();
 let last=performance.now();
 function loop(now){
   let dt=(now-last)/1000; last=now; if(dt>0.05) dt=0.05;
-  if(A.loaded>=A.need){ update(dt); render(); }
+  // try/catch: sem ele, UMA exceção num frame matava o desenho PARA SEMPRE
+  // (tela preta com HUD vivo). Agora o frame com erro é pulado.
+  try {
+    if(A.loaded>=A.need){ update(dt); render(); }
+  } catch(err) {
+    if(!loop._err){ loop._err=true; console.error('FKW frame error:', err); }
+  }
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
