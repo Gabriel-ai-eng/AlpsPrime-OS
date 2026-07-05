@@ -21,7 +21,7 @@ const LoadingScreen = () => (
 
 const SLIDES = [
   { id: 'alps', bg: null, titulo: true },
-  { id: 'branco', bg: '#FFFFFF', titulo: false, img: '/apps/fkw-bg.jpg' },
+  { id: 'branco', bg: '#FFFFFF', titulo: false, img: '/apps/fkw-bg-v2.jpg' },
 ];
 
 const TOTAL = SLIDES.length;
