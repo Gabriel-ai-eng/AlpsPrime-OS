@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -32,6 +32,29 @@ const Privacidade = lazy(() => import('@/pages/Privacidade'));
 const Pagamento = lazy(() => import('@/pages/Pagamento'));
 const Favoritos = lazy(() => import('@/pages/Favoritos'));
 
+// Assim que o navegador fica OCIOSO (app já desenhado), baixa em segundo plano
+// o código de todas as seções acima. O bundle inicial continua pequeno, mas ao
+// tocar em qualquer seção (Suporte, Configurações, Perfil…) o código já está
+// no aparelho e a tela abre na hora, sem o spinner de carregamento.
+// (O import() repetido aponta para o mesmo chunk do lazy() — é baixado 1x só.)
+const preCarregarSecoes = () => {
+  [
+    () => import('@/pages/Suporte'),
+    () => import('@/pages/Settings'),
+    () => import('@/pages/Profile'),
+    () => import('@/pages/Search'),
+    () => import('@/pages/Notifications'),
+    () => import('@/pages/Favoritos'),
+    () => import('@/pages/Categorias'),
+    () => import('@/pages/Todos'),
+    () => import('@/pages/ImageGen'),
+    () => import('@/pages/Verified'),
+    () => import('@/pages/TermosDeUso'),
+    () => import('@/pages/Privacidade'),
+    () => import('@/pages/Pagamento'),
+  ].forEach((carregar) => { carregar().catch(() => {}); });
+};
+
 // Fallback das rotas preguiçosas: mesmo spinner da tela de carregamento.
 const RouteFallback = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-background">
@@ -41,6 +64,17 @@ const RouteFallback = () => (
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, isAuthenticated, user } = useAuth();
+
+  // Dispara o pré-carregamento das seções num momento ocioso, para não
+  // competir com o carregamento inicial do app.
+  useEffect(() => {
+    if (typeof window.requestIdleCallback === 'function') {
+      const id = window.requestIdleCallback(preCarregarSecoes, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = setTimeout(preCarregarSecoes, 2500); // Safari: sem requestIdleCallback
+    return () => clearTimeout(id);
+  }, []);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
