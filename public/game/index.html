@@ -113,11 +113,20 @@
   /* ---------- Controles na tela ---------- */
   #pad { position:fixed; inset:0; z-index:7; display:none; pointer-events:none; }
   #pad.on { display:block; }
+  /* Joystick futurista em código (glassmorphism) — sem imagens */
   #stick { position:absolute; bottom:22px; left:22px; width:104px; height:104px;
-    border-radius:50%; background:rgba(148,163,184,.16); border:3px solid rgba(148,163,184,.45);
+    border-radius:50%;
+    background:rgba(255,255,255,.06);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.55);
+    box-shadow:0 0 18px rgba(255,255,255,.18), inset 0 0 20px rgba(255,255,255,.08);
+    touch-action:none; transition:transform .12s ease;
     pointer-events:auto; }
+  #stick.active { transform:scale(1.08); }
   #knob { position:absolute; width:44px; height:44px; border-radius:50%; left:30px; top:30px;
-    background:rgba(125,211,252,.55); border:3px solid rgba(125,211,252,.9); }
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.7);
+    box-shadow:0 0 12px rgba(255,255,255,.2); }
   /* Botões de ação à direita (compactos, lado a lado): PULAR e CHUTAR */
   .actbtn { position:absolute; border-radius:50%; display:flex; align-items:center;
     justify-content:center; font-family:inherit; font-weight:bold; letter-spacing:1px;
@@ -952,11 +961,11 @@ let stickVec={x:0,y:0}, stickPid=null, center={x:0,y:0};
 const MAXR=34;
 function setKnob(dx,dy){ knob.style.left=(30+dx)+'px'; knob.style.top=(30+dy)+'px'; }
 stick.addEventListener('pointerdown',e=>{
-  stickPid=e.pointerId; stick.setPointerCapture(e.pointerId);
+  stickPid=e.pointerId; stick.setPointerCapture(e.pointerId); stick.classList.add('active');
   const r=stick.getBoundingClientRect(); center={x:r.left+r.width/2,y:r.top+r.height/2}; movePointer(e);
 });
 stick.addEventListener('pointermove',e=>{ if(e.pointerId===stickPid) movePointer(e); });
-function endStick(e){ if(e.pointerId===stickPid){ stickPid=null; stickVec={x:0,y:0}; setKnob(0,0); } }
+function endStick(e){ if(e.pointerId===stickPid){ stickPid=null; stickVec={x:0,y:0}; setKnob(0,0); stick.classList.remove('active'); } }
 stick.addEventListener('pointerup',endStick);
 stick.addEventListener('pointercancel',endStick);
 function movePointer(e){
