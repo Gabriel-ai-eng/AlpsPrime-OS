@@ -1,9 +1,11 @@
 {
+  "redirects": [
+    { "source": "/fkw", "destination": "/fkw/", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/jogo", "destination": "https://projeto-armor.vercel.app/" },
     { "source": "/jogo/", "destination": "https://projeto-armor.vercel.app/" },
     { "source": "/jogo/:path*", "destination": "https://projeto-armor.vercel.app/:path*" },
-    { "source": "/fkw", "destination": "https://free-kick-world.vercel.app/" },
     { "source": "/fkw/", "destination": "https://free-kick-world.vercel.app/" },
     { "source": "/fkw/:path*", "destination": "https://free-kick-world.vercel.app/:path*" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
