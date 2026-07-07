@@ -53,7 +53,7 @@ function inDnd(prefs, date = new Date()) {
 
 function fire(title, body, tag) {
   try {
-    new Notification(title, { body, icon: '/favicon.png', tag });
+    new Notification(title, { body, icon: '/favicon.webp', tag });
   } catch {
     // ignore
   }
