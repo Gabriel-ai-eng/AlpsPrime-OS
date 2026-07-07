@@ -51,7 +51,7 @@ function Group({ label, children }) {
   return (
     <div>
       <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2 ml-1">{label}</p>
-      <div className="bg-[#F1F2F6] border border-border rounded-2xl overflow-hidden divide-y divide-border">{children}</div>
+      <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border shadow-sm">{children}</div>
     </div>
   );
 }
@@ -218,7 +218,7 @@ export default function Settings() {
   const navStyle = prefs.navbar_style || 'floating';
 
   return (
-    <div className="min-h-full bg-background text-foreground">
+    <div className="settings-page min-h-full bg-background text-foreground">
       <div className="px-6 lg:px-8 pt-6 pb-2 bg-transparent">
         <div className="max-w-2xl mx-auto">
           <button
