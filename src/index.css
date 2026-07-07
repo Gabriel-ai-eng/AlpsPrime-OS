@@ -17,7 +17,7 @@
     /* ── LIGHT / WHITE PALETTE (Estilo YouTube Neutro) ── */
     --background:        0 0% 100%;
     --foreground:        0 0% 6%;       /* Cinza quase preto neutro para textos */
-    --card:              0 0% 96%;      /* #F2F2F2 — Cinza neutro e suave para destacar secções/cards */
+    --card:              0 0% 96%;      /* #F2F2F2 — Cinza neutro e suave para destacar seções/cards */
     --card-foreground:   0 0% 6%;
     --popover:           0 0% 100%;
     --popover-foreground:0 0% 6%;
@@ -320,5 +320,4 @@ html.dark .bottom-nav-pro,
 html.dark .scrollbar-thin::-webkit-scrollbar-thumb,
 [data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-thumb {
   background: rgba(255,255,255,0.15) !important;
-}
 }
