@@ -14,25 +14,25 @@
     --gold-light: 232 199 122;
     --gold-dark:  168 133 46;
 
-    /* ── LIGHT / WHITE PALETTE ── */
+    /* ── LIGHT / WHITE PALETTE (Estilo YouTube Neutro) ── */
     --background:        0 0% 100%;
-    --foreground:        240 10% 12%;
-    --card:              0 0% 95.7%; /* #F4F4F4 — cards/seções em cinza bem suave sobre o fundo branco */
-    --card-foreground:   240 10% 12%;
+    --foreground:        0 0% 6%;       /* Cinza quase preto neutro para textos */
+    --card:              0 0% 96%;      /* #F2F2F2 — Cinza neutro e suave para destacar secções/cards */
+    --card-foreground:   0 0% 6%;
     --popover:           0 0% 100%;
-    --popover-foreground:240 10% 12%;
+    --popover-foreground:0 0% 6%;
     --primary:           38 65% 55%;
     --primary-foreground:0 0% 100%;
-    --secondary:         40 25% 95%;
-    --secondary-foreground:240 10% 18%;
-    --muted:             40 20% 94%;
-    --muted-foreground:  240 5% 46%;
-    --accent:            260 45% 93%;
-    --accent-foreground: 260 30% 30%;
+    --secondary:         0 0% 96%;      /* Fundo secundário neutro */
+    --secondary-foreground: 0 0% 12%;
+    --muted:             0 0% 95%;      /* Elementos desativados/fundo neutro */
+    --muted-foreground:  0 0% 45%;      /* Texto secundário neutro */
+    --accent:            0 0% 93%;
+    --accent-foreground: 0 0% 15%;
     --destructive:       0 72% 55%;
-    --destructive-foreground:0 0% 100%;
-    --border:            40 18% 88%;
-    --input:             40 18% 92%;
+    --destructive-foreground: 0 0% 100%;
+    --border:            0 0% 88%;      /* Bordas cinza neutras */
+    --input:             0 0% 90%;      /* Inputs cinza neutros */
     --ring:              38 65% 55%;
 
     --chart-1: 38 65% 55%;
@@ -44,12 +44,12 @@
     --radius: 1rem;
 
     --sidebar-background:         0 0% 100%;
-    --sidebar-foreground:         240 10% 20%;
+    --sidebar-foreground:         0 0% 15%;
     --sidebar-primary:            38 65% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent:             40 25% 96%;
-    --sidebar-accent-foreground:  240 10% 14%;
-    --sidebar-border:             40 18% 90%;
+    --sidebar-accent:             0 0% 96%;
+    --sidebar-accent-foreground:  0 0% 10%;
+    --sidebar-border:             0 0% 90%;
     --sidebar-ring:               38 65% 55%;
   }
 
@@ -98,9 +98,8 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     background-color: #ffffff;
-    background-image:
-      radial-gradient(ellipse 70% 45% at 10% 0%,   rgba(201,162,79,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 55% 40% at 90% 100%,  rgba(160,120,220,0.04) 0%, transparent 60%);
+    /* Gradientes radiais removidos para garantir o branco puro e brilhante estilo YouTube */
+    background-image: none;
     background-attachment: fixed;
     transition: background-color 0.4s ease, color 0.4s ease;
   }
@@ -117,8 +116,8 @@
     -webkit-backdrop-filter: blur(24px) saturate(160%) brightness(1.04);
     border: 1px solid rgba(255, 255, 255, 0.80);
     box-shadow:
-      0 8px 32px rgba(120, 90, 40, 0.09),
-      0 2px 8px  rgba(0, 0, 0, 0.05),
+      0 8px 32px rgba(0, 0, 0, 0.04),
+      0 2px 8px  rgba(0, 0, 0, 0.04),
       0 1px 0    rgba(255,255,255,0.95) inset;
     position: relative;
     isolation: isolate;
@@ -129,7 +128,7 @@
     backdrop-filter: blur(40px) saturate(180%) brightness(1.05);
     border: 1px solid rgba(255, 255, 255, 0.88);
     box-shadow:
-      0 16px 56px rgba(120, 90, 40, 0.10),
+      0 16px 56px rgba(0, 0, 0, 0.05),
       0 1px  0   rgba(255,255,255,1.00) inset;
     position: relative;
     isolation: isolate;
@@ -166,7 +165,7 @@
   .scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(120,90,40,0.14);
+    background: rgba(0,0,0,0.1);
     border-radius: 3px;
   }
 }
@@ -321,4 +320,5 @@ html.dark .bottom-nav-pro,
 html.dark .scrollbar-thin::-webkit-scrollbar-thumb,
 [data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-thumb {
   background: rgba(255,255,255,0.15) !important;
+}
 }
