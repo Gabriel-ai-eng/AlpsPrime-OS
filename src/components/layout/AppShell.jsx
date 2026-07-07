@@ -24,10 +24,12 @@ import CachedImage from '@/components/CachedImage';
 
 const NAV_ITEMS = [];
 
-/* ── Atmospheric orbs ── */
+/* ── Atmospheric orbs ──
+   Só no tema ESCURO: no claro o fundo é branco puro (estilo YouTube), sem
+   manchas douradas/roxas lavando o branco. */
 function AtmosphericOrbs() {
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
+    <div className="hidden dark:block pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
       {/* Estáticas (sem animação infinita) — mantém o clima sem custo de repintura no scroll */}
       <div
         className="absolute"

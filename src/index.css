@@ -14,10 +14,12 @@
     --gold-light: 232 199 122;
     --gold-dark:  168 133 46;
 
-    /* ── LIGHT / WHITE PALETTE (Estilo YouTube Neutro) ── */
+    /* ── LIGHT / WHITE PALETTE (branco puro, neutro — estilo YouTube) ──
+       Superfícies em branco/cinza NEUTRO (matiz/saturação zeradas): nada de
+       tom quente (âmbar) puxando o branco para creme. */
     --background:        0 0% 100%;
     --foreground:        0 0% 6%;       /* Cinza quase preto neutro para textos */
-    --card:              0 0% 96%;      /* #F2F2F2 — Cinza neutro e suave para destacar seções/cards */
+    --card:              0 0% 100%;     /* cards brancos, separados só pela borda neutra */
     --card-foreground:   0 0% 6%;
     --popover:           0 0% 100%;
     --popover-foreground:0 0% 6%;
@@ -97,6 +99,8 @@
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    /* Branco puro e chapado no tema claro (sem lavagem dourada/roxa). O tema
+       escuro reaplica o próprio fundo mais abaixo (html.dark body). */
     background-color: #ffffff;
     /* Gradientes radiais removidos para garantir o branco puro e brilhante estilo YouTube */
     background-image: none;
