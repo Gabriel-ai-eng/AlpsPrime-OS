@@ -130,9 +130,9 @@ function NavItem({ item, active }) {
         )}
         <div className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 relative overflow-hidden">
           <Icon
-            className="w-6 h-6 transition-all duration-300 relative z-10 text-foreground/70"
+            className="w-6 h-6 transition-all duration-300 relative z-10 text-foreground"
             fill="none"
-            strokeWidth={2.4}
+            strokeWidth={2.2}
           />
         </div>
       </button>
@@ -152,21 +152,14 @@ function NavItem({ item, active }) {
         transition={{ type: 'spring', stiffness: 450, damping: 25 }}
         className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 relative overflow-hidden ripple-surface"
       >
-        <div
-          className={cn(
-            'absolute inset-0 rounded-2xl bg-gold/15 transition-opacity duration-300 ease-out',
-            active ? 'opacity-100' : 'opacity-0'
-          )}
-        />
-
+        {/* Estilo YouTube: sem pílula dourada de destaque. Todos os ícones em
+            #0F0F0F (text-foreground); o estado ATIVO é o ícone PREENCHIDO
+            (fill), o inativo fica só no contorno — igual à barra do YouTube. */}
         <Icon
-          className={cn(
-            'w-6 h-6 transition-all duration-300 relative z-10',
-            active ? 'text-gold' : 'text-foreground/70 hover:text-foreground'
-          )}
+          className="w-6 h-6 transition-all duration-300 relative z-10 text-foreground"
           fill={active ? 'currentColor' : 'none'}
-          strokeWidth={active ? 2.6 : 2.4}
-          style={{ willChange: 'transform, color, fill' }}
+          strokeWidth={active ? 2.5 : 2.2}
+          style={{ willChange: 'transform, fill' }}
         />
       </motion.div>
     </Link>
@@ -191,8 +184,8 @@ function AppCenterpiece({ active, path }) {
         className={cn(
           'w-12 h-12 rounded-full flex items-center justify-center overflow-hidden relative ripple-surface transition-all duration-300',
           active
-            ? 'bg-gold/15 shadow-sm ring-2 ring-gold/60'
-            : 'bg-foreground/10 shadow-sm hover:bg-foreground/15 ring-1 ring-foreground/10'
+            ? 'shadow-sm ring-2 ring-foreground/70'
+            : 'bg-foreground/5 shadow-sm hover:bg-foreground/10 ring-1 ring-foreground/15'
         )}
       >
         {user?.profile_picture_url ? (
@@ -204,12 +197,9 @@ function AppCenterpiece({ active, path }) {
           />
         ) : (
           <User
-            className={cn(
-              'w-6 h-6 transition-all duration-300',
-              active ? 'text-gold' : 'text-foreground/70'
-            )}
+            className="w-6 h-6 transition-all duration-300 text-foreground"
             fill={active ? 'currentColor' : 'none'}
-            strokeWidth={active ? 2.6 : 2.4}
+            strokeWidth={active ? 2.5 : 2.2}
           />
         )}
       </motion.div>
@@ -294,7 +284,7 @@ export default function BottomNav() {
         }}
         transition={{ type: 'spring', stiffness: 350, damping: 28, mass: 0.8 }}
         className={cn(
-          'relative overflow-hidden pointer-events-auto bg-card/80 backdrop-blur-3xl shadow-[0_20px_60px_rgba(0,0,0,0.25)]',
+          'relative overflow-hidden pointer-events-auto bg-card shadow-[0_20px_60px_rgba(0,0,0,0.12)]',
           isFixedBar
             ? 'w-full border-t border-border'
             : 'mx-auto max-w-sm h-[64px] rounded-[2rem] border border-border'

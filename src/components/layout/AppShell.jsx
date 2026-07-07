@@ -251,7 +251,7 @@ export default function AppShell() {
 
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
         {!hideHeader && (
-        <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-white backdrop-blur-xl border-b border-border">
+        <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-white border-b border-border">
           <div>
             <Link
               to="/settings"
@@ -282,7 +282,7 @@ export default function AppShell() {
         )}
 
         {!hideHeader && (
-        <header className="hidden lg:flex items-center justify-end px-6 h-12 border-b border-border bg-white backdrop-blur-xl sticky top-0 z-20">
+        <header className="hidden lg:flex items-center justify-end px-6 h-12 border-b border-border bg-white sticky top-0 z-20">
           <NotificationsBell userEmail={user?.email} />
         </header>
         )}
