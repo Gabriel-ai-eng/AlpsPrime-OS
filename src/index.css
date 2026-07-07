@@ -325,3 +325,61 @@ html.dark .scrollbar-thin::-webkit-scrollbar-thumb,
 [data-theme="dark"] .scrollbar-thin::-webkit-scrollbar-thumb {
   background: rgba(255,255,255,0.15) !important;
 }
+
+/* =========================================================
+   CONFIGURAÇÕES — refinamento do modo escuro
+   O shield global acima achata TODOS os ícones para cinza
+   (#E4E6EB) e cobre os realces com sombras pesadas, deixando
+   a tela apagada. Aqui, apenas dentro da página de
+   Configurações, devolvemos o acento dourado aos ícones e
+   damos um fundo de card mais elegante (grafite premium),
+   igual ao espírito do tema claro.
+========================================================= */
+
+/* Card das seções: grafite levemente mais claro que o fundo,
+   borda sutil e uma sombra suave — em vez do preto chapado. */
+html.dark .settings-page .bg-card,
+[data-theme="dark"] .settings-page .bg-card {
+  background: #242526 !important;
+  border-color: rgba(255,255,255,0.09) !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03) !important;
+}
+
+/* Ícones das linhas voltam a ser DOURADOS (o shield global os
+   deixava cinza e quase invisíveis sobre o círculo dourado). */
+html.dark .settings-page .text-gold,
+[data-theme="dark"] .settings-page .text-gold {
+  color: #E4BC62 !important;
+  opacity: 1 !important;
+}
+
+/* Círculos/realces dourados: um dourado discreto e limpo, sem
+   as sombras pesadas do shield, para um contraste agradável. */
+html.dark .settings-page .bg-gold\/10,
+[data-theme="dark"] .settings-page .bg-gold\/10 {
+  background: rgba(228, 188, 98, 0.14) !important;
+  border-color: rgba(228, 188, 98, 0.22) !important;
+  box-shadow: none !important;
+}
+
+/* Sub-caixas internas (idioma, sub-apps, inputs) um degrau mais
+   escuras que o card, para dar profundidade sem "lavar" a tela. */
+html.dark .settings-page .bg-background,
+[data-theme="dark"] .settings-page .bg-background {
+  background: #1B1C1D !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+/* Pontos de lista e barras do gráfico mantêm o dourado vivo. */
+html.dark .settings-page .bg-gold,
+[data-theme="dark"] .settings-page .bg-gold {
+  background: #E4BC62 !important;
+}
+
+/* Ação destrutiva ("Apagar minha conta" / "Sair") continua VERMELHA
+   no escuro — o shield global a deixava cinza, escondendo o aviso. */
+html.dark .settings-page .text-destructive,
+[data-theme="dark"] .settings-page .text-destructive {
+  color: #F87171 !important;
+  opacity: 1 !important;
+}
