@@ -27,3 +27,20 @@ Por isso, ao concluir qualquer mudança:
   - `HOTMART_CHECKOUT_URL` — link do checkout (usado pelo botão "Comprar"; sem ela
     o botão fica desabilitado).
   - `HOTMART_HOTTOK` — Hottok do webhook da Hotmart (valida e libera o acesso).
+
+### Segurança do acesso (não é só o HotmartGate)
+
+O `HotmartGate` no frontend é apenas a "cortina" visual. Como o app fala DIRETO
+com o Supabase pela chave pública (anon), o bloqueio de verdade está no BANCO,
+via **Row Level Security (RLS)** — ver `supabase/migrations/0001_rls_paywall_lockdown.sql`.
+
+Regras:
+- Todas as tabelas de conteúdo têm RLS ligada com a política `acesso_pago_all`:
+  só lê/grava quem está **logado E com acesso pago** (função `pode_acessar()` =
+  admin fixo **ou** `tem_acesso(email)` = ativo em `acessos_pagos`).
+- `acessos_pagos` e `authorized_access` têm RLS **sem política** — só a service
+  key (webhook) e a função `tem_acesso` (SECURITY DEFINER) acessam.
+- Ao criar QUALQUER tabela nova de conteúdo, **ligue RLS e crie a política**
+  seguindo o mesmo padrão, senão ela nasce aberta para não-pagantes.
+- Admins: mantidos em `pode_acessar()` no banco **e** em `ADMIN_EMAILS`
+  (`src/lib/branding.js`) — os dois precisam bater.
