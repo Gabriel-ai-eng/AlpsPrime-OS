@@ -140,8 +140,8 @@ export default function Settings() {
   const { lang, setLang, t } = useLang();
 
   const LANGS = [
-    { id: 'pt', label: 'Português', flag: '🇧🇷' },
-    { id: 'en', label: 'English', flag: '🇺🇸' },
+    { id: 'pt', label: 'Português' },
+    { id: 'en', label: 'English' },
   ];
   // Palavra de confirmação para apagar a conta, no idioma atual.
   const DELETE_WORD = lang === 'en' ? 'DELETE' : 'EXCLUIR';
@@ -255,7 +255,6 @@ export default function Settings() {
                       ativo ? 'border-gold/50 bg-gold/10 text-gold' : 'border-border bg-background text-muted-foreground hover:bg-muted'
                     )}
                   >
-                    <span className="text-base leading-none">{l.flag}</span>
                     {l.label}
                   </button>
                 );
