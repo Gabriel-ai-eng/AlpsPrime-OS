@@ -21,7 +21,8 @@ export default function NotificationsBell({ userEmail }) {
   return (
     <Link
       to="/notifications"
-      className="relative p-2 rounded-lg hover:bg-muted transition-colors inline-flex items-center justify-center"
+      className="relative p-3 -m-1 min-w-[44px] min-h-[44px] rounded-xl hover:bg-muted active:bg-black/10 active:scale-95 transition-all duration-75 inline-flex items-center justify-center"
+      style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
       aria-label="Notificações"
     >
       <Bell className="w-5 h-5 text-black" strokeWidth={2.6} />

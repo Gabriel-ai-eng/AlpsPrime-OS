@@ -128,7 +128,7 @@ function NavItem({ item, active }) {
           </AnimatePresence>,
           document.body
         )}
-        <div className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 relative overflow-hidden">
+        <div className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-75 active:scale-90 active:bg-black/10 relative overflow-hidden">
           <Icon
             className="w-6 h-6 transition-all duration-300 relative z-10 text-foreground"
             fill="none"

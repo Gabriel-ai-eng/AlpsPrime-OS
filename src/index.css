@@ -93,6 +93,10 @@
 
   html {
     scroll-behavior: smooth;
+    /* Mata o delay de 300ms do double-tap-to-zoom em toda a UI, sem desativar
+       o pinch-to-zoom (acessibilidade) — a alternativa moderna e correta ao
+       velho truque de "user-scalable=0" no viewport. */
+    touch-action: manipulation;
   }
 
   body {
