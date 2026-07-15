@@ -211,33 +211,7 @@ export default function BottomNav() {
   const location = useLocation();
   const t = useT();
 
-  const [isVisible, setIsVisible] = useState(true);
   const [navStyle, setNavStyle] = useState(() => getPrefs().navbar_style || 'floating');
-  const lastScrollY = useRef(0);
-
-  useEffect(() => {
-    const handleScroll = (e) => {
-      const currentScrollY = e.target.scrollTop || window.scrollY || 0;
-
-      if (currentScrollY <= 10) {
-        setIsVisible(true);
-        lastScrollY.current = currentScrollY;
-        return;
-      }
-
-      if (currentScrollY > lastScrollY.current + 8) {
-        setIsVisible(false);
-      } else if (currentScrollY < lastScrollY.current - 8) {
-        setIsVisible(true);
-      }
-
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
-
-    return () => window.removeEventListener('scroll', handleScroll, { capture: true });
-  }, []);
 
   // Reflete na hora a escolha "flutuante / fixa" feita nas Configurações.
   useEffect(() => {
@@ -263,8 +237,8 @@ export default function BottomNav() {
     );
 
   // Barra fixa: acoplada à base, largura total e borda no topo. Barra flutuante:
-  // "pílula" centralizada com margem. Em ambos os casos a barra desliza para
-  // baixo e some ao rolar a tela para baixo (mesma lógica de y/opacity).
+  // "pílula" centralizada com margem. Em ambos os casos a barra fica sempre
+  // visível, sem sumir/descer ao rolar a tela.
   const isFixedBar = navStyle === 'fixed';
 
   return (
@@ -278,10 +252,7 @@ export default function BottomNav() {
     >
       <motion.div
         initial={{ y: 120, opacity: 0 }}
-        animate={{
-          y: isVisible ? 0 : 120,
-          opacity: isVisible ? 1 : 0,
-        }}
+        animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 350, damping: 28, mass: 0.8 }}
         className={cn(
           'relative overflow-hidden pointer-events-auto bg-card shadow-[0_20px_60px_rgba(0,0,0,0.12)]',
