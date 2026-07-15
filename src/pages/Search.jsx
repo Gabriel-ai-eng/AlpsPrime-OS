@@ -6,12 +6,21 @@ import { useT } from '@/lib/i18n';
 
 // id = chave usada na navegação (openApp → telaAtual no Home). `status: 'soon'`
 // marca os apps ainda não lançados. Projeto Armor (id 'armor') vem primeiro.
+// `url` = apps servidos fora do SPA (proxy do vercel.json): clique navega
+// direto pra lá, em vez de passar pelo openApp/telaAtual do Home.
 const SUB_APPS = [
   {
     id: 'armor',
     name: 'Projeto Armor',
     image: '/apps/armor-bg.webp',
     status: 'live',
+  },
+  {
+    id: 'fkw',
+    name: 'Free Kick World',
+    image: '/apps/fkw-bg-v2.jpg',
+    status: 'live',
+    url: '/fkw/',
   },
   {
     id: 'sexta',
@@ -101,9 +110,14 @@ export default function Search() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-                  // Envia o id do aplicativo no estado da navegação.
-                  // Sexta-feira está bloqueada: clicar não faz nada.
-                  onClick={() => { if (BLOQUEADOS.has(app.id)) return; navigate('/home', { state: { openApp: app.id } }); }}
+                  // Sexta-feira está bloqueada: clicar não faz nada. Apps com
+                  // `url` (servidos fora do SPA, ex.: FKW) navegam direto pra
+                  // lá; os demais mandam o id no estado pro Home abrir.
+                  onClick={() => {
+                    if (BLOQUEADOS.has(app.id)) return;
+                    if (app.url) { window.location.href = app.url; return; }
+                    navigate('/home', { state: { openApp: app.id } });
+                  }}
                   className={`w-full rounded-[32px] overflow-hidden relative aspect-[4/3] group transition-all outline-none ${BLOQUEADOS.has(app.id) ? '' : 'cursor-pointer active:scale-95'}`}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
