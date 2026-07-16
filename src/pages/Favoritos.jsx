@@ -25,7 +25,7 @@ export default function Favoritos() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="mb-8 pt-4 md:pt-0"
+        className="mb-8"
       >
         <div className="mb-2">
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">
