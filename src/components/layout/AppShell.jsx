@@ -107,6 +107,17 @@ export default function AppShell() {
   const [aiLockedOpen, setAiLockedOpen] = useState(false);
   const { aiUnlocked, showCelebration, dismissCelebration } = useAIUnlock();
 
+  // Mascote da home: só aparece (entra andando) alguns segundos DEPOIS que o
+  // usuário abre/recarrega a tela inicial — não logo de cara. O timer reinicia
+  // ao entrar de novo na /home, então ele reaparece a cada visita/recarga.
+  const [mostrarMascote, setMostrarMascote] = useState(false);
+  useEffect(() => {
+    if (location.pathname !== '/home') { setMostrarMascote(false); return; }
+    setMostrarMascote(false);
+    const id = setTimeout(() => setMostrarMascote(true), 3000);
+    return () => clearTimeout(id);
+  }, [location.pathname]);
+
   const { setMode } = useLiquidGlass();
 
   usePushNotifications(user?.email);
@@ -184,7 +195,7 @@ export default function AppShell() {
               O vídeo tem fundo branco removido: o WebM já vem com transparência
               (alpha) e o multiply garante o recorte no fallback MP4 (Safari),
               já que o header é sempre branco. */}
-          {location.pathname === '/home' && (
+          {location.pathname === '/home' && mostrarMascote && (
             <video
               className="pointer-events-none absolute z-0 select-none"
               style={{ height: 88, top: -9, left: 'calc(50% + 38px)', mixBlendMode: 'multiply' }}
