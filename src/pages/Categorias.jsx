@@ -64,9 +64,9 @@ export default function Categorias() {
       {/* LISTA DE SERVIÇOS */}
       <div className="flex-1 px-6 pt-6 pb-32 space-y-3">
         {appsVisiveis.map((app) => {
-          // O FKW recebe um destaque visual maior no thumbnail, como um card
-          // "hero" — o mockup pede a arte do personagem em tamanho ampliado.
-          const thumbSize = app.id === 'fkw' ? 'w-20 h-20' : 'w-14 h-14';
+          // O FKW é um card "hero": a arte ocupa a altura inteira do card,
+          // colada na borda esquerda (sem padding), como no mockup.
+          const hero = app.id === 'fkw';
           return (
             <div
               key={app.id}
@@ -75,12 +75,14 @@ export default function Categorias() {
                 if (app.url) { window.location.href = app.url; return; }
                 navigate('/home');
               }}
-              className={`flex items-center gap-4 p-4 rounded-3xl bg-card border border-border transition-all ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
+              className={`flex items-center gap-4 rounded-3xl bg-card border border-border transition-all overflow-hidden ${hero ? '' : 'p-4'} ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
             >
-              <div className={`${thumbSize} rounded-2xl flex items-center justify-center flex-shrink-0 bg-white overflow-hidden`}>
-                <img src={app.logo} alt={app.nome} className="w-full h-full object-contain" decoding="async" fetchpriority="high" />
+              <div className={hero
+                ? 'w-20 self-stretch flex-shrink-0'
+                : 'w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white overflow-hidden'}>
+                <img src={app.logo} alt={app.nome} className={`w-full h-full ${hero ? 'object-cover' : 'object-contain'}`} decoding="async" fetchpriority="high" />
               </div>
-              <div className="flex-1 min-w-0">
+              <div className={`flex-1 min-w-0 ${hero ? 'py-4 pr-4' : ''}`}>
                 <div className="flex items-center gap-2 mb-0.5">
                   <h3 className="text-[17px] font-semibold text-foreground">{app.nome}</h3>
                   {app.status === 'soon' && (
