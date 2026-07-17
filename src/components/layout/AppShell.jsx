@@ -178,7 +178,28 @@ export default function AppShell() {
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
         {!hideHeader && (
         <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-white border-b border-border">
-          <div>
+          {/* Mascote da home: entra andando e fica "apoiado" no logo. Fica ATRÁS
+              do logo e dos ícones (z-0; logo/ícones sobem para z-10) e transborda
+              para baixo do header, por cima do conteúdo. Só na tela inicial.
+              O vídeo tem fundo branco removido: o WebM já vem com transparência
+              (alpha) e o multiply garante o recorte no fallback MP4 (Safari),
+              já que o header é sempre branco. */}
+          {location.pathname === '/home' && (
+            <video
+              className="pointer-events-none absolute z-0 select-none"
+              style={{ height: 88, top: -9, left: 'calc(50% + 38px)', mixBlendMode: 'multiply' }}
+              autoPlay
+              muted
+              playsInline
+              preload="auto"
+              aria-hidden="true"
+            >
+              <source src="/brand/mascote-andando.webm" type="video/webm" />
+              <source src="/brand/mascote-andando.mp4" type="video/mp4" />
+            </video>
+          )}
+
+          <div className="relative z-10">
             <Link
               to="/settings"
               className="p-3 -ml-2 min-w-[48px] min-h-[48px] hover:bg-muted active:bg-black/10 active:scale-95 rounded-xl transition-all duration-75 outline-none inline-flex items-center justify-center"
@@ -189,13 +210,13 @@ export default function AppShell() {
             </Link>
           </div>
 
-          <span className="flex-1 flex items-center justify-center px-2 select-none">
+          <span className="relative z-10 flex-1 flex items-center justify-center px-2 select-none">
             {/* Tema claro: logo preto · Tema escuro: logo branco */}
             <img src="/brand/alps-prime-black.webp" alt="Alps Prime" className="h-5 w-auto object-contain dark:hidden" decoding="async" fetchpriority="high" />
             <img src="/brand/alps-prime-white.webp" alt="Alps Prime" className="h-5 w-auto object-contain hidden dark:block" decoding="async" fetchpriority="high" />
           </span>
 
-          <div className="flex items-center gap-1">
+          <div className="relative z-10 flex items-center gap-1">
             <Link to="/search" className="p-2 rounded-full hover:bg-muted transition-colors outline-none" aria-label={t('Buscar')}>
               <SearchIcon className="w-5 h-5 text-black hover:text-black" strokeWidth={2.6} />
             </Link>
