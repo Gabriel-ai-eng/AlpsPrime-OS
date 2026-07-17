@@ -64,9 +64,9 @@ export default function Categorias() {
       {/* LISTA DE SERVIÇOS */}
       <div className="flex-1 px-6 pt-6 pb-32 space-y-3">
         {appsVisiveis.map((app) => {
-          // O FKW é um card "hero": a arte ocupa a altura inteira do card,
-          // colada na borda esquerda (sem padding), como no mockup.
-          const hero = app.id === 'fkw';
+          // FKW e Projeto Armor são cards "hero": a arte ocupa a altura
+          // inteira do card, colada na borda esquerda (sem padding).
+          const hero = app.id === 'fkw' || app.id === 'armor';
           return (
             <div
               key={app.id}
