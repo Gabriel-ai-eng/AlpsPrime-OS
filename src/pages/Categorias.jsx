@@ -64,6 +64,9 @@ export default function Categorias() {
       {/* LISTA DE SERVIÇOS */}
       <div className="flex-1 px-6 pt-6 pb-32 space-y-3">
         {appsVisiveis.map((app) => {
+          // O FKW recebe um destaque visual maior no thumbnail, como um card
+          // "hero" — o mockup pede a arte do personagem em tamanho ampliado.
+          const thumbSize = app.id === 'fkw' ? 'w-28 h-28' : 'w-14 h-14';
           return (
             <div
               key={app.id}
@@ -74,7 +77,7 @@ export default function Categorias() {
               }}
               className={`flex items-center gap-4 p-4 rounded-3xl bg-card border border-border transition-all ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
             >
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white overflow-hidden">
+              <div className={`${thumbSize} rounded-2xl flex items-center justify-center flex-shrink-0 bg-white overflow-hidden`}>
                 <img src={app.logo} alt={app.nome} className="w-full h-full object-contain" decoding="async" fetchpriority="high" />
               </div>
               <div className="flex-1 min-w-0">
