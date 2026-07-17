@@ -66,7 +66,7 @@ export default function Categorias() {
         {appsVisiveis.map((app) => {
           // O FKW recebe um destaque visual maior no thumbnail, como um card
           // "hero" — o mockup pede a arte do personagem em tamanho ampliado.
-          const thumbSize = app.id === 'fkw' ? 'w-28 h-28' : 'w-14 h-14';
+          const thumbSize = app.id === 'fkw' ? 'w-20 h-20' : 'w-14 h-14';
           return (
             <div
               key={app.id}
