@@ -111,12 +111,28 @@ export default function AppShell() {
   // usuário abre/recarrega a tela inicial — não logo de cara. O timer reinicia
   // ao entrar de novo na /home, então ele reaparece a cada visita/recarga.
   const [mostrarMascote, setMostrarMascote] = useState(false);
+  // Se o navegador bloquear o autoplay (Opera com economia de dados, modo de
+  // bateria etc.), trocamos o vídeo pela pose final estática — melhor o
+  // personagem já apoiado do que congelado no meio do passo.
+  const [mascoteEstatico, setMascoteEstatico] = useState(false);
+  const mascoteRef = useRef(null);
   useEffect(() => {
     if (location.pathname !== '/home') { setMostrarMascote(false); return; }
     setMostrarMascote(false);
+    setMascoteEstatico(false);
     const id = setTimeout(() => setMostrarMascote(true), 3000);
     return () => clearTimeout(id);
   }, [location.pathname]);
+  useEffect(() => {
+    if (!mostrarMascote || mascoteEstatico) return;
+    // 1,8s depois de montar: se o vídeo continua parado no 0, o autoplay foi
+    // bloqueado — cai pra imagem estática da pose final.
+    const id = setTimeout(() => {
+      const v = mascoteRef.current;
+      if (!v || v.paused || v.currentTime === 0) setMascoteEstatico(true);
+    }, 1800);
+    return () => clearTimeout(id);
+  }, [mostrarMascote, mascoteEstatico]);
 
   const { setMode } = useLiquidGlass();
 
@@ -195,10 +211,32 @@ export default function AppShell() {
               O vídeo tem fundo branco removido: o WebM já vem com transparência
               (alpha) e o multiply garante o recorte no fallback MP4 (Safari),
               já que o header é sempre branco. */}
-          {location.pathname === '/home' && mostrarMascote && (
-            <video
+          {location.pathname === '/home' && mostrarMascote && (mascoteEstatico ? (
+            <img
+              src="/brand/mascote-apoiado.webp"
+              alt=""
               className="pointer-events-none absolute z-0 select-none"
-              style={{ height: 88, top: -9, left: 'calc(50% + 38px)', mixBlendMode: 'multiply' }}
+              style={{ height: 64, top: -6, left: 'calc(50% + 54px)', mixBlendMode: 'multiply' }}
+              aria-hidden="true"
+            />
+          ) : (
+            <video
+              ref={(el) => {
+                mascoteRef.current = el;
+                if (!el) return;
+                // O React nem sempre grava o atributo `muted` no DOM — e sem
+                // ele o navegador bloqueia o autoplay (foi o que congelou o
+                // vídeo no primeiro quadro). Força mudo via propriedade E
+                // atributo antes de dar o play manualmente.
+                el.muted = true;
+                el.defaultMuted = true;
+                el.setAttribute('muted', '');
+                const p = el.play();
+                if (p && p.catch) p.catch(() => {});
+              }}
+              onCanPlay={(e) => { const p = e.currentTarget.play(); if (p && p.catch) p.catch(() => {}); }}
+              className="pointer-events-none absolute z-0 select-none"
+              style={{ height: 64, top: -6, left: 'calc(50% + 54px)', mixBlendMode: 'multiply' }}
               autoPlay
               muted
               playsInline
@@ -208,7 +246,7 @@ export default function AppShell() {
               <source src="/brand/mascote-andando.webm" type="video/webm" />
               <source src="/brand/mascote-andando.mp4" type="video/mp4" />
             </video>
-          )}
+          ))}
 
           <div className="relative z-10">
             <Link
