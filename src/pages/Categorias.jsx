@@ -12,8 +12,8 @@ const FILTROS = [
   { id: 'embreve', label: 'Em breve' },
 ];
 
-// Modos de exibição da lista abaixo. "Cards grandes" já está implementado
-// (ver render abaixo); "Grade" ainda não — por enquanto cai na Lista.
+// Modos de exibição da lista abaixo — "Lista", "Cards grandes" e "Grade"
+// já estão implementados (ver render abaixo).
 const MODOS_VISUAIS = [
   { id: 'lista', label: 'Lista', icon: List },
   { id: 'cards', label: 'Cards grandes', icon: GalleryVerticalEnd },
@@ -116,7 +116,7 @@ export default function Categorias() {
       </div>
 
       {/* LISTA DE SERVIÇOS */}
-      <div className="flex-1 px-6 pt-6 pb-32 space-y-3">
+      <div className={`flex-1 px-6 pt-6 pb-32 ${modoVisual === 'grade' ? 'grid grid-cols-3 gap-3' : 'space-y-3'}`}>
         {modoVisual === 'cards' ? (
           appsVisiveis.map((app) => (
             <div
@@ -140,6 +140,26 @@ export default function Categorias() {
                   {t('Em breve')}
                 </span>
               )}
+            </div>
+          ))
+        ) : modoVisual === 'grade' ? (
+          appsVisiveis.map((app) => (
+            <div
+              key={app.id}
+              onClick={() => {
+                if (BLOQUEADOS.has(app.id)) return;
+                if (app.url) { window.location.href = app.url; return; }
+                navigate('/home');
+              }}
+              className={`aspect-square w-full rounded-3xl bg-card border border-border overflow-hidden transition-all ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
+            >
+              <img
+                src={app.logoQuadrado || app.logo}
+                alt={app.nome}
+                className="w-full h-full object-cover"
+                decoding="async"
+                fetchpriority="high"
+              />
             </div>
           ))
         ) : (
