@@ -104,26 +104,6 @@ export async function signUp(email, password, fullName) {
   return data;
 }
 
-// Login/cadastro com o Google (OAuth). É o MESMO que criar conta com e-mail e
-// senha: cria/entra na conta pelo e-mail do Google e volta para /home. O
-// paywall continua valendo — ao voltar, o `HotmartGate` roda `hasPaidAccess`
-// com o e-mail do Google e só libera quem já pagou na Hotmart (os demais veem
-// a tela "Acesso restrito"). Não há pré-checagem aqui porque o Google leva o
-// usuário para fora do app e o traz de volta já autenticado.
-export async function signInWithGoogle() {
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: appRedirectUrl(),
-      // Sempre pede a escolha da conta (evita logar automático com uma conta
-      // errada que o navegador já tenha guardado).
-      queryParams: { prompt: 'select_account' },
-    },
-  });
-  if (error) throw error;
-  return data;
-}
-
 // Código de 6 dígitos enviado por e-mail no cadastro (Supabase: verifyOtp).
 export async function verifySignupOtp(email, token) {
   const { data, error } = await supabase.auth.verifyOtp({
