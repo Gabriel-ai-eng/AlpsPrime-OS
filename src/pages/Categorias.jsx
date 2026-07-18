@@ -21,13 +21,13 @@ const MODOS_VISUAIS = [
 ];
 
 // Serviços disponíveis, cada um marcado com a sua categoria. `status: 'soon'`
-// marca os que ainda não foram lançados. `logoQuadrado` é usado só no modo
-// "Cards grandes" (card quadrado, edge-to-edge); quando não existe, cai no
-// `logo` normal (recortado ao quadrado via object-cover).
+// marca os que ainda não foram lançados. `logoQuadrado` é a arte própria pro
+// modo "Cards grandes" (card quadrado, edge-to-edge, já vem enquadrada certa
+// — nada de recortar o `logo` retangular usado na Lista).
 const APPS = [
   { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', logo: '/apps/armor-logo.webp', logoQuadrado: '/apps/armor-logo-square.webp', status: 'live', url: '/jogo' },
-  { id: 'fkw', nome: 'Free Kick World', desc: 'Jogo de futebol: mire e cobre a falta perfeita.', cat: 'jogos', logo: '/apps/fkw-logo.webp', status: 'soon' },
-  { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', cat: 'ia', logo: '/apps/sexta-logo.webp', status: 'soon' },
+  { id: 'fkw', nome: 'Free Kick World', desc: 'Jogo de futebol: mire e cobre a falta perfeita.', cat: 'jogos', logo: '/apps/fkw-logo.webp', logoQuadrado: '/apps/fkw-logo-square.webp', status: 'soon' },
+  { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', cat: 'ia', logo: '/apps/sexta-logo.webp', logoQuadrado: '/apps/sexta-logo-square.webp', status: 'soon' },
 ];
 
 // Apps indisponíveis: aparecem na lista, mas clicar neles NÃO faz nada.
