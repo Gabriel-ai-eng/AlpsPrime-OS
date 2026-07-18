@@ -111,28 +111,50 @@ export default function AppShell() {
   // usuário abre/recarrega a tela inicial — não logo de cara. O timer reinicia
   // ao entrar de novo na /home, então ele reaparece a cada visita/recarga.
   const [mostrarMascote, setMostrarMascote] = useState(false);
-  // Se o navegador bloquear o autoplay (Opera com economia de dados, modo de
-  // bateria etc.), trocamos o vídeo pela pose final estática — melhor o
-  // personagem já apoiado do que congelado no meio do passo.
-  const [mascoteEstatico, setMascoteEstatico] = useState(false);
   const mascoteRef = useRef(null);
   useEffect(() => {
     if (location.pathname !== '/home') { setMostrarMascote(false); return; }
     setMostrarMascote(false);
-    setMascoteEstatico(false);
     const id = setTimeout(() => setMostrarMascote(true), 3000);
     return () => clearTimeout(id);
   }, [location.pathname]);
   useEffect(() => {
-    if (!mostrarMascote || mascoteEstatico) return;
-    // 1,8s depois de montar: se o vídeo continua parado no 0, o autoplay foi
-    // bloqueado — cai pra imagem estática da pose final.
+    if (!mostrarMascote) return;
+    // Plano B, SEMPRE com o próprio vídeo (nunca imagem): se 1,8s depois de
+    // montar ele continua parado no 0, o navegador bloqueou o autoplay
+    // (economia de dados/bateria). Aí saltamos pro último quadro — a pose
+    // apoiada, do próprio vídeo, como na referência — e no PRIMEIRO toque ou
+    // rolagem (gesto do usuário destrava o play) a animação completa toca
+    // desde o início: ele entra andando e para apoiado de novo.
+    const ouvintes = [];
+    const limpar = () => {
+      for (const [alvo, tipo, fn, opts] of ouvintes) alvo.removeEventListener(tipo, fn, opts);
+      ouvintes.length = 0;
+    };
     const id = setTimeout(() => {
       const v = mascoteRef.current;
-      if (!v || v.paused || v.currentTime === 0) setMascoteEstatico(true);
+      if (!v || (!v.paused && v.currentTime > 0)) return;   // tocou normalmente
+      const irProFinal = () => {
+        try { if (v.duration && isFinite(v.duration)) v.currentTime = Math.max(0, v.duration - 0.05); } catch {}
+      };
+      if (v.readyState >= 1) irProFinal();
+      else v.addEventListener('loadedmetadata', irProFinal, { once: true });
+      const tocarComGesto = () => {
+        limpar();
+        try { v.currentTime = 0; } catch {}
+        v.muted = true;
+        const p = v.play();
+        if (p && p.catch) p.catch(() => {});
+      };
+      for (const tipo of ['touchstart', 'pointerdown']) {
+        window.addEventListener(tipo, tocarComGesto, { once: true, passive: true });
+        ouvintes.push([window, tipo, tocarComGesto, { once: true, passive: true }]);
+      }
+      window.addEventListener('scroll', tocarComGesto, { once: true, passive: true, capture: true });
+      ouvintes.push([window, 'scroll', tocarComGesto, { once: true, passive: true, capture: true }]);
     }, 1800);
-    return () => clearTimeout(id);
-  }, [mostrarMascote, mascoteEstatico]);
+    return () => { clearTimeout(id); limpar(); };
+  }, [mostrarMascote]);
 
   const { setMode } = useLiquidGlass();
 
@@ -211,15 +233,7 @@ export default function AppShell() {
               O vídeo tem fundo branco removido: o WebM já vem com transparência
               (alpha) e o multiply garante o recorte no fallback MP4 (Safari),
               já que o header é sempre branco. */}
-          {location.pathname === '/home' && mostrarMascote && (mascoteEstatico ? (
-            <img
-              src="/brand/mascote-apoiado.webp"
-              alt=""
-              className="pointer-events-none absolute z-0 select-none"
-              style={{ height: 64, top: -6, left: 'calc(50% + 54px)', mixBlendMode: 'multiply' }}
-              aria-hidden="true"
-            />
-          ) : (
+          {location.pathname === '/home' && mostrarMascote && (
             <video
               ref={(el) => {
                 mascoteRef.current = el;
@@ -246,7 +260,7 @@ export default function AppShell() {
               <source src="/brand/mascote-andando.webm" type="video/webm" />
               <source src="/brand/mascote-andando.mp4" type="video/mp4" />
             </video>
-          ))}
+          )}
 
           <div className="relative z-10">
             <Link
