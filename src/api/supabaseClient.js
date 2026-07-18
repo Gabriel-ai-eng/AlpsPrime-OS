@@ -48,6 +48,11 @@ export function mapSupabaseUser(u) {
     avatar: meta.avatar_url || meta.avatar || '',
     role: appMeta.role || meta.role || 'user',
     plan: meta.plan || 'free',
+    // Provedor de login usado ('google', 'email', etc.) — o HotmartGate usa
+    // isso pra saber se pode mandar direto pro checkout da Hotmart quando o
+    // e-mail do Google não tem acesso pago (não dá pra checar ANTES, como no
+    // login manual, porque só se sabe o e-mail depois que o Google devolve).
+    provider: appMeta.provider || 'email',
     ...meta,
   };
 }

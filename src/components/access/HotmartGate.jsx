@@ -5,13 +5,25 @@ import { LOGO_URL } from '@/lib/branding';
 import { motion } from 'framer-motion';
 import { useT } from '@/lib/i18n';
 
+// Checkout da Hotmart (mesmo usado no Welcome/AuthSection).
+const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
+
 /**
  * Bloqueia o app até que o usuário logado tenha comprado o acesso na Hotmart.
  * - Consulta `checkMyAccess` no backend
  * - Se liberado, renderiza `children`
  * - Caso contrário, mostra paywall com CTA pra Hotmart e botão "Já comprei"
+ *
+ * Login manual (e-mail/senha): o AuthSection já checa o acesso ANTES de criar
+ * a sessão, então cair aqui sem acesso é um caso raro (ex.: reembolso depois
+ * de já ter conta) — mostramos a tela "Acesso restrito" com o CTA de compra.
+ *
+ * Login com Google (`userProvider === 'google'`): não dá pra checar o e-mail
+ * antes, porque só se sabe quem é depois que o Google devolve o usuário já
+ * autenticado. Por isso, se o e-mail do Google não tiver acesso pago, manda
+ * direto pro checkout da Hotmart (sem passar pela tela "Acesso restrito").
  */
-export default function HotmartGate({ userEmail, children }) {
+export default function HotmartGate({ userEmail, userProvider, children }) {
   const t = useT();
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
@@ -35,6 +47,13 @@ export default function HotmartGate({ userEmail, children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userEmail]);
 
+  useEffect(() => {
+    if (loading || hasAccess || rechecking) return;
+    if (userProvider === 'google') {
+      window.location.href = CHECKOUT_URL;
+    }
+  }, [loading, hasAccess, rechecking, userProvider]);
+
   // Carrega o widget de checkout da Hotmart (abre o checkout em overlay — checkoutMode=2)
   useEffect(() => {
     if (document.getElementById('hotmart-checkout-widget')) return;
@@ -49,7 +68,10 @@ export default function HotmartGate({ userEmail, children }) {
     document.head.appendChild(link);
   }, []);
 
-  if (loading) {
+  // Enquanto checa o acesso, ou enquanto redireciona uma conta Google sem
+  // acesso pro checkout da Hotmart, mostra só o spinner (evita piscar a tela
+  // "Acesso restrito" por uma fração de segundo antes do redirect).
+  if (loading || (!hasAccess && userProvider === 'google')) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -106,7 +128,7 @@ export default function HotmartGate({ userEmail, children }) {
           {/* Link real do checkout da Hotmart: o widget (quando carregado) abre em
               overlay; se o widget não interceptar, o link abre o checkout direto. */}
           <a
-            href="https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh"
+            href={CHECKOUT_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="hotmart-fb hotmart__button-checkout w-full mt-7 h-12 rounded-md hover:opacity-90 text-background font-semibold text-base flex items-center justify-center"

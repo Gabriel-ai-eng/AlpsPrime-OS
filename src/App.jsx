@@ -118,7 +118,7 @@ const AuthenticatedApp = () => {
   // Fluxo único de acesso pela Hotmart: usuários logados são verificados pelo HotmartGate
   // (checkMyAccess → AuthorizedAccess). Quem não comprou vê a tela "Acesso restrito".
   return (
-    <HotmartGate userEmail={user?.email}>
+    <HotmartGate userEmail={user?.email} userProvider={user?.provider}>
     <Suspense fallback={<RouteFallback />}>
     <Routes>
       <Route element={<AppShell />}>
