@@ -107,55 +107,6 @@ export default function AppShell() {
   const [aiLockedOpen, setAiLockedOpen] = useState(false);
   const { aiUnlocked, showCelebration, dismissCelebration } = useAIUnlock();
 
-  // Mascote da home: só aparece (entra andando) alguns segundos DEPOIS que o
-  // usuário abre/recarrega a tela inicial — não logo de cara. O timer reinicia
-  // ao entrar de novo na /home, então ele reaparece a cada visita/recarga.
-  const [mostrarMascote, setMostrarMascote] = useState(false);
-  const mascoteRef = useRef(null);
-  useEffect(() => {
-    if (location.pathname !== '/home') { setMostrarMascote(false); return; }
-    setMostrarMascote(false);
-    const id = setTimeout(() => setMostrarMascote(true), 3000);
-    return () => clearTimeout(id);
-  }, [location.pathname]);
-  useEffect(() => {
-    if (!mostrarMascote) return;
-    // Plano B, SEMPRE com o próprio vídeo (nunca imagem): se 1,8s depois de
-    // montar ele continua parado no 0, o navegador bloqueou o autoplay
-    // (economia de dados/bateria). Aí saltamos pro último quadro — a pose
-    // apoiada, do próprio vídeo, como na referência — e no PRIMEIRO toque ou
-    // rolagem (gesto do usuário destrava o play) a animação completa toca
-    // desde o início: ele entra andando e para apoiado de novo.
-    const ouvintes = [];
-    const limpar = () => {
-      for (const [alvo, tipo, fn, opts] of ouvintes) alvo.removeEventListener(tipo, fn, opts);
-      ouvintes.length = 0;
-    };
-    const id = setTimeout(() => {
-      const v = mascoteRef.current;
-      if (!v || (!v.paused && v.currentTime > 0)) return;   // tocou normalmente
-      const irProFinal = () => {
-        try { if (v.duration && isFinite(v.duration)) v.currentTime = Math.max(0, v.duration - 0.05); } catch {}
-      };
-      if (v.readyState >= 1) irProFinal();
-      else v.addEventListener('loadedmetadata', irProFinal, { once: true });
-      const tocarComGesto = () => {
-        limpar();
-        try { v.currentTime = 0; } catch {}
-        v.muted = true;
-        const p = v.play();
-        if (p && p.catch) p.catch(() => {});
-      };
-      for (const tipo of ['touchstart', 'pointerdown']) {
-        window.addEventListener(tipo, tocarComGesto, { once: true, passive: true });
-        ouvintes.push([window, tipo, tocarComGesto, { once: true, passive: true }]);
-      }
-      window.addEventListener('scroll', tocarComGesto, { once: true, passive: true, capture: true });
-      ouvintes.push([window, 'scroll', tocarComGesto, { once: true, passive: true, capture: true }]);
-    }, 1800);
-    return () => { clearTimeout(id); limpar(); };
-  }, [mostrarMascote]);
-
   const { setMode } = useLiquidGlass();
 
   usePushNotifications(user?.email);
@@ -227,41 +178,6 @@ export default function AppShell() {
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
         {!hideHeader && (
         <header className="lg:hidden fixed top-0 left-0 w-full h-14 z-[90000] flex items-center justify-between px-4 bg-white border-b border-border">
-          {/* Mascote da home: entra andando e fica "apoiado" no logo. Fica ATRÁS
-              do logo e dos ícones (z-0; logo/ícones sobem para z-10) e transborda
-              para baixo do header, por cima do conteúdo. Só na tela inicial.
-              O vídeo tem fundo branco removido: o WebM já vem com transparência
-              (alpha) e o multiply garante o recorte no fallback MP4 (Safari),
-              já que o header é sempre branco. */}
-          {location.pathname === '/home' && mostrarMascote && (
-            <video
-              ref={(el) => {
-                mascoteRef.current = el;
-                if (!el) return;
-                // O React nem sempre grava o atributo `muted` no DOM — e sem
-                // ele o navegador bloqueia o autoplay (foi o que congelou o
-                // vídeo no primeiro quadro). Força mudo via propriedade E
-                // atributo antes de dar o play manualmente.
-                el.muted = true;
-                el.defaultMuted = true;
-                el.setAttribute('muted', '');
-                const p = el.play();
-                if (p && p.catch) p.catch(() => {});
-              }}
-              onCanPlay={(e) => { const p = e.currentTarget.play(); if (p && p.catch) p.catch(() => {}); }}
-              className="pointer-events-none absolute z-0 select-none"
-              style={{ height: 64, top: -6, left: 'calc(50% + 54px)', mixBlendMode: 'multiply' }}
-              autoPlay
-              muted
-              playsInline
-              preload="auto"
-              aria-hidden="true"
-            >
-              <source src="/brand/mascote-andando.webm" type="video/webm" />
-              <source src="/brand/mascote-andando.mp4" type="video/mp4" />
-            </video>
-          )}
-
           <div className="relative z-10">
             <Link
               to="/settings"
