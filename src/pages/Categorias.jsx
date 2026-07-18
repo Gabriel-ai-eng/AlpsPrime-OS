@@ -111,14 +111,21 @@ export default function Categorias() {
               className={`flex items-center gap-4 rounded-3xl bg-card border border-border transition-all overflow-hidden ${hero ? '' : 'p-4'} ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
             >
               <div className={hero
-                ? 'w-20 self-stretch flex-shrink-0'
-                : 'w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white overflow-hidden'}>
+                ? 'relative w-20 self-stretch flex-shrink-0'
+                : 'relative w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white overflow-hidden'}>
                 <img src={app.logo} alt={app.nome} className={`w-full h-full ${hero ? 'object-cover' : 'object-contain'}`} decoding="async" fetchpriority="high" />
+                {/* Nos cards "hero" o selo fica sobre a arte (não empurra o
+                    texto), assim o card não cresce em relação aos demais. */}
+                {hero && app.status === 'soon' && (
+                  <span className="absolute top-2 left-2 text-[8px] font-semibold uppercase tracking-wider text-gold bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded-full leading-none">
+                    {t('Em breve')}
+                  </span>
+                )}
               </div>
               <div className={`flex-1 min-w-0 ${hero ? 'py-4 pr-4' : ''}`}>
                 <div className="flex items-center gap-2 mb-0.5">
                   <h3 className="text-[17px] font-semibold text-foreground">{app.nome}</h3>
-                  {app.status === 'soon' && (
+                  {!hero && app.status === 'soon' && (
                     <span className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wider text-gold bg-gold/10 border border-gold/20 px-2 py-0.5 rounded-full">
                       {t('Em breve')}
                     </span>
