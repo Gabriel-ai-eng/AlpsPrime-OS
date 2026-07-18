@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { List, GalleryVerticalEnd, Grid3x3 } from 'lucide-react';
 import { useT } from '@/lib/i18n';
 
 // Filtros de categoria — "Todos" mostra tudo; "Em breve" mostra os ainda não
@@ -9,6 +10,14 @@ const FILTROS = [
   { id: 'ia', label: 'IA' },
   { id: 'jogos', label: 'Jogos' },
   { id: 'embreve', label: 'Em breve' },
+];
+
+// Modos de exibição da lista abaixo. Por enquanto só os ícones/seleção — a
+// troca do layout em si ainda não está implementada.
+const MODOS_VISUAIS = [
+  { id: 'lista', label: 'Lista', icon: List },
+  { id: 'cards', label: 'Cards grandes', icon: GalleryVerticalEnd },
+  { id: 'grade', label: 'Grade', icon: Grid3x3 },
 ];
 
 // Serviços disponíveis, cada um marcado com a sua categoria. `status: 'soon'`
@@ -26,6 +35,7 @@ export default function Categorias() {
   const navigate = useNavigate();
   const t = useT();
   const [filtro, setFiltro] = useState('todos');
+  const [modoVisual, setModoVisual] = useState('lista');
 
   const appsVisiveis =
     filtro === 'todos' ? APPS
@@ -55,6 +65,29 @@ export default function Categorias() {
                 }`}
               >
                 {t(f.label)}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* MODO DE EXIBIÇÃO */}
+        <div className="flex gap-2 mt-3">
+          {MODOS_VISUAIS.map((m) => {
+            const ativo = modoVisual === m.id;
+            const Icone = m.icon;
+            return (
+              <button
+                key={m.id}
+                onClick={() => setModoVisual(m.id)}
+                aria-label={t(m.label)}
+                title={t(m.label)}
+                className={`w-10 h-10 flex items-center justify-center rounded-full border transition-all active:scale-95 ${
+                  ativo
+                    ? 'bg-foreground text-background border-foreground'
+                    : 'bg-muted text-muted-foreground border-border hover:text-foreground hover:bg-muted/70'
+                }`}
+              >
+                <Icone className="w-[18px] h-[18px]" strokeWidth={2.2} />
               </button>
             );
           })}
