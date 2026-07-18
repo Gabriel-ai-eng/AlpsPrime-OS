@@ -1,16 +1,63 @@
 {
-  "name": "AlpsPrime-OS",
-  "short_name": "AlpsPrime-OS",
+  "id": "/",
+  "name": "Alps Prime",
+  "short_name": "Alps Prime",
+  "description": "Alps Prime: uma plataforma, três experiências — a assistente de inteligência artificial Sexta-feira e os jogos Projeto Armor e Free Kick World. Acesso vitalício, pagamento único.",
+  "lang": "pt-BR",
+  "dir": "ltr",
   "start_url": "/home",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#FBFAF6",
   "theme_color": "#C9A24F",
+  "categories": ["entertainment", "games", "productivity"],
   "icons": [
     {
-      "src": "/image.webp",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-192.webp?v=3",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.webp?v=3",
       "sizes": "512x512",
       "type": "image/webp",
-      "purpose": "any maskable"
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/categorias-lista.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Categorias — seus apps em lista"
+    },
+    {
+      "src": "/screenshots/categorias-grade.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Categorias — seus apps em grade"
     }
   ]
 }
