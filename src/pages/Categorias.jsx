@@ -12,8 +12,8 @@ const FILTROS = [
   { id: 'embreve', label: 'Em breve' },
 ];
 
-// Modos de exibição da lista abaixo. Por enquanto só os ícones/seleção — a
-// troca do layout em si ainda não está implementada.
+// Modos de exibição da lista abaixo. "Cards grandes" já está implementado
+// (ver render abaixo); "Grade" ainda não — por enquanto cai na Lista.
 const MODOS_VISUAIS = [
   { id: 'lista', label: 'Lista', icon: List },
   { id: 'cards', label: 'Cards grandes', icon: GalleryVerticalEnd },
@@ -21,9 +21,11 @@ const MODOS_VISUAIS = [
 ];
 
 // Serviços disponíveis, cada um marcado com a sua categoria. `status: 'soon'`
-// marca os que ainda não foram lançados.
+// marca os que ainda não foram lançados. `logoQuadrado` é usado só no modo
+// "Cards grandes" (card quadrado, edge-to-edge); quando não existe, cai no
+// `logo` normal (recortado ao quadrado via object-cover).
 const APPS = [
-  { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', logo: '/apps/armor-logo.webp', status: 'live', url: '/jogo' },
+  { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', logo: '/apps/armor-logo.webp', logoQuadrado: '/apps/armor-logo-square.webp', status: 'live', url: '/jogo' },
   { id: 'fkw', nome: 'Free Kick World', desc: 'Jogo de futebol: mire e cobre a falta perfeita.', cat: 'jogos', logo: '/apps/fkw-logo.webp', status: 'soon' },
   { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', cat: 'ia', logo: '/apps/sexta-logo.webp', status: 'soon' },
 ];
@@ -115,11 +117,8 @@ export default function Categorias() {
 
       {/* LISTA DE SERVIÇOS */}
       <div className="flex-1 px-6 pt-6 pb-32 space-y-3">
-        {appsVisiveis.map((app) => {
-          // FKW, Projeto Armor e Sexta-feira são cards "hero": a arte ocupa
-          // a altura inteira do card, colada na borda esquerda (sem padding).
-          const hero = app.id === 'fkw' || app.id === 'armor' || app.id === 'sexta';
-          return (
+        {modoVisual === 'cards' ? (
+          appsVisiveis.map((app) => (
             <div
               key={app.id}
               onClick={() => {
@@ -127,34 +126,64 @@ export default function Categorias() {
                 if (app.url) { window.location.href = app.url; return; }
                 navigate('/home');
               }}
-              className={`flex items-center gap-4 rounded-3xl bg-card border border-border transition-all overflow-hidden ${hero ? '' : 'p-4'} ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
+              className={`relative aspect-square w-full rounded-3xl bg-card border border-border overflow-hidden transition-all ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
             >
-              <div className={hero
-                ? 'relative w-20 self-stretch flex-shrink-0'
-                : 'relative w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white overflow-hidden'}>
-                <img src={app.logo} alt={app.nome} className={`w-full h-full ${hero ? 'object-cover' : 'object-contain'}`} decoding="async" fetchpriority="high" />
-                {/* Nos cards "hero" o selo fica sobre a arte (não empurra o
-                    texto), assim o card não cresce em relação aos demais. */}
-                {hero && app.status === 'soon' && (
-                  <span className="absolute top-2 left-2 text-[8px] font-semibold uppercase tracking-wider text-gold bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded-full leading-none">
-                    {t('Em breve')}
-                  </span>
-                )}
-              </div>
-              <div className={`flex-1 min-w-0 ${hero ? 'py-4 pr-4' : ''}`}>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <h3 className="text-[17px] font-semibold text-foreground">{app.nome}</h3>
-                  {!hero && app.status === 'soon' && (
-                    <span className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wider text-gold bg-gold/10 border border-gold/20 px-2 py-0.5 rounded-full">
+              <img
+                src={app.logoQuadrado || app.logo}
+                alt={app.nome}
+                className="w-full h-full object-cover"
+                decoding="async"
+                fetchpriority="high"
+              />
+              {app.status === 'soon' && (
+                <span className="absolute top-3 left-3 text-[10px] font-semibold uppercase tracking-wider text-gold bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded-full leading-none">
+                  {t('Em breve')}
+                </span>
+              )}
+            </div>
+          ))
+        ) : (
+          appsVisiveis.map((app) => {
+            // FKW, Projeto Armor e Sexta-feira são cards "hero": a arte ocupa
+            // a altura inteira do card, colada na borda esquerda (sem padding).
+            const hero = app.id === 'fkw' || app.id === 'armor' || app.id === 'sexta';
+            return (
+              <div
+                key={app.id}
+                onClick={() => {
+                  if (BLOQUEADOS.has(app.id)) return;
+                  if (app.url) { window.location.href = app.url; return; }
+                  navigate('/home');
+                }}
+                className={`flex items-center gap-4 rounded-3xl bg-card border border-border transition-all overflow-hidden ${hero ? '' : 'p-4'} ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
+              >
+                <div className={hero
+                  ? 'relative w-20 self-stretch flex-shrink-0'
+                  : 'relative w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white overflow-hidden'}>
+                  <img src={app.logo} alt={app.nome} className={`w-full h-full ${hero ? 'object-cover' : 'object-contain'}`} decoding="async" fetchpriority="high" />
+                  {/* Nos cards "hero" o selo fica sobre a arte (não empurra o
+                      texto), assim o card não cresce em relação aos demais. */}
+                  {hero && app.status === 'soon' && (
+                    <span className="absolute top-2 left-2 text-[8px] font-semibold uppercase tracking-wider text-gold bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded-full leading-none">
                       {t('Em breve')}
                     </span>
                   )}
                 </div>
-                <p className="text-muted-foreground text-[13px] leading-snug pr-2">{t(app.desc)}</p>
+                <div className={`flex-1 min-w-0 ${hero ? 'py-4 pr-4' : ''}`}>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <h3 className="text-[17px] font-semibold text-foreground">{app.nome}</h3>
+                    {!hero && app.status === 'soon' && (
+                      <span className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wider text-gold bg-gold/10 border border-gold/20 px-2 py-0.5 rounded-full">
+                        {t('Em breve')}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-muted-foreground text-[13px] leading-snug pr-2">{t(app.desc)}</p>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
 
         {appsVisiveis.length === 0 && (
           <p className="text-center text-muted-foreground text-sm pt-10">
