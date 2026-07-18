@@ -31,11 +31,30 @@ const APPS = [
 // Apps indisponíveis: aparecem na lista, mas clicar neles NÃO faz nada.
 const BLOQUEADOS = new Set(['sexta', 'fkw']);
 
+// Modo de exibição escolhido fica salvo no aparelho — ao recarregar a
+// página, continua na mesma opção (lista, cards grandes ou grade).
+const MODO_VISUAL_KEY = 'sf_categorias_modo_visual';
+const IDS_MODOS_VALIDOS = new Set(MODOS_VISUAIS.map((m) => m.id));
+
+function lerModoVisualSalvo() {
+  try {
+    const salvo = localStorage.getItem(MODO_VISUAL_KEY);
+    return IDS_MODOS_VALIDOS.has(salvo) ? salvo : 'lista';
+  } catch {
+    return 'lista';
+  }
+}
+
 export default function Categorias() {
   const navigate = useNavigate();
   const t = useT();
   const [filtro, setFiltro] = useState('todos');
-  const [modoVisual, setModoVisual] = useState('lista');
+  const [modoVisual, setModoVisual] = useState(lerModoVisualSalvo);
+
+  const selecionarModoVisual = (id) => {
+    setModoVisual(id);
+    try { localStorage.setItem(MODO_VISUAL_KEY, id); } catch {}
+  };
 
   const appsVisiveis =
     filtro === 'todos' ? APPS
@@ -78,7 +97,7 @@ export default function Categorias() {
             return (
               <button
                 key={m.id}
-                onClick={() => setModoVisual(m.id)}
+                onClick={() => selecionarModoVisual(m.id)}
                 aria-label={t(m.label)}
                 title={t(m.label)}
                 className={`w-10 h-10 flex items-center justify-center rounded-full border transition-all active:scale-95 ${
