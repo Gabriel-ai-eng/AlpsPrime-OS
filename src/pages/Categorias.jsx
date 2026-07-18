@@ -15,12 +15,12 @@ const FILTROS = [
 // marca os que ainda não foram lançados.
 const APPS = [
   { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', logo: '/apps/armor-logo.webp', status: 'live', url: '/jogo' },
-  { id: 'fkw', nome: 'Free Kick World', desc: 'Jogo de futebol: mire e cobre a falta perfeita.', cat: 'jogos', logo: '/apps/fkw-logo.webp', status: 'live', url: '/fkw/' },
+  { id: 'fkw', nome: 'Free Kick World', desc: 'Jogo de futebol: mire e cobre a falta perfeita.', cat: 'jogos', logo: '/apps/fkw-logo.webp', status: 'soon' },
   { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', cat: 'ia', logo: '/apps/sexta-logo.webp', status: 'soon' },
 ];
 
 // Apps indisponíveis: aparecem na lista, mas clicar neles NÃO faz nada.
-const BLOQUEADOS = new Set(['sexta']);
+const BLOQUEADOS = new Set(['sexta', 'fkw']);
 
 export default function Categorias() {
   const navigate = useNavigate();
