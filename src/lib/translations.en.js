@@ -146,6 +146,7 @@ export const EN = {
   // ── Favoritos ──
   'Sua coleção pessoal de apps preferidos.': 'Your personal collection of favorite apps.',
   'Remover dos favoritos': 'Remove from favorites',
+  'Adicionar aos favoritos': 'Add to favorites',
   'Acessar': 'Open',
   'Nenhum favorito': 'No favorites',
   'Explore a plataforma para adicionar apps aos seus favoritos.':

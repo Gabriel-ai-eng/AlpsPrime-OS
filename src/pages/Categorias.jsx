@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { List, GalleryVerticalEnd, Grid3x3 } from 'lucide-react';
+import { List, GalleryVerticalEnd, Grid3x3, Star } from 'lucide-react';
 import { useT } from '@/lib/i18n';
+import { useFavorites } from '@/lib/useFavorites';
+import { APPS, BLOQUEADOS } from '@/lib/apps';
 
 // Filtros de categoria — "Todos" mostra tudo; "Em breve" mostra os ainda não
 // lançados; os demais filtram por tipo.
@@ -20,18 +22,11 @@ const MODOS_VISUAIS = [
   { id: 'grade', label: 'Grade', icon: Grid3x3 },
 ];
 
-// Serviços disponíveis, cada um marcado com a sua categoria. `status: 'soon'`
-// marca os que ainda não foram lançados. `logoQuadrado` é a arte própria pro
-// modo "Cards grandes" (card quadrado, edge-to-edge, já vem enquadrada certa
-// — nada de recortar o `logo` retangular usado na Lista).
-const APPS = [
-  { id: 'armor', nome: 'Projeto Armor', desc: 'Jogo de ação e sobrevivência com gravidade.', cat: 'jogos', logo: '/apps/armor-logo.webp', logoQuadrado: '/apps/armor-logo-square.webp', status: 'live', url: '/jogo' },
-  { id: 'fkw', nome: 'Free Kick World', desc: 'Jogo de futebol: mire e cobre a falta perfeita.', cat: 'jogos', logo: '/apps/fkw-logo.webp', logoQuadrado: '/apps/fkw-logo-square.webp', status: 'soon' },
-  { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', cat: 'ia', logo: '/apps/sexta-logo.webp', logoQuadrado: '/apps/sexta-logo-square.webp', status: 'soon' },
-];
-
-// Apps indisponíveis: aparecem na lista, mas clicar neles NÃO faz nada.
-const BLOQUEADOS = new Set(['sexta', 'fkw']);
+// Serviços disponíveis (`APPS`/`BLOQUEADOS` vêm de `@/lib/apps`, compartilhado
+// com a tela de Favoritos). `status: 'soon'` marca os que ainda não foram
+// lançados. `logoQuadrado` é a arte própria pro modo "Cards grandes" (card
+// quadrado, edge-to-edge, já vem enquadrada certa — nada de recortar o `logo`
+// retangular usado na Lista).
 
 // Modo de exibição escolhido fica salvo no aparelho — ao recarregar a
 // página, continua na mesma opção (lista, cards grandes ou grade).
@@ -52,6 +47,7 @@ export default function Categorias() {
   const t = useT();
   const [filtro, setFiltro] = useState('todos');
   const [modoVisual, setModoVisual] = useState(lerModoVisualSalvo);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const selecionarModoVisual = (id) => {
     setModoVisual(id);
@@ -140,6 +136,14 @@ export default function Categorias() {
                   {t('Em breve')}
                 </span>
               )}
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleFavorite(app.id); }}
+                aria-label={t('Adicionar aos favoritos')}
+                title={isFavorite(app.id) ? t('Remover dos favoritos') : t('Adicionar aos favoritos')}
+                className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center bg-black/60 backdrop-blur-sm active:scale-90 transition-transform"
+              >
+                <Star className={`w-4 h-4 ${isFavorite(app.id) ? 'text-gold fill-gold' : 'text-white'}`} />
+              </button>
             </div>
           ))
         ) : modoVisual === 'grade' ? (
@@ -151,7 +155,7 @@ export default function Categorias() {
                 if (app.url) { window.location.href = app.url; return; }
                 navigate('/home');
               }}
-              className={`aspect-square w-full rounded-3xl bg-card border border-border overflow-hidden transition-all ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
+              className={`relative aspect-square w-full rounded-3xl bg-card border border-border overflow-hidden transition-all ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
             >
               <img
                 src={app.logoQuadrado || app.logo}
@@ -160,6 +164,14 @@ export default function Categorias() {
                 decoding="async"
                 fetchpriority="high"
               />
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleFavorite(app.id); }}
+                aria-label={t('Adicionar aos favoritos')}
+                title={isFavorite(app.id) ? t('Remover dos favoritos') : t('Adicionar aos favoritos')}
+                className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center bg-black/60 backdrop-blur-sm active:scale-90 transition-transform"
+              >
+                <Star className={`w-3.5 h-3.5 ${isFavorite(app.id) ? 'text-gold fill-gold' : 'text-white'}`} />
+              </button>
             </div>
           ))
         ) : (
@@ -175,7 +187,7 @@ export default function Categorias() {
                   if (app.url) { window.location.href = app.url; return; }
                   navigate('/home');
                 }}
-                className={`flex items-center gap-4 rounded-3xl bg-card border border-border transition-all overflow-hidden ${hero ? '' : 'p-4'} ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
+                className={`relative flex items-center gap-4 rounded-3xl bg-card border border-border transition-all overflow-hidden ${hero ? '' : 'p-4'} ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
               >
                 <div className={hero
                   ? 'relative w-20 self-stretch flex-shrink-0'
@@ -189,7 +201,7 @@ export default function Categorias() {
                     </span>
                   )}
                 </div>
-                <div className={`flex-1 min-w-0 ${hero ? 'py-4 pr-4' : ''}`}>
+                <div className={`flex-1 min-w-0 ${hero ? 'py-4 pr-14' : 'pr-10'}`}>
                   <div className="flex items-center gap-2 mb-0.5">
                     <h3 className="text-[17px] font-semibold text-foreground">{app.nome}</h3>
                     {!hero && app.status === 'soon' && (
@@ -200,6 +212,14 @@ export default function Categorias() {
                   </div>
                   <p className="text-muted-foreground text-[13px] leading-snug pr-2">{t(app.desc)}</p>
                 </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleFavorite(app.id); }}
+                  aria-label={t('Adicionar aos favoritos')}
+                  title={isFavorite(app.id) ? t('Remover dos favoritos') : t('Adicionar aos favoritos')}
+                  className={`absolute z-10 w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform ${hero ? 'top-3 right-3 bg-black/60 backdrop-blur-sm' : 'top-1/2 -translate-y-1/2 right-4 bg-muted border border-border'}`}
+                >
+                  <Star className={`w-4 h-4 ${isFavorite(app.id) ? 'text-gold fill-gold' : hero ? 'text-white' : 'text-muted-foreground'}`} />
+                </button>
               </div>
             );
           })
