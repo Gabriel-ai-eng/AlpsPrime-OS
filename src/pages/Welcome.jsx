@@ -6,12 +6,10 @@ import { motion } from 'framer-motion';
 import {
   ShoppingBag,
   ChevronDown,
+  ChevronRight,
   Languages,
   Check,
-  Shield,
-  Sparkles,
-  Layers3,
-  ArrowRight
+  ArrowRight,
 } from 'lucide-react';
 import { LOGO_URL } from '@/lib/branding';
 import { useT, useLang } from '@/lib/i18n';
@@ -75,21 +73,28 @@ function LanguagePicker() {
 
 const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
 
-const FEATURES = [
+// Vitrine no estilo apple.com: cada jogo é um "produto" numa seção própria,
+// com nome grande, uma frase e a arte embaixo. `disponivel: false` mostra o
+// selo "Em breve" (sem botão de jogar) — é o caso do Free Kick World, cujo
+// acesso está bloqueado no momento.
+const PRODUTOS = [
   {
-    icon: Sparkles,
-    title: 'Experiência integrada',
-    desc: 'Um único acesso para organizar tudo em um fluxo simples e contínuo.',
+    id: 'armor',
+    eyebrow: 'Jogo de ação',
+    titulo: 'Projeto Armor',
+    subtitulo: 'Conheça a nova geração da ação e sobrevivência.',
+    img: '/apps/armor-hero.webp',
+    quadrado: true,
+    disponivel: true,
   },
   {
-    icon: Layers3,
-    title: 'Estrutura curada',
-    desc: 'Tudo distribuído em blocos claros, com foco no que importa primeiro.',
-  },
-  {
-    icon: Shield,
-    title: 'Acesso protegido',
-    desc: 'Login rápido com a mesma conta usada na compra e navegação segura.',
+    id: 'fkw',
+    eyebrow: 'Jogo de futebol',
+    titulo: 'Free Kick World',
+    subtitulo: 'Mire, cobre a falta perfeita e domine o gramado.',
+    img: '/apps/fkw-hero.webp',
+    quadrado: false,
+    disponivel: false,
   },
 ];
 
@@ -164,27 +169,76 @@ export default function Welcome() {
       </header>
 
       <main>
-        <section className="mx-auto max-w-6xl px-5 pt-16 sm:px-8 sm:pt-24">
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55 }}
-            className="mx-auto max-w-4xl text-center"
+        {/* VITRINE DE PRODUTOS — estilo apple.com: cada jogo é um produto */}
+        {PRODUTOS.map((p, i) => (
+          <section
+            key={p.id}
+            className={`${i % 2 === 0 ? 'bg-[#fbfbfd]' : 'bg-white'} px-5 py-16 sm:py-20`}
           >
-            <p className="mb-4 text-sm font-medium text-black/55">
-              {t('Novo acesso disponível')}
-            </p>
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.55 }}
+              className="mx-auto max-w-3xl text-center"
+            >
+              <p className="text-sm font-medium text-black/50">{t(p.eyebrow)}</p>
+              <h2 className="mt-1 text-4xl font-semibold tracking-tight sm:text-6xl">{p.titulo}</h2>
+              <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-black/60">{t(p.subtitulo)}</p>
 
-            <h1 className="text-4xl font-semibold tracking-tight sm:text-6xl">
-              {t('Tudo da Alps Prime.')}<br />
-              {t('em um só lugar.')}
-            </h1>
+              <div className="mt-6 flex items-center justify-center gap-5">
+                {p.disponivel ? (
+                  <>
+                    <button
+                      onClick={() => setShowAuth(true)}
+                      className="rounded-full bg-[#0071e3] px-6 py-2.5 text-[15px] font-medium text-white transition hover:scale-[1.02] hover:bg-[#0077ed] focus:outline-none focus:ring-2 focus:ring-[#0071e3]/30"
+                    >
+                      {t('Jogar')}
+                    </button>
+                    <a
+                      href="#acesso"
+                      className="inline-flex items-center gap-1 text-[15px] font-medium text-[#0071e3] transition hover:underline"
+                    >
+                      {t('Saiba mais')}
+                      <ChevronRight className="h-4 w-4" />
+                    </a>
+                  </>
+                ) : (
+                  <span className="inline-flex items-center rounded-full border border-black/10 bg-black/[0.04] px-5 py-2 text-[15px] font-medium text-black/50">
+                    {t('Em breve')}
+                  </span>
+                )}
+              </div>
 
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-black/60 sm:text-lg">
+              <div
+                className={`mx-auto mt-10 overflow-hidden rounded-[28px] bg-black shadow-[0_20px_60px_rgba(0,0,0,0.14)] ${
+                  p.quadrado ? 'max-w-md' : 'max-w-3xl'
+                }`}
+              >
+                <img
+                  src={p.img}
+                  alt={p.titulo}
+                  loading="lazy"
+                  decoding="async"
+                  className={`w-full object-cover ${p.quadrado ? 'aspect-square' : ''}`}
+                />
+              </div>
+            </motion.div>
+          </section>
+        ))}
+
+        {/* ACESSO — mantém a função de venda/login da tela de entrada */}
+        <section id="acesso" className="scroll-mt-24 bg-[#f5f5f7] px-5 py-16 sm:py-24">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="mb-3 text-sm font-medium text-black/50">{t('Novo acesso disponível')}</p>
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              {t('Um acesso. Todo o ecossistema.')}
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-black/60">
               {t('Uma entrada única para explorar o ecossistema Alps com mais clareza, rapidez e consistência.')}
             </p>
 
-            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <a
                 href={CHECKOUT_URL}
                 target="_blank"
@@ -207,78 +261,10 @@ export default function Welcome() {
             <p className="mt-6 text-xs text-black/40">
               {totalUsers > 0 ? `${totalUsers.toLocaleString('pt-BR')} ${t('usuários já acessaram essa experiência.')}` : t('Acesso direto e simples.')}
             </p>
-          </motion.div>
-
-          <div className="mt-16 grid gap-4 md:grid-cols-3">
-            {FEATURES.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ delay: i * 0.08, duration: 0.45 }}
-                className="rounded-3xl border border-black/10 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)]"
-              >
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-black/[0.04]">
-                  <f.icon className="h-5 w-5 text-black" />
-                </div>
-                <h3 className="text-lg font-semibold tracking-tight">{t(f.title)}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-black/58">{t(f.desc)}</p>
-              </motion.div>
-            ))}
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-            <div>
-              <p className="text-sm font-medium text-black/50">{t('Pensado para ser intuitivo')}</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                {t('Menos ruído. Mais direção.')}
-              </h2>
-              <p className="mt-4 max-w-xl text-base leading-relaxed text-black/60">
-                {t('A interface usa hierarquia forte, botões claros e blocos com função definida, para reduzir esforço mental e acelerar a decisão.')}
-              </p>
-
-              <div className="mt-8 space-y-3">
-                {[
-                  'Mensagem principal visível no primeiro olhar.',
-                  'CTA forte, mas sem exagero visual.',
-                  'Seções curtas, com leitura rápida e fluida.',
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3 rounded-2xl border border-black/8 bg-white px-4 py-3">
-                    <div className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-black text-[10px] text-white">✓</div>
-                    <p className="text-sm leading-relaxed text-black/70">{t(item)}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-black/10 bg-gradient-to-b from-white to-black/[0.02] p-6">
-              <div className="mb-6 flex items-center justify-between">
-                <p className="text-sm font-medium text-black/50">{t('Fluxo recomendado')}</p>
-                <p className="text-xs text-black/40">{t('Apple-like')}</p>
-              </div>
-
-              <div className="space-y-4">
-                {[
-                  ['1', 'Apresentar o valor principal em uma frase curta.'],
-                  ['2', 'Oferecer uma ação primária e uma secundária.'],
-                  ['3', 'Reforçar confiança com FAQ e detalhes mínimos.'],
-                ].map(([num, txt]) => (
-                  <div key={num} className="flex gap-4 rounded-2xl bg-white p-4 shadow-sm">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-sm font-semibold text-white">
-                      {num}
-                    </div>
-                    <p className="pt-1 text-sm leading-relaxed text-black/68">{t(txt)}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-3xl px-5 pb-16 sm:px-8 sm:pb-24">
+        <section className="mx-auto max-w-3xl px-5 pb-16 sm:pb-24">
           <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
             {t('Perguntas frequentes')}
           </h2>
