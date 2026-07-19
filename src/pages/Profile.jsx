@@ -8,7 +8,7 @@ import {
   User, Camera, Edit3, Check, X, Loader2, PenLine, 
   MessageCircle, Calendar
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { uploadProfileImage } from '@/lib/supabaseUpload';
 import { getConversationKey } from '@/lib/chatUtils';
@@ -66,6 +66,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [avatarFullscreen, setAvatarFullscreen] = useState(false);
   const avatarInputRef = useRef(null);
   const bannerInputRef = useRef(null);
 
@@ -199,11 +200,11 @@ export default function Profile() {
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-end gap-5 mb-4">
           {/* Avatar Clickable */}
           <div className="relative w-fit shrink-0">
-            <div 
-              onClick={() => !readOnly && avatarInputRef.current?.click()}
+            <div
+              onClick={() => user.profile_picture_url && setAvatarFullscreen(true)}
               className={cn(
                 "w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-background flex items-center justify-center shadow-2xl relative overflow-hidden ring-[6px] ring-background z-10",
-                !readOnly && "cursor-pointer group"
+                user.profile_picture_url && "cursor-zoom-in group"
               )}
             >
               <div className="w-full h-full rounded-full bg-muted overflow-hidden relative">
@@ -211,13 +212,6 @@ export default function Profile() {
                   <CachedImage src={user.profile_picture_url} cacheKey={`avatar_${user.email}`} alt={primaryName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 ) : (
                   <User className="w-12 h-12 text-muted-foreground absolute inset-0 m-auto" />
-                )}
-                
-                {/* Overlay da Câmera diretamente no avatar principal */}
-                {!readOnly && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px]">
-                    {uploadingAvatar ? <Loader2 className="w-6 h-6 animate-spin text-white" /> : <Camera className="w-7 h-7 text-white" />}
-                  </div>
                 )}
               </div>
             </div>
@@ -339,6 +333,38 @@ export default function Profile() {
         </motion.div>
 
       </motion.div>
+
+      {/* --- FOTO EM TELA CHEIA --- */}
+      <AnimatePresence>
+        {avatarFullscreen && user.profile_picture_url && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setAvatarFullscreen(false)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 cursor-zoom-out"
+          >
+            <button
+              onClick={() => setAvatarFullscreen(false)}
+              className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              title={t('Fechar')}
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <motion.img
+              initial={{ scale: 0.85 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.85 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+              src={user.profile_picture_url}
+              alt={primaryName}
+              onClick={(e) => e.stopPropagation()}
+              className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl cursor-default"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
     </ProfileTranslationProvider>
   );
