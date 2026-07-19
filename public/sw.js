@@ -7,6 +7,9 @@
  * - Navegações (HTML): SEMPRE rede primeiro. O cache só entra como fallback
  *   quando o usuário está offline.
  * - /assets/ (arquivos com hash no nome, imutáveis): cache primeiro.
+ * - /api, /jogo e /fkw: o SW NÃO se mete — backend e sub-apps têm vida
+ *   própria (e cachear a navegação deles sobrescreveria o fallback offline
+ *   da casca com o HTML do jogo).
  * - Demais requisições: passam direto pra rede (sem interferência).
  * - O cache de imagens do app (sf-img-cache-v1, usado pelo CachedImage) é
  *   de outra dona — este SW nunca lê nem apaga ele.
@@ -45,6 +48,13 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // só o próprio site
+
+  // Backend e sub-apps (Projeto Armor, FKW): o SW não se mete.
+  if (
+    url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/jogo') ||
+    url.pathname.startsWith('/fkw')
+  ) return;
 
   // Navegações: rede primeiro (HTML sempre fresco); cache só se offline.
   if (req.mode === 'navigate') {
