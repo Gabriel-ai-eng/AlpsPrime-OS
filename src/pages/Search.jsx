@@ -12,20 +12,20 @@ const SUB_APPS = [
   {
     id: 'armor',
     name: 'Projeto Armor',
-    image: '/apps/armor-bg.webp',
+    image: '/apps/armor-logo-square.webp',
     status: 'live',
   },
   {
     id: 'fkw',
     name: 'Free Kick World',
-    image: '/apps/fkw-bg-v2.jpg',
+    image: '/apps/fkw-logo-square.webp',
     status: 'live',
     url: '/fkw/',
   },
   {
     id: 'sexta',
     name: 'Sexta-feira',
-    image: '/apps/sexta-bg.webp',
+    image: '/apps/sexta-logo-square.webp',
     status: 'soon',
   }
 ];
@@ -118,7 +118,7 @@ export default function Search() {
                     if (app.url) { window.location.href = app.url; return; }
                     navigate('/home', { state: { openApp: app.id } });
                   }}
-                  className={`w-full rounded-[32px] overflow-hidden relative aspect-[4/3] group transition-all outline-none ${BLOQUEADOS.has(app.id) ? '' : 'cursor-pointer active:scale-95'}`}
+                  className={`w-full rounded-[32px] overflow-hidden relative aspect-square group transition-all outline-none ${BLOQUEADOS.has(app.id) ? '' : 'cursor-pointer active:scale-95'}`}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <img
