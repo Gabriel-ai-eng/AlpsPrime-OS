@@ -42,6 +42,69 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Re-aquece o fallback offline com a casca mais recente do app.
+async function atualizarShell() {
+  try {
+    const res = await fetch('/', { cache: 'no-cache' });
+    if (res.ok) {
+      const cache = await caches.open(SW_CACHE);
+      await cache.put('/', res.clone());
+    }
+  } catch {
+    // sem rede agora — fica pra próxima
+  }
+}
+
+// Background Sync: quando a conexão volta, atualiza o fallback offline
+// (registrado pelo fetch handler quando uma navegação falha offline).
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'alps-refresh-shell') event.waitUntil(atualizarShell());
+});
+
+// Periodic Background Sync: mantém o fallback offline fresco de tempos em
+// tempos (só roda com o PWA instalado e permissão do navegador — ver main.jsx).
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'alps-refresh-shell') event.waitUntil(atualizarShell());
+});
+
+// ── Notificações push ──
+// Exibe notificações recebidas via Web Push (quando um servidor de push for
+// plugado) e também as disparadas pelo próprio app via showNotification —
+// no Chrome do Android, notificação de página só funciona pelo SW.
+self.addEventListener('push', (event) => {
+  let dados = {};
+  try {
+    dados = event.data ? event.data.json() : {};
+  } catch {
+    dados = { body: event.data ? event.data.text() : '' };
+  }
+  event.waitUntil(
+    self.registration.showNotification(dados.title || 'Alps OS', {
+      body: dados.body || 'Você tem novidades para ver.',
+      icon: '/icon-192.webp',
+      badge: '/favicon.webp',
+      tag: dados.tag || 'alps-push',
+      data: { url: dados.url || '/home' },
+    })
+  );
+});
+
+// Clique na notificação: foca uma aba já aberta do app ou abre uma nova.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/home';
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then((janelas) => {
+        for (const janela of janelas) {
+          if ('focus' in janela) return janela.focus();
+        }
+        return self.clients.openWindow(url);
+      })
+  );
+});
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
@@ -66,6 +129,9 @@ self.addEventListener('fetch', (event) => {
           cache.put('/', fresh.clone()).catch(() => {});
           return fresh;
         } catch {
+          // Sem rede: agenda uma atualização do shell pra quando a conexão
+          // voltar (Background Sync; se o navegador não suportar, ignora).
+          try { await self.registration.sync.register('alps-refresh-shell'); } catch {}
           const cached = await caches.match('/', { cacheName: SW_CACHE });
           return (
             cached ||

@@ -51,9 +51,22 @@ function inDnd(prefs, date = new Date()) {
   return from <= to ? now >= from && now < to : now >= from || now < to;
 }
 
-function fire(title, body, tag) {
+async function fire(title, body, tag) {
+  const opts = { body, icon: '/favicon.webp', tag, data: { url: '/home' } };
+  // No Chrome do Android, `new Notification()` de página lança erro — a
+  // notificação precisa ser exibida pelo service worker (showNotification).
+  // Com o SW registrado (main.jsx), usamos ele; senão, cai no construtor.
   try {
-    new Notification(title, { body, icon: '/favicon.webp', tag });
+    const reg = await navigator.serviceWorker?.getRegistration();
+    if (reg?.showNotification) {
+      await reg.showNotification(title, opts);
+      return;
+    }
+  } catch {
+    // segue pro fallback
+  }
+  try {
+    new Notification(title, opts);
   } catch {
     // ignore
   }

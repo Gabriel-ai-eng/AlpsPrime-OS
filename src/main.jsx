@@ -8,7 +8,19 @@ import '@/index.css';
 // só como fallback offline) — ver public/sw.js.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then(async (reg) => {
+        // Tenta agendar a atualização periódica do fallback offline (Periodic
+        // Background Sync). Só funciona com o PWA instalado e permissão do
+        // navegador — se não der, o app segue normal sem isso.
+        try {
+          await reg.periodicSync?.register('alps-refresh-shell', {
+            minInterval: 24 * 60 * 60 * 1000, // 1x por dia
+          });
+        } catch {}
+      })
+      .catch(() => {});
   });
   // Limpa caches órfãos de service workers antigos — MAS preserva o cache de
   // imagens do CachedImage (sf-img-cache-v1) e os caches do SW atual (sf-sw-*):
