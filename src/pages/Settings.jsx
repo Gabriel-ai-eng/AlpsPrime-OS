@@ -552,7 +552,7 @@ export default function Settings() {
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
                 <a href="https://alpsprime.com.br/termos-de-uso" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">{t('Termos de Uso')}</a>
-                <a href="https://alpsprime.com.br/politica-de-privacidade" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">{t('Política de Privacidade')}</a>
+                <a href="https://alpsprime.com.br/privacidade" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">{t('Política de Privacidade')}</a>
               </div>
               <p className="text-[11px] text-muted-foreground">© {new Date().getFullYear()} Alps OS</p>
             </div>
