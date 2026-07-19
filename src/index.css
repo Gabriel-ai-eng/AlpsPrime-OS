@@ -93,16 +93,23 @@
 
   html {
     scroll-behavior: smooth;
-    /* Mata o delay de 300ms do double-tap-to-zoom em toda a UI, sem desativar
-       o pinch-to-zoom (acessibilidade) — a alternativa moderna e correta ao
-       velho truque de "user-scalable=0" no viewport. */
+    /* Sem double-tap-to-zoom (o pinch é bloqueado pelo viewport no Android e
+       pelo gesturestart no iOS — ver main.jsx; pedido do dono: app com "cara
+       de nativo", sem zoom). */
     touch-action: manipulation;
+    /* Sem o flash/realce cinza ao tocar em botões e cards (Android/iOS). */
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    /* App com "cara de nativo": nada de selecionar texto da interface nem de
+       menu de long-press do navegador. Campos de digitação re-liberam abaixo. */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
     /* Branco puro e chapado no tema claro (sem lavagem dourada/roxa). O tema
        escuro reaplica o próprio fundo mais abaixo (html.dark body). */
     background-color: #ffffff;
@@ -110,6 +117,14 @@
     background-image: none;
     background-attachment: fixed;
     transition: background-color 0.4s ease, color 0.4s ease;
+  }
+
+  /* Onde o usuário digita, a seleção volta a funcionar (cursor, copiar/colar). */
+  input,
+  textarea,
+  [contenteditable='true'] {
+    -webkit-user-select: text;
+    user-select: text;
   }
 }
 

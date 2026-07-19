@@ -35,6 +35,12 @@ if ('serviceWorker' in navigator) {
   }
 }
 
+// Bloqueia o pinch-zoom no iOS: o Safari ignora o user-scalable=0 do viewport,
+// mas respeita o preventDefault nos eventos de gesto (Android já é bloqueado
+// pelo próprio viewport). Pedido do dono: app sem zoom, com cara de nativo.
+document.addEventListener('gesturestart', (e) => e.preventDefault());
+document.addEventListener('gesturechange', (e) => e.preventDefault());
+
 // Aplica tema salvo ANTES do React montar (evita flash)
 (function() {
   try {
