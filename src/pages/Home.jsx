@@ -21,7 +21,6 @@ const LoadingScreen = () => (
 
 const SLIDES = [
   { id: 'alps', bg: null, titulo: true },
-  { id: 'branco', bg: '#FFFFFF', titulo: false, img: '/apps/fkw-bg-v2.jpg' },
 ];
 
 const TOTAL = SLIDES.length;
@@ -67,18 +66,6 @@ export default function Home() {
   const navSlide = (dir) => {
     setPos(p => p + dir);
     resetTimer();
-  };
-
-  // Abre o jogo FKW na MESMA ORIGEM (alpsprime.com.br/fkw), via rewrite/proxy da
-  // Vercel (ver vercel.json). Por ser a mesma origem, o jogo reaproveita a sessão
-  // de login já feita aqui (o supabase-js guarda a sessão no localStorage por
-  // origem), então o jogador NÃO precisa logar de novo e o progresso é salvo na
-  // mesma conta. A barra final "/" é importante: mantém os assets do jogo sob
-  // /fkw/ para o proxy encontrá-los. Não pedimos tela cheia nem giramos o
-  // celular — o próprio jogo mostra a animação de "vire o celular".
-  const abrirJogoFKW = () => {
-    if (touchRef.current.moved) return; // foi swipe, não clique
-    window.location.href = '/fkw/';
   };
 
   // Arrastar com o dedo (swipe) para trocar de slide.
@@ -162,8 +149,7 @@ export default function Home() {
                 {EXT.map((slide, i) => (
                   <div
                     key={i}
-                    onClick={slide.id === 'branco' ? abrirJogoFKW : undefined}
-                    className={`h-full flex items-center justify-center${slide.id === 'branco' ? ' cursor-pointer' : ''}`}
+                    className="h-full flex items-center justify-center"
                     style={{
                       width: `${100 / EXT_LEN}%`,
                       backgroundColor: slide.bg ?? 'transparent',
@@ -174,15 +160,6 @@ export default function Home() {
                         src="/apps/alps-os-bg.jpg"
                         cacheKey="alps_slide"
                         alt="Alps OS"
-                        decoding="async"
-                        className="w-full h-full object-cover select-none"
-                      />
-                    )}
-                    {slide.img && (
-                      <CachedImage
-                        src={slide.img}
-                        cacheKey="fkw_slide"
-                        alt="Free Kick World"
                         decoding="async"
                         className="w-full h-full object-cover select-none"
                       />

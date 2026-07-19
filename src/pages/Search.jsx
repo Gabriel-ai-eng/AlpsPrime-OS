@@ -19,8 +19,7 @@ const SUB_APPS = [
     id: 'fkw',
     name: 'Free Kick World',
     image: '/apps/fkw-logo-square.webp',
-    status: 'live',
-    url: '/fkw/',
+    status: 'soon',
   },
   {
     id: 'sexta',
@@ -31,8 +30,8 @@ const SUB_APPS = [
 ];
 
 // Apps indisponíveis: continuam aparecendo na lista, mas clicar neles NÃO faz
-// nada (o usuário não consegue acessar Sexta-feira).
-const BLOQUEADOS = new Set(['sexta']);
+// nada (o usuário não consegue acessar Sexta-feira nem Free Kick World).
+const BLOQUEADOS = new Set(['sexta', 'fkw']);
 
 // minúsculas + sem acentos, para a busca casar "Projeto" com "projeto" etc.
 const normalize = (s) =>
@@ -110,9 +109,8 @@ export default function Search() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-                  // Sexta-feira está bloqueada: clicar não faz nada. Apps com
-                  // `url` (servidos fora do SPA, ex.: FKW) navegam direto pra
-                  // lá; os demais mandam o id no estado pro Home abrir.
+                  // Apps bloqueados (Sexta-feira, Free Kick World): clicar não
+                  // faz nada. Os demais mandam o id no estado pro Home abrir.
                   onClick={() => {
                     if (BLOQUEADOS.has(app.id)) return;
                     if (app.url) { window.location.href = app.url; return; }
