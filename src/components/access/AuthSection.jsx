@@ -297,6 +297,16 @@ export default function AuthSection({ onClose }) {
               </button>
             )}
 
+            {step === 'form' && mode === 'register' && (
+              <button
+                type="button"
+                onClick={() => reset('login')}
+                className="w-full text-xs text-gray-500 hover:text-gray-900 transition-colors pt-2 relative z-20 outline-none"
+              >
+                {t('Entrar')}
+              </button>
+            )}
+
             {mode === 'forgot' && (
               <button
                 type="button"
