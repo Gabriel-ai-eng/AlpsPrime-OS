@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   hasPaidAccess,
   signInWithPassword,
@@ -9,41 +9,7 @@ import {
   resetPasswordWithCode,
 } from '@/lib/auth';
 import { Mail, Lock, User, ChevronLeft, Loader2, KeyRound, Eye, EyeOff, ShoppingBag } from 'lucide-react';
-import { useT, useLang } from '@/lib/i18n';
-
-// Título "Entrar" com o E se transformando numa porta (abre sozinho alguns
-// segundos depois que a tela aparece, e volta a ser "E" em seguida). Só faz
-// sentido em PT — em EN o título vira "Sign in" e não começa com E.
-function EntrarDoorTitle() {
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const openTimer = setTimeout(() => setOpen(true), 2600);
-    return () => clearTimeout(openTimer);
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-    const closeTimer = setTimeout(() => setOpen(false), 2100);
-    return () => clearTimeout(closeTimer);
-  }, [open]);
-
-  return (
-    <h1 className="text-4xl font-bold text-gray-900 flex items-center justify-center">
-      <span className={`door-e ${open ? 'door-e--open' : ''}`} aria-hidden="true">
-        <svg viewBox="0 0 32 44" className="door-e__svg">
-          <rect className="door-e__top" x="2" y="2" width="24" height="8" rx="2" />
-          <rect className="door-e__mid" x="2" y="18" width="18" height="8" rx="2" />
-          <rect className="door-e__bottom" x="2" y="34" width="24" height="8" rx="2" />
-          <rect className="door-e__stem" x="2" y="2" width="8" height="40" rx="3" />
-          <circle className="door-e__knob" cx="17" cy="22" r="2.6" />
-        </svg>
-      </span>
-      <span aria-hidden="true">ntrar</span>
-      <span className="sr-only">Entrar</span>
-    </h1>
-  );
-}
+import { useT } from '@/lib/i18n';
 
 // Checkout da Hotmart (mesmo usado no Welcome/HotmartGate).
 const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
@@ -61,7 +27,6 @@ function msgErro(e) {
 
 export default function AuthSection({ onClose }) {
   const t = useT();
-  const { lang } = useLang();
   const [mode, setMode] = useState('login');
   const [step, setStep] = useState('form');
   const [email, setEmail] = useState('');
@@ -196,11 +161,7 @@ export default function AuthSection({ onClose }) {
       <div className="flex-1 flex flex-col justify-center w-full max-w-sm mx-auto">
         <div className="relative z-20">
           <div className="flex flex-col items-center mb-8">
-            {titulo === 'Entrar' && lang === 'pt' ? (
-              <EntrarDoorTitle />
-            ) : (
-              <h1 className="text-4xl font-bold text-gray-900">{t(titulo)}</h1>
-            )}
+            <h1 className="text-4xl font-bold text-gray-900">{t(titulo)}</h1>
             <p className="text-sm text-gray-500 mt-3 text-center">
               {t('Use o mesmo e-mail da sua compra na Hotmart.')}
             </p>
