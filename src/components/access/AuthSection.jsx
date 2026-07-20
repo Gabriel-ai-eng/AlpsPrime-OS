@@ -8,8 +8,7 @@ import {
   requestPasswordReset,
   resetPasswordWithCode,
 } from '@/lib/auth';
-import { Mail, Lock, User, ArrowLeft, Loader2, KeyRound, Eye, EyeOff, ShoppingBag } from 'lucide-react';
-import { LOGO_URL } from '@/lib/branding';
+import { Mail, Lock, User, ChevronLeft, Loader2, KeyRound, Eye, EyeOff, ShoppingBag } from 'lucide-react';
 import { useT } from '@/lib/i18n';
 
 // Checkout da Hotmart (mesmo usado no Welcome/HotmartGate).
@@ -131,9 +130,9 @@ export default function AuthSection({ onClose }) {
     : mode === 'forgot' ? (step === 'reset' ? 'Redefinir senha' : 'Enviar instruções')
     : mode === 'login' ? 'Entrar' : 'Criar conta';
 
-  // Inputs claros: fundo cinza bem suave, texto escuro, foco em dourado.
+  // Inputs claros: fundo cinza bem suave, texto escuro, foco neutro.
   const inputBase =
-    'w-full h-12 pl-11 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 outline-none focus:border-gold focus:bg-white focus:ring-2 focus:ring-gold/20 transition-all relative z-10 caret-gray-900 [&:-webkit-autofill]:[box-shadow:0_0_0_40px_#f9fafb_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]';
+    'w-full h-12 pl-11 rounded-2xl bg-gray-100 text-gray-900 placeholder-gray-400 outline-none focus:bg-white focus:ring-2 focus:ring-gray-900/10 transition-all relative z-10 caret-gray-900 [&:-webkit-autofill]:[box-shadow:0_0_0_40px_#f3f4f6_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]';
   const inputCls = `${inputBase} pr-3`;
   const inputPw = `${inputBase} pr-11`;
 
@@ -150,33 +149,33 @@ export default function AuthSection({ onClose }) {
   );
 
   return (
-    <div className="fixed inset-0 z-[100000] bg-white flex flex-col px-6 pt-6 pb-10 overflow-y-auto overflow-x-hidden">
+    <div className="fixed inset-0 z-[100000] bg-[#f5f5f7] flex flex-col px-6 pt-6 pb-10 overflow-y-auto overflow-x-hidden">
       <button
         onClick={onClose}
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors outline-none self-start"
+        aria-label={t('Voltar')}
+        className="w-11 h-11 rounded-full bg-white shadow-md flex items-center justify-center text-gray-900 hover:bg-gray-50 transition-colors outline-none self-start"
       >
-        <ArrowLeft className="w-4 h-4" /> {t('Voltar')}
+        <ChevronLeft className="w-5 h-5" />
       </button>
 
       <div className="flex-1 flex flex-col justify-center w-full max-w-sm mx-auto">
         <div className="relative z-20">
           <div className="flex flex-col items-center mb-8">
-            <img src={LOGO_URL} alt="Alps Prime" className="w-16 h-16 rounded-2xl object-cover shadow-md" />
-            <h1 className="mt-5 text-2xl font-semibold text-gray-900">{t(titulo)}</h1>
-            <p className="text-sm text-gray-500 mt-1.5 text-center">
+            <h1 className="text-4xl font-bold text-gray-900">{t(titulo)}</h1>
+            <p className="text-sm text-gray-500 mt-3 text-center">
               {t('Use o mesmo e-mail da sua compra na Hotmart.')}
             </p>
           </div>
 
           {step === 'form' && mode !== 'forgot' && (
-            <div className="flex p-1 mb-5 rounded-xl bg-gray-100 border border-gray-200 relative z-10">
+            <div className="flex p-1 mb-5 rounded-2xl bg-gray-100 relative z-10">
               {['login', 'register'].map((m) => (
                 <button
                   key={m}
                   type="button"
                   onClick={() => reset(m)}
-                  className={`flex-1 h-9 rounded-lg text-sm font-medium transition-all outline-none ${
-                    mode === m ? 'bg-white text-gold shadow-sm' : 'text-gray-500 hover:text-gray-900'
+                  className={`flex-1 h-9 rounded-xl text-sm font-medium transition-all outline-none ${
+                    mode === m ? 'bg-white text-gray-900 font-semibold shadow-sm' : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
                   {m === 'login' ? t('Entrar') : t('Criar conta')}
@@ -276,8 +275,8 @@ export default function AuthSection({ onClose }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-xl text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60 relative z-20 mt-2 outline-none"
-              style={{ background: 'linear-gradient(to right, #E8C77A, #C9A24F, #A8852E)' }}
+              className="w-full h-12 rounded-2xl text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60 relative z-20 mt-2 outline-none"
+              style={{ background: 'linear-gradient(180deg, #1a1d24, #000000)' }}
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {t(botao)}
