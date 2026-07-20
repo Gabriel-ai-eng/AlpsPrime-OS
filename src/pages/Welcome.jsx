@@ -267,6 +267,10 @@ export default function Welcome() {
             </Link>
           </div>
 
+          <div className="mt-5 flex justify-center">
+            <LanguagePicker />
+          </div>
+
           <p className="mt-4 text-[11px] text-black/30">© {new Date().getFullYear()} Alps OS</p>
         </div>
       </footer>
