@@ -22,12 +22,23 @@ const LANG_OPTIONS = [
 function LanguagePicker({ variant = 'light' }) {
   const { lang, setLang } = useLang();
   const [open, setOpen] = useState(false);
+  const wrapperRef = React.useRef(null);
   const current = LANG_OPTIONS.find((l) => l.id === lang) || LANG_OPTIONS[0];
   const dark = variant === 'dark';
 
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [open]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={wrapperRef}>
       <button
+        type="button"
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -43,42 +54,40 @@ function LanguagePicker({ variant = 'light' }) {
       </button>
 
       {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div
-            role="listbox"
-            className={
-              dark
-                ? 'absolute right-0 z-20 mt-2 min-w-[150px] overflow-hidden rounded-2xl border border-white/10 bg-black/95 p-1 shadow-xl backdrop-blur-xl'
-                : 'absolute right-0 z-20 mt-2 min-w-[150px] overflow-hidden rounded-2xl border border-black/10 bg-white p-1 shadow-xl'
-            }
-          >
-            {LANG_OPTIONS.map((l) => {
-              const active = lang === l.id;
-              return (
-                <button
-                  key={l.id}
-                  role="option"
-                  aria-selected={active}
-                  onClick={() => {
-                    setLang(l.id);
-                    setOpen(false);
-                  }}
-                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm transition ${
-                    active
-                      ? 'bg-black text-white'
-                      : dark
-                      ? 'text-white/75 hover:bg-white/10 hover:text-white'
-                      : 'text-black/75 hover:bg-black/[0.04] hover:text-black'
-                  }`}
-                >
-                  {l.label}
-                  {active && <Check className="h-3.5 w-3.5" />}
-                </button>
-              );
-            })}
-          </div>
-        </>
+        <div
+          role="listbox"
+          className={
+            dark
+              ? 'absolute right-0 z-20 mt-2 min-w-[150px] overflow-hidden rounded-2xl border border-white/10 bg-black/95 p-1 shadow-xl backdrop-blur-xl'
+              : 'absolute right-0 z-20 mt-2 min-w-[150px] overflow-hidden rounded-2xl border border-black/10 bg-white p-1 shadow-xl'
+          }
+        >
+          {LANG_OPTIONS.map((l) => {
+            const active = lang === l.id;
+            return (
+              <button
+                key={l.id}
+                type="button"
+                role="option"
+                aria-selected={active}
+                onClick={() => {
+                  setLang(l.id);
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm transition ${
+                  active
+                    ? 'bg-black text-white'
+                    : dark
+                    ? 'text-white/75 hover:bg-white/10 hover:text-white'
+                    : 'text-black/75 hover:bg-black/[0.04] hover:text-black'
+                }`}
+              >
+                {l.label}
+                {active && <Check className="h-3.5 w-3.5" />}
+              </button>
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -147,6 +156,7 @@ function FaqItem({ q, a }) {
 export default function Welcome() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [showAuth, setShowAuth] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const t = useT();
 
   useEffect(() => {
@@ -155,11 +165,22 @@ export default function Welcome() {
       .catch(() => setTotalUsers(0));
   }, []);
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   if (showAuth) return <AuthSection onClose={() => setShowAuth(false)} />;
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] text-black antialiased" style={{ fontFamily: "'Inter', 'SF Pro Display', 'SF Pro Text', sans-serif" }}>
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/85 backdrop-blur-xl">
+      <header
+        className={`sticky top-0 z-30 border-b border-white/10 transition-colors duration-300 ${
+          scrolled ? 'bg-black/85 backdrop-blur-xl' : 'bg-black/95'
+        }`}
+      >
         <div className="mx-auto flex max-w-6xl items-center px-5 py-3 sm:px-8">
           <div className="flex flex-1 justify-center pr-6 sm:pr-10">
             <img src={LOGO_MARK_URL} alt="Alps OS" className="h-10 w-auto object-contain sm:h-12" />
