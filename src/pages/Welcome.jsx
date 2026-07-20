@@ -6,21 +6,24 @@ import {
   ShoppingBag,
   ChevronDown,
   Languages,
+  Globe,
   Check,
   ArrowRight,
 } from 'lucide-react';
-import { LOGO_URL } from '@/lib/branding';
 import { useT, useLang } from '@/lib/i18n';
+
+const LOGO_MARK_URL = '/brand/logo-mark.webp';
 
 const LANG_OPTIONS = [
   { id: 'pt', label: 'Português' },
   { id: 'en', label: 'English' },
 ];
 
-function LanguagePicker() {
+function LanguagePicker({ variant = 'light' }) {
   const { lang, setLang } = useLang();
   const [open, setOpen] = useState(false);
   const current = LANG_OPTIONS.find((l) => l.id === lang) || LANG_OPTIONS[0];
+  const dark = variant === 'dark';
 
   return (
     <div className="relative">
@@ -28,9 +31,13 @@ function LanguagePicker() {
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-medium text-black/80 shadow-sm transition hover:border-black/20 hover:bg-black/[0.02] focus:outline-none focus:ring-2 focus:ring-black/10"
+        className={
+          dark
+            ? 'inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/20'
+            : 'inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-medium text-black/80 shadow-sm transition hover:border-black/20 hover:bg-black/[0.02] focus:outline-none focus:ring-2 focus:ring-black/10'
+        }
       >
-        <Languages className="h-3.5 w-3.5" />
+        {dark ? <Globe className="h-3.5 w-3.5" /> : <Languages className="h-3.5 w-3.5" />}
         <span>{current.label}</span>
         <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
@@ -40,7 +47,11 @@ function LanguagePicker() {
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div
             role="listbox"
-            className="absolute right-0 z-20 mt-2 min-w-[150px] overflow-hidden rounded-2xl border border-black/10 bg-white p-1 shadow-xl"
+            className={
+              dark
+                ? 'absolute right-0 z-20 mt-2 min-w-[150px] overflow-hidden rounded-2xl border border-white/10 bg-black/95 p-1 shadow-xl backdrop-blur-xl'
+                : 'absolute right-0 z-20 mt-2 min-w-[150px] overflow-hidden rounded-2xl border border-black/10 bg-white p-1 shadow-xl'
+            }
           >
             {LANG_OPTIONS.map((l) => {
               const active = lang === l.id;
@@ -54,7 +65,11 @@ function LanguagePicker() {
                     setOpen(false);
                   }}
                   className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm transition ${
-                    active ? 'bg-black text-white' : 'text-black/75 hover:bg-black/[0.04] hover:text-black'
+                    active
+                      ? 'bg-black text-white'
+                      : dark
+                      ? 'text-white/75 hover:bg-white/10 hover:text-white'
+                      : 'text-black/75 hover:bg-black/[0.04] hover:text-black'
                   }`}
                 >
                   {l.label}
@@ -144,21 +159,16 @@ export default function Welcome() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] text-black antialiased" style={{ fontFamily: "'Inter', 'SF Pro Display', 'SF Pro Text', sans-serif" }}>
-      <header className="sticky top-0 z-30 border-b border-black/5 bg-[#f5f5f7]/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-          <div className="flex items-center gap-3">
-            <img src={LOGO_URL} alt="Alps OS" className="h-8 w-8 rounded-xl object-cover" />
-            <div className="leading-tight">
-              <p className="text-sm font-semibold tracking-tight">Alps OS</p>
-              <p className="text-[11px] text-black/45">{t('Um ecossistema, um login')}</p>
-            </div>
-          </div>
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/95 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-8">
+          <img src={LOGO_MARK_URL} alt="Alps OS" className="h-10 w-auto object-contain sm:h-12" />
 
-          <div className="flex items-center gap-2.5">
-            <LanguagePicker />
+          <div className="flex items-center gap-3.5">
+            <div className="h-6 w-px bg-white/15" />
+            <LanguagePicker variant="dark" />
             <button
               onClick={() => setShowAuth(true)}
-              className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-black/85 focus:outline-none focus:ring-2 focus:ring-black/10"
+              className="rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white/20"
             >
               {t('Entrar')}
             </button>
