@@ -162,6 +162,9 @@ export default function AuthSection({ onClose }) {
         <div className="relative z-20">
           <div className="flex flex-col items-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900">{t(titulo)}</h1>
+            <p className="text-sm text-gray-500 mt-3 text-center">
+              {t('Use o mesmo e-mail da sua compra na Hotmart.')}
+            </p>
           </div>
 
           <form onSubmit={submit} className="space-y-3 relative z-10">
