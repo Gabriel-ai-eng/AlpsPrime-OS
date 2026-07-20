@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import AuthSection from '@/components/access/AuthSection';
-import { motion } from 'framer-motion';
 import {
   ShoppingBag,
   ChevronDown,
-  ChevronRight,
   Languages,
   Check,
   ArrowRight,
@@ -169,63 +167,40 @@ export default function Welcome() {
       </header>
 
       <main>
-        {/* VITRINE DE PRODUTOS — estilo apple.com: cada jogo é um produto */}
-        {PRODUTOS.map((p, i) => (
-          <section
-            key={p.id}
-            className={`${i % 2 === 0 ? 'bg-[#fbfbfd]' : 'bg-white'} px-5 py-16 sm:py-20`}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.55 }}
-              className="mx-auto max-w-3xl text-center"
-            >
-              <p className="text-sm font-medium text-black/50">{t(p.eyebrow)}</p>
-              <h2 className="mt-1 text-4xl font-semibold tracking-tight sm:text-6xl">{p.titulo}</h2>
-              <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-black/60">{t(p.subtitulo)}</p>
-
-              <div className="mt-6 flex items-center justify-center gap-5">
-                {p.disponivel ? (
-                  <>
-                    <button
-                      onClick={() => setShowAuth(true)}
-                      className="rounded-full bg-[#0071e3] px-6 py-2.5 text-[15px] font-medium text-white transition hover:scale-[1.02] hover:bg-[#0077ed] focus:outline-none focus:ring-2 focus:ring-[#0071e3]/30"
-                    >
-                      {t('Jogar')}
-                    </button>
-                    <a
-                      href="#acesso"
-                      className="inline-flex items-center gap-1 text-[15px] font-medium text-[#0071e3] transition hover:underline"
-                    >
-                      {t('Saiba mais')}
-                      <ChevronRight className="h-4 w-4" />
-                    </a>
-                  </>
-                ) : (
-                  <span className="inline-flex items-center rounded-full border border-black/10 bg-black/[0.04] px-5 py-2 text-[15px] font-medium text-black/50">
-                    {t('Em breve')}
-                  </span>
-                )}
-              </div>
-
-              <div
-                className={`mx-auto mt-10 overflow-hidden rounded-[28px] bg-black shadow-[0_20px_60px_rgba(0,0,0,0.14)] ${
-                  p.quadrado ? 'max-w-md' : 'max-w-3xl'
-                }`}
-              >
+        {/* VITRINE — imagens dos jogos em tela cheia, empilhadas logo abaixo do
+            cabeçalho (a arte já traz o nome do jogo embutido). O jogo disponível
+            abre o login ao ser tocado; o "Em breve" fica apenas como imagem. */}
+        <section className="bg-[#f5f5f7]">
+          <div className="flex flex-col gap-2">
+            {PRODUTOS.map((p) =>
+              p.disponivel ? (
+                <button
+                  key={p.id}
+                  onClick={() => setShowAuth(true)}
+                  aria-label={p.titulo}
+                  className="block w-full bg-black focus:outline-none focus:ring-2 focus:ring-inset focus:ring-black/20"
+                >
+                  <img
+                    src={p.img}
+                    alt={p.titulo}
+                    loading="lazy"
+                    decoding="async"
+                    className={`w-full object-cover ${p.quadrado ? 'aspect-square' : ''}`}
+                  />
+                </button>
+              ) : (
                 <img
+                  key={p.id}
                   src={p.img}
                   alt={p.titulo}
                   loading="lazy"
                   decoding="async"
-                  className={`w-full object-cover ${p.quadrado ? 'aspect-square' : ''}`}
+                  className={`block w-full bg-black object-cover ${p.quadrado ? 'aspect-square' : ''}`}
                 />
-              </div>
-            </motion.div>
-          </section>
-        ))}
+              )
+            )}
+          </div>
+        </section>
 
         {/* ACESSO — mantém a função de venda/login da tela de entrada */}
         <section id="acesso" className="scroll-mt-24 bg-[#f5f5f7] px-5 py-16 sm:py-24">
