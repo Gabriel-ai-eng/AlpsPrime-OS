@@ -162,27 +162,7 @@ export default function AuthSection({ onClose }) {
         <div className="relative z-20">
           <div className="flex flex-col items-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900">{t(titulo)}</h1>
-            <p className="text-sm text-gray-500 mt-3 text-center">
-              {t('Use o mesmo e-mail da sua compra na Hotmart.')}
-            </p>
           </div>
-
-          {step === 'form' && mode !== 'forgot' && (
-            <div className="flex p-1 mb-5 rounded-2xl bg-gray-100 relative z-10">
-              {['login', 'register'].map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => reset(m)}
-                  className={`flex-1 h-9 rounded-xl text-sm font-medium transition-all outline-none ${
-                    mode === m ? 'bg-white text-gray-900 font-semibold shadow-sm' : 'text-gray-500 hover:text-gray-900'
-                  }`}
-                >
-                  {m === 'login' ? t('Entrar') : t('Criar conta')}
-                </button>
-              ))}
-            </div>
-          )}
 
           <form onSubmit={submit} className="space-y-3 relative z-10">
             {step === 'form' && mode === 'register' && (
@@ -301,6 +281,16 @@ export default function AuthSection({ onClose }) {
                 className="w-full text-xs text-gray-500 hover:text-gray-900 transition-colors pt-2 relative z-20 outline-none"
               >
                 {t('Esqueci minha senha')}
+              </button>
+            )}
+
+            {step === 'form' && mode === 'login' && (
+              <button
+                type="button"
+                onClick={() => reset('register')}
+                className="w-full text-xs text-gray-500 hover:text-gray-900 transition-colors pt-2 relative z-20 outline-none"
+              >
+                {t('Criar conta')}
               </button>
             )}
 
