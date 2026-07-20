@@ -159,9 +159,11 @@ export default function Welcome() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] text-black antialiased" style={{ fontFamily: "'Inter', 'SF Pro Display', 'SF Pro Text', sans-serif" }}>
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-8">
-          <img src={LOGO_MARK_URL} alt="Alps OS" className="h-10 w-auto object-contain sm:h-12" />
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/60 backdrop-blur-xl backdrop-saturate-150">
+        <div className="mx-auto flex max-w-6xl items-center px-5 py-3 sm:px-8">
+          <div className="flex flex-1 justify-center">
+            <img src={LOGO_MARK_URL} alt="Alps OS" className="h-10 w-auto object-contain sm:h-12" />
+          </div>
 
           <div className="flex items-center gap-3.5">
             <div className="h-6 w-px bg-white/15" />
