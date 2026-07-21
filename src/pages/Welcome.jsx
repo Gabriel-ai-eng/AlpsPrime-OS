@@ -341,7 +341,7 @@ export default function Welcome() {
                       decoding="async"
                       className="block w-full object-cover"
                     />
-                    <span className="absolute left-1/2 top-[9%] -translate-x-1/2 rounded-full bg-black px-10 py-3.5 text-lg text-white sm:px-12 sm:py-4 sm:text-xl">
+                    <span className="absolute left-1/2 top-[13%] -translate-x-1/2 rounded-full bg-black px-10 py-3.5 text-lg text-white sm:px-12 sm:py-4 sm:text-xl">
                       {t('Em breve')}
                     </span>
                   </div>
