@@ -135,16 +135,16 @@ function FaqItem({ q, a }) {
   const t = useT();
 
   return (
-    <button
-      onClick={() => setOpen((o) => !o)}
-      className="w-full rounded-2xl border border-black/10 bg-white px-5 py-4 text-left transition hover:bg-black/[0.02] focus:outline-none focus:ring-2 focus:ring-black/10"
-    >
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-sm font-medium text-black">{t(q)}</span>
-        <ChevronDown className={`h-4 w-4 flex-shrink-0 text-black/50 transition-transform ${open ? 'rotate-180' : ''}`} />
-      </div>
-      {open && <p className="mt-3 text-sm leading-relaxed text-black/65">{t(a)}</p>}
-    </button>
+    <div className="border-b border-black/10">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between gap-4 py-4 text-left transition hover:text-black focus:outline-none"
+      >
+        <span className="text-sm text-black/70">{t(q)}</span>
+        <ChevronDown className={`h-4 w-4 flex-shrink-0 text-black/40 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && <p className="pb-4 text-sm leading-relaxed text-black/55">{t(a)}</p>}
+    </div>
   );
 }
 
@@ -223,11 +223,11 @@ export default function Welcome() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-3xl px-5 pt-16 pb-16 sm:pt-24 sm:pb-24">
-          <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
+        <section className="mx-auto max-w-2xl px-5 pt-16 pb-16 sm:pt-24 sm:pb-24">
+          <h2 className="text-center text-base font-medium text-black/50">
             {t('Perguntas frequentes')}
           </h2>
-          <div className="mt-8 space-y-3">
+          <div className="mt-6 border-t border-black/10">
             {FAQ.map((item) => <FaqItem key={item.q} {...item} />)}
           </div>
         </section>
