@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import AuthSection from '@/components/access/AuthSection';
 import {
@@ -157,9 +157,103 @@ function FaqItem({ q, a }) {
   );
 }
 
+// Ícones que rodopiam ao redor do wordmark "Alps OS" no topo do site, tipo um
+// "tornado": cada um orbita num raio/velocidade levemente diferente e ganha
+// escala/opacidade conforme passa na frente (profundidade simulada via seno
+// do ângulo). A velocidade acompanha o scroll — em vez de saltar direto pro
+// alvo, ela é amortecida (lerp) quadro a quadro, então a desaceleração fica
+// suave em vez de travar de uma vez.
+const ORBIT_ICONS = [
+  { id: 'sexta', src: '/apps/sexta-logo-square.webp', radius: 0.15, ellipse: 0.32, speed: 1, phase: 0 },
+  { id: 'fkw', src: '/apps/fkw-logo-square.webp', radius: 0.2, ellipse: 0.32, speed: 0.82, phase: 120 },
+  { id: 'armor', src: '/apps/armor-logo-square.webp', radius: 0.175, ellipse: 0.32, speed: 1.18, phase: 240 },
+];
+
+const ORBIT_SCROLL_RANGE = 220; // px de scroll até a órbita parar de vez
+const ORBIT_BASE_SPEED = 26; // graus/seg no topo da página
+
+function OrbitIcons({ stageRef }) {
+  const iconRefs = useRef([]);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const scrollRef = { current: 0 };
+
+    const applyFrame = (angleBase, width) => {
+      ORBIT_ICONS.forEach((cfg, i) => {
+        const el = iconRefs.current[i];
+        if (!el) return;
+        const angDeg = angleBase * cfg.speed + cfg.phase;
+        const ang = (angDeg * Math.PI) / 180;
+        const depth = Math.sin(ang); // -1 = atrás do texto, 1 = na frente
+        const x = Math.cos(ang) * cfg.radius * width;
+        const y = depth * cfg.ellipse * cfg.radius * width;
+        const scale = 0.72 + (depth + 1) * 0.19;
+        const opacity = 0.5 + (depth + 1) * 0.25;
+        el.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${scale})`;
+        el.style.opacity = String(opacity);
+        el.style.zIndex = depth >= 0 ? '20' : '5';
+      });
+    };
+
+    const onScroll = () => {
+      scrollRef.current = Math.min(1, Math.max(0, window.scrollY / ORBIT_SCROLL_RANGE));
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    if (reduceMotion) {
+      applyFrame(0, stageRef.current?.clientWidth || 0);
+      return () => window.removeEventListener('scroll', onScroll);
+    }
+
+    let raf;
+    let lastT = performance.now();
+    let angle = 0;
+    let speed = ORBIT_BASE_SPEED;
+
+    const tick = (t) => {
+      const dt = Math.min(0.05, (t - lastT) / 1000);
+      lastT = t;
+
+      const eased = 1 - scrollRef.current * scrollRef.current; // desacelera suave até 0
+      const targetSpeed = ORBIT_BASE_SPEED * Math.max(0, eased);
+      speed += (targetSpeed - speed) * Math.min(1, dt * 2.4);
+      angle = (angle + speed * dt) % 360;
+
+      applyFrame(angle, stageRef.current?.clientWidth || 0);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, [stageRef]);
+
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      {ORBIT_ICONS.map((cfg, i) => (
+        <img
+          key={cfg.id}
+          ref={(el) => (iconRefs.current[i] = el)}
+          src={cfg.src}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="absolute left-1/2 top-[37.5%] h-11 w-11 sm:h-14 sm:w-14 md:h-16 md:w-16"
+          style={{ willChange: 'transform, opacity', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.35))' }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function Welcome() {
   const [showAuth, setShowAuth] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const alpsStageRef = useRef(null);
   const t = useT();
 
   useEffect(() => {
@@ -202,8 +296,23 @@ export default function Welcome() {
             abre o login ao ser tocado; o "Em breve" fica apenas como imagem. */}
         <section className="bg-[#f5f5f7]">
           <div className="flex flex-col gap-2">
-            {PRODUTOS.map((p) =>
-              p.disponivel ? (
+            {PRODUTOS.map((p) => {
+              if (p.id === 'alpsos') {
+                return (
+                  <div key={p.id} ref={alpsStageRef} className="relative block w-full bg-black">
+                    <img
+                      src={p.img}
+                      alt={p.titulo}
+                      loading="lazy"
+                      decoding="async"
+                      className="block w-full object-cover"
+                    />
+                    <OrbitIcons stageRef={alpsStageRef} />
+                  </div>
+                );
+              }
+
+              return p.disponivel ? (
                 <button
                   key={p.id}
                   onClick={() => setShowAuth(true)}
@@ -227,8 +336,8 @@ export default function Welcome() {
                   decoding="async"
                   className={`block w-full bg-black object-cover ${p.quadrado ? 'aspect-square' : ''}`}
                 />
-              )
-            )}
+              );
+            })}
           </div>
         </section>
 
