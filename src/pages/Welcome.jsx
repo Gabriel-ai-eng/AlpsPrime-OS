@@ -219,7 +219,11 @@ function OrbitIcons({ stageRef }) {
       const eased = 1 - scrollRef.current * scrollRef.current; // desacelera suave até 0
       const targetSpeed = ORBIT_BASE_SPEED * Math.max(0, eased);
       speed += (targetSpeed - speed) * Math.min(1, dt * 2.4);
-      angle = (angle + speed * dt) % 360;
+      // Sem módulo aqui: os ícones giram em velocidades diferentes (speed
+      // multiplicado por cfg.speed), então "enrolar" esse ângulo base a cada
+      // 360° quebra a continuidade de quem não gira a 1x — cada um pularia
+      // pra um ponto diferente da própria órbita a cada volta da base.
+      angle += speed * dt;
 
       applyFrame(angle, stageRef.current?.clientWidth || 0);
       raf = requestAnimationFrame(tick);
