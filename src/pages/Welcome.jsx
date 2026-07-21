@@ -11,6 +11,9 @@ import { useT, useLang } from '@/lib/i18n';
 
 const LOGO_MARK_URL = '/brand/logo-mark.webp';
 
+// Checkout da Hotmart (mesmo usado no AuthSection/HotmartGate).
+const HOTMART_CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
+
 const LANG_OPTIONS = [
   { id: 'pt', label: 'Português' },
   { id: 'en', label: 'English' },
@@ -312,6 +315,15 @@ export default function Welcome() {
                       className="block w-full object-cover"
                     />
                     <OrbitIcons stageRef={alpsStageRef} />
+                    <a
+                      href={HOTMART_CHECKOUT_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute left-1/2 top-[79%] -translate-x-1/2 rounded-full px-10 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:opacity-90 sm:px-12 sm:py-4 sm:text-base"
+                      style={{ backgroundColor: '#0071e3' }}
+                    >
+                      {t('Garantir agora')}
+                    </a>
                   </div>
                 );
               }
