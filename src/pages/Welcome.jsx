@@ -246,7 +246,7 @@ function OrbitIcons({ stageRef }) {
           alt=""
           loading="lazy"
           decoding="async"
-          className="absolute left-1/2 top-[37.5%] h-11 w-11 sm:h-14 sm:w-14 md:h-16 md:w-16"
+          className="absolute left-1/2 top-[27%] h-11 w-11 sm:h-14 sm:w-14 md:h-16 md:w-16"
           style={{ willChange: 'transform, opacity', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.35))' }}
         />
       ))}
