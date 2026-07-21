@@ -315,15 +315,18 @@ export default function Welcome() {
                       className="block w-full object-cover"
                     />
                     <OrbitIcons stageRef={alpsStageRef} />
-                    <a
-                      href={HOTMART_CHECKOUT_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute left-1/2 top-[79%] -translate-x-1/2 rounded-full px-10 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:opacity-90 sm:px-12 sm:py-4 sm:text-base"
-                      style={{ backgroundColor: '#0071e3' }}
-                    >
-                      {t('Garantir agora')}
-                    </a>
+                    <div className="absolute left-1/2 top-[72%] flex -translate-x-1/2 flex-col items-center gap-3">
+                      <p className="text-sm text-black sm:text-base">{t('Um toque. Um mundo.')}</p>
+                      <a
+                        href={HOTMART_CHECKOUT_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-full border-2 px-10 py-3.5 text-sm text-[#0071e3] transition hover:opacity-80 sm:px-12 sm:py-4 sm:text-base"
+                        style={{ borderColor: '#0071e3' }}
+                      >
+                        {t('Garantir agora')}
+                      </a>
+                    </div>
                   </div>
                 );
               }
