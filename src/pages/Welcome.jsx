@@ -223,7 +223,7 @@ export default function Welcome() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-2xl px-5 pt-16 pb-16 sm:pt-24 sm:pb-24">
+        <section className="mx-auto max-w-2xl px-5 pt-32 pb-8 sm:pt-48 sm:pb-12">
           <h2 className="text-center text-base font-medium text-black/50">
             {t('Perguntas frequentes')}
           </h2>
