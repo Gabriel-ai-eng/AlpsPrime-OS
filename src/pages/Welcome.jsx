@@ -96,6 +96,15 @@ function LanguagePicker({ variant = 'light' }) {
 // acesso está bloqueado no momento.
 const PRODUTOS = [
   {
+    id: 'alpsos',
+    eyebrow: 'Alps OS',
+    titulo: 'Alps OS',
+    subtitulo: 'O ecossistema Alps Prime.',
+    img: '/apps/alpsos-hero.webp',
+    quadrado: false,
+    disponivel: false,
+  },
+  {
     id: 'armor',
     eyebrow: 'Jogo de ação',
     titulo: 'Projeto Armor',
