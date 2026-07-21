@@ -164,9 +164,9 @@ function FaqItem({ q, a }) {
 // alvo, ela é amortecida (lerp) quadro a quadro, então a desaceleração fica
 // suave em vez de travar de uma vez.
 const ORBIT_ICONS = [
-  { id: 'sexta', src: '/apps/sexta-logo-square.webp', radius: 0.15, ellipse: 0.32, speed: 1, phase: 0 },
-  { id: 'fkw', src: '/apps/fkw-logo-square.webp', radius: 0.2, ellipse: 0.32, speed: 0.82, phase: 120 },
-  { id: 'armor', src: '/apps/armor-logo-square.webp', radius: 0.175, ellipse: 0.32, speed: 1.18, phase: 240 },
+  { id: 'sexta', src: '/apps/sexta-logo-square.webp', radius: 0.36, ellipse: 0.58, speed: 1, phase: 0 },
+  { id: 'fkw', src: '/apps/fkw-logo-square.webp', radius: 0.4, ellipse: 0.58, speed: 0.82, phase: 120 },
+  { id: 'armor', src: '/apps/armor-logo-square.webp', radius: 0.385, ellipse: 0.58, speed: 1.18, phase: 240 },
 ];
 
 const ORBIT_SCROLL_RANGE = 220; // px de scroll até a órbita parar de vez
