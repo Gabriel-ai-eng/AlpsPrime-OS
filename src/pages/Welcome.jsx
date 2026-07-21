@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
 import AuthSection from '@/components/access/AuthSection';
 import {
-  ShoppingBag,
   ChevronDown,
   Languages,
   Globe,
   Check,
-  ArrowRight,
 } from 'lucide-react';
 import { useT, useLang } from '@/lib/i18n';
 
@@ -93,8 +90,6 @@ function LanguagePicker({ variant = 'light' }) {
   );
 }
 
-const CHECKOUT_URL = 'https://pay.hotmart.com/G105845926J?checkoutMode=2&off=ncqx25bh';
-
 // Vitrine no estilo apple.com: cada jogo é um "produto" numa seção própria,
 // com nome grande, uma frase e a arte embaixo. `disponivel: false` mostra o
 // selo "Em breve" (sem botão de jogar) — é o caso do Free Kick World, cujo
@@ -154,16 +149,9 @@ function FaqItem({ q, a }) {
 }
 
 export default function Welcome() {
-  const [totalUsers, setTotalUsers] = useState(0);
   const [showAuth, setShowAuth] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const t = useT();
-
-  useEffect(() => {
-    base44.functions.invoke('getUsersCount', {})
-      .then((r) => setTotalUsers(r?.data?.count || 0))
-      .catch(() => setTotalUsers(0));
-  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -235,44 +223,7 @@ export default function Welcome() {
           </div>
         </section>
 
-        {/* ACESSO — mantém a função de venda/login da tela de entrada */}
-        <section id="acesso" className="scroll-mt-24 bg-[#f5f5f7] px-5 py-16 sm:py-24">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="mb-3 text-sm font-medium text-black/50">{t('Novo acesso disponível')}</p>
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              {t('Um acesso. Todo o ecossistema.')}
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-black/60">
-              {t('Uma entrada única para explorar o ecossistema Alps com mais clareza, rapidez e consistência.')}
-            </p>
-
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a
-                href={CHECKOUT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-black px-7 text-sm font-medium text-white transition hover:scale-[1.02] hover:bg-black/90 focus:outline-none focus:ring-2 focus:ring-black/10"
-              >
-                <ShoppingBag className="h-4 w-4" />
-                {t('Garantir acesso')}
-              </a>
-
-              <button
-                onClick={() => setShowAuth(true)}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-7 text-sm font-medium text-black/80 transition hover:border-black/20 hover:bg-black/[0.02] focus:outline-none focus:ring-2 focus:ring-black/10"
-              >
-                {t('Já sou cliente')}
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-
-            <p className="mt-6 text-xs text-black/40">
-              {totalUsers > 0 ? `${totalUsers.toLocaleString('pt-BR')} ${t('usuários já acessaram essa experiência.')}` : t('Acesso direto e simples.')}
-            </p>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-3xl px-5 pb-16 sm:pb-24">
+        <section className="mx-auto max-w-3xl px-5 pt-16 pb-16 sm:pt-24 sm:pb-24">
           <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
             {t('Perguntas frequentes')}
           </h2>
