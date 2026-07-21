@@ -331,6 +331,23 @@ export default function Welcome() {
                 );
               }
 
+              if (p.id === 'fkw') {
+                return (
+                  <div key={p.id} className="relative block w-full bg-black">
+                    <img
+                      src={p.img}
+                      alt={p.titulo}
+                      loading="lazy"
+                      decoding="async"
+                      className="block w-full object-cover"
+                    />
+                    <span className="absolute left-1/2 top-[20%] -translate-x-1/2 rounded-full px-10 py-3.5 text-sm text-white sm:px-12 sm:py-4 sm:text-base" style={{ backgroundColor: '#0071e3' }}>
+                      {t('Em breve')}
+                    </span>
+                  </div>
+                );
+              }
+
               return p.disponivel ? (
                 <button
                   key={p.id}
