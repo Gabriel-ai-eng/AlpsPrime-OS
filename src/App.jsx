@@ -8,6 +8,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { LanguageProvider } from '@/lib/i18n';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Sempre no bundle inicial: casca do app, tela de entrada e o Home (destino
 // principal). As demais páginas carregam SOB DEMANDA (React.lazy) — o JS
@@ -163,17 +164,19 @@ const AuthenticatedApp = () => {
 
 function App() {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <QueryClientProvider client={queryClientInstance}>
-          <Router>
-            <AuthenticatedApp />
-          </Router>
-          <Toaster />
-          <SonnerToaster theme="dark" position="top-right" />
-        </QueryClientProvider>
-      </AuthProvider>
-    </LanguageProvider>
+    <ErrorBoundary>
+      <LanguageProvider>
+        <AuthProvider>
+          <QueryClientProvider client={queryClientInstance}>
+            <Router>
+              <AuthenticatedApp />
+            </Router>
+            <Toaster />
+            <SonnerToaster theme="dark" position="top-right" />
+          </QueryClientProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </ErrorBoundary>
   );
 }
 
