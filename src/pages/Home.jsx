@@ -21,6 +21,7 @@ const LoadingScreen = () => (
 
 const SLIDES = [
   { id: 'alps', bg: null, titulo: true },
+  { id: 'branco', bg: '#FFFFFF', titulo: false, img: '/apps/fkw-bg-v2.jpg' },
 ];
 
 const TOTAL = SLIDES.length;
@@ -160,6 +161,15 @@ export default function Home() {
                         src="/apps/alps-os-bg.jpg"
                         cacheKey="alps_slide"
                         alt="Alps OS"
+                        decoding="async"
+                        className="w-full h-full object-cover select-none"
+                      />
+                    )}
+                    {slide.img && (
+                      <CachedImage
+                        src={slide.img}
+                        cacheKey="fkw_slide"
+                        alt="Free Kick World"
                         decoding="async"
                         className="w-full h-full object-cover select-none"
                       />
