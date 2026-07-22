@@ -5,6 +5,24 @@ import { useT } from '@/lib/i18n';
 import { useFavorites } from '@/lib/useFavorites';
 import { APPS, BLOQUEADOS } from '@/lib/apps';
 
+// Ícone de cronômetro (selo "em breve") recriado em SVG — corpo sólido,
+// coroa no topo, botão lateral e o mostrador em forma de "fatia" (ponteiro
+// varrendo do topo até por volta das 10h) com o pivô central, igual ao
+// ícone de referência.
+function TimerIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none">
+      <rect x="8.25" y="2" width="7.5" height="3.6" rx="1.8" fill="currentColor" />
+      <g transform="rotate(45 18 7.2)">
+        <rect x="14.7" y="5.5" width="6.6" height="3.4" rx="1.7" fill="currentColor" />
+      </g>
+      <circle cx="12" cy="13.8" r="8.8" fill="currentColor" />
+      <path d="M12,13.8 L12,5 A8.8,8.8 0 0,0 4.81,9.65 Z" className="fill-black/60" />
+      <circle cx="12" cy="13.8" r="2.3" className="fill-black/60" />
+    </svg>
+  );
+}
+
 // Filtros de categoria — "Todos" mostra tudo; "Em breve" mostra os ainda não
 // lançados; os demais filtram por tipo.
 const FILTROS = [
@@ -193,13 +211,6 @@ export default function Categorias() {
                   ? 'relative w-20 self-stretch flex-shrink-0'
                   : 'relative w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 bg-white overflow-hidden'}>
                   <img src={app.logo} alt={app.nome} className={`w-full h-full ${hero ? 'object-cover' : 'object-contain'}`} decoding="async" fetchpriority="high" />
-                  {/* Nos cards "hero" o selo fica sobre a arte (não empurra o
-                      texto), assim o card não cresce em relação aos demais. */}
-                  {hero && app.status === 'soon' && (
-                    <span className="absolute top-2 left-2 text-[8px] font-semibold uppercase tracking-wider text-gold bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded-full leading-none">
-                      {t('Em breve')}
-                    </span>
-                  )}
                 </div>
                 <div className={`flex-1 min-w-0 ${hero ? 'py-4 pr-14' : 'pr-10'}`}>
                   <div className="flex items-center gap-2 mb-0.5">
@@ -220,6 +231,11 @@ export default function Categorias() {
                 >
                   <Star className={`w-4 h-4 ${isFavorite(app.id) ? 'text-gold fill-gold' : hero ? 'text-white' : 'text-muted-foreground'}`} />
                 </button>
+                {hero && app.status === 'soon' && (
+                  <span className="absolute top-[50px] right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <TimerIcon className="w-4 h-4 text-white" />
+                  </span>
+                )}
               </div>
             );
           })
