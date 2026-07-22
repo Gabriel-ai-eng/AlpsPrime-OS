@@ -302,7 +302,7 @@ export default function Welcome() {
             cabeçalho (a arte já traz o nome do jogo embutido). O jogo disponível
             abre o login ao ser tocado; o "Em breve" fica apenas como imagem. */}
         <section className="bg-[#f5f5f7]">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-5">
             {PRODUTOS.map((p) => {
               if (p.id === 'alpsos') {
                 return (
