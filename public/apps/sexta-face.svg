@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 941 1672" width="941" height="1672">
+  <defs>
+    <!-- Fundo: campo creme quente com luz vinda do topo -->
+    <linearGradient id="bgBase" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6f2ec"/>
+      <stop offset="0.5" stop-color="#efe9e3"/>
+      <stop offset="0.72" stop-color="#f1ebe4"/>
+      <stop offset="1" stop-color="#eae4df"/>
+    </linearGradient>
+    <radialGradient id="topGlow" cx="0.5" cy="0.04" r="0.75">
+      <stop offset="0" stop-color="#fffdf7" stop-opacity="0.95"/>
+      <stop offset="0.35" stop-color="#fbf5ec" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#fbf5ec" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="edgeVignette" cx="0.5" cy="0.5" r="0.75">
+      <stop offset="0.62" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#cabfad" stop-opacity="0.10"/>
+    </radialGradient>
+    <!-- Faixa de luz do horizonte -->
+    <radialGradient id="horizonGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff7ea" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#fff7ea" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Cor quente do tubo de neon do rosto -->
+    <linearGradient id="ringGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffef9"/>
+      <stop offset="0.5" stop-color="#f7e4cc"/>
+      <stop offset="1" stop-color="#f0d6b8"/>
+    </linearGradient>
+
+    <!-- Halo difuso do neon -->
+    <filter id="haloBig" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <filter id="haloSoft" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="3.2"/>
+    </filter>
+    <filter id="blurLine" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+
+    <radialGradient id="eyeFill" cx="0.5" cy="0.42" r="0.7">
+      <stop offset="0" stop-color="#fffdf8"/>
+      <stop offset="0.7" stop-color="#f6efe6"/>
+      <stop offset="1" stop-color="#efe6da"/>
+    </radialGradient>
+  </defs>
+
+  <!-- ===== FUNDO ===== -->
+  <rect width="941" height="1672" fill="url(#bgBase)"/>
+  <rect width="941" height="1672" fill="url(#topGlow)"/>
+  <!-- faixa de luz no horizonte / reflexo do piso -->
+  <ellipse cx="470" cy="1200" rx="430" ry="46" fill="url(#horizonGlow)" filter="url(#blurLine)"/>
+  <rect x="120" y="1196" width="700" height="6" rx="3" fill="#fff8ec" opacity="0.5" filter="url(#haloSoft)"/>
+  <rect width="941" height="1672" fill="url(#edgeVignette)"/>
+
+  <!-- ===== ROSTO (neon quente) ===== -->
+  <!-- HALO difuso (camada de brilho) -->
+  <g filter="url(#haloBig)" opacity="0.42" fill="none" stroke="#edcca2" stroke-linecap="round">
+    <circle cx="470" cy="813" r="193" stroke-width="11"/>
+    <ellipse cx="398" cy="780" rx="25" ry="40" stroke-width="7"/>
+    <path d="M 506 795 Q 546 753 586 794" stroke-width="9"/>
+    <path d="M 393 882 Q 473 952 545 886" stroke-width="9"/>
+  </g>
+
+  <!-- CAMADA MÉDIA (dourada suave) -->
+  <g filter="url(#haloSoft)" fill="none" stroke="url(#ringGold)" stroke-linecap="round">
+    <circle cx="470" cy="813" r="193" stroke-width="5.5"/>
+    <ellipse cx="398" cy="780" rx="25" ry="40" fill="url(#eyeFill)" stroke-width="4"/>
+    <path d="M 506 795 Q 546 753 586 794" stroke-width="4.6"/>
+    <path d="M 393 882 Q 473 952 545 886" stroke-width="4.6"/>
+  </g>
+
+  <!-- NÚCLEO nítido (branco-quente) -->
+  <g fill="none" stroke="#fffdf6" stroke-linecap="round" opacity="0.95">
+    <circle cx="470" cy="813" r="193" stroke-width="2.4"/>
+    <ellipse cx="398" cy="780" rx="25" ry="40" stroke-width="1.8"/>
+    <path d="M 506 795 Q 546 753 586 794" stroke-width="2.2"/>
+    <path d="M 393 882 Q 473 952 545 886" stroke-width="2.2"/>
+  </g>
+</svg>
