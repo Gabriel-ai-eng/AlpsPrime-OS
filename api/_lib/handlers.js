@@ -161,6 +161,70 @@ export const handlers = {
     return { url, revised_prompt: data?.data?.[0]?.revised_prompt || prompt };
   },
 
+  // --- Sexta-feira: cérebro (OpenRouter) e voz (Google Cloud TTS) ---
+  // As chaves ficam só aqui no servidor (env vars OpenRouter / GoogleCloudTTS
+  // na Vercel) — nunca chegam ao navegador do usuário.
+  async sextaChat({ body }) {
+    const { mensagens } = body || {};
+    if (!Array.isArray(mensagens) || !mensagens.length) {
+      const e = new Error('mensagens is required (array)'); e.status = 400; throw e;
+    }
+    const apiKey = process.env.OpenRouter;
+    if (!apiKey) { const e = new Error('OpenRouter not configured'); e.status = 500; throw e; }
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://alpsprime.com.br',
+        'X-Title': 'Alps OS - Sexta-feira',
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-3.3-70b-instruct',
+        provider: { sort: 'throughput' }, // prioriza o provedor mais rápido disponível
+        messages: mensagens,
+        max_tokens: 220,
+        temperature: 0.85,
+      }),
+    });
+    if (!response.ok) {
+      const t = await response.text();
+      console.error('OpenRouter error:', response.status, t);
+      const e = new Error(`OpenRouter API error: ${response.status}`); e.status = 502; throw e;
+    }
+    const data = await response.json();
+    const resposta = (data?.choices?.[0]?.message?.content || '').trim();
+    return { resposta };
+  },
+
+  async sextaTts({ body }) {
+    const { texto } = body || {};
+    if (!texto || typeof texto !== 'string') {
+      const e = new Error('texto is required (string)'); e.status = 400; throw e;
+    }
+    const apiKey = process.env.GoogleCloudTTS;
+    if (!apiKey) { const e = new Error('GoogleCloudTTS not configured'); e.status = 500; throw e; }
+
+    const response = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        input: { text: texto },
+        voice: { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-A' },
+        audioConfig: { audioEncoding: 'MP3' },
+      }),
+    });
+    if (!response.ok) {
+      const t = await response.text();
+      console.error('Google TTS error:', response.status, t);
+      const e = new Error(`Google TTS API error: ${response.status}`); e.status = 502; throw e;
+    }
+    const data = await response.json();
+    if (!data?.audioContent) { const e = new Error('No audio returned by Google TTS'); e.status = 500; throw e; }
+    return { audio_base64: data.audioContent };
+  },
+
   // --- Analytics do perfil (tela Profile, planos Pro/Unlimited) ---
   async getProfileAnalytics({ user }) {
     const plan = user.plan || 'free';

@@ -1,32 +1,19 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { MoreHorizontal, X, Eye, EyeOff, Volume2, VolumeX, Mic, MicOff, Activity } from 'lucide-react';
+import { chamarCerebroSexta, sintetizarVozSexta } from '@/lib/sextaApi';
 
 // ============================================================
-// COLA AS TUAS CHAVES AQUI
+// CHAVES
 // ============================================================
-
-// 1) CEREBRAS — cérebro principal (texto, ultra-rápido)
-// Obtem em: https://cloud.cerebras.ai/platform/
-const CEREBRAS_API_KEY = "csk-dnkt48d2xmrkf8jvt9dhprkj38fhhryhf6x3pm6fc6dpwdh4";
-
-// 2) MISTRAL — visão (quando a câmera está ativa)
+// O cérebro (OpenRouter) e a voz (Google Cloud TTS) rodam no servidor
+// (api/fn/sextaChat e api/fn/sextaTts) — as chaves ficam só na Vercel
+// (env vars "OpenRouter" e "GoogleCloudTTS"), nunca no navegador.
+//
+// A visão (Mistral, câmera) ainda chama a API direto do navegador — não foi
+// migrada para o servidor nesta rodada.
 // Obtem em: https://console.mistral.ai/api-keys
 const MISTRAL_API_KEY = "MnfXDbULqv5vx0dcexB8yyXUd7goL0tw";
-
-// 3) ELEVENLABS — voz humana real
-// Obtem em: https://elevenlabs.io/app/settings/api-keys
-const ELEVENLABS_API_KEY = "sk_19b18bb82e4ad99f2593400a8d9410873494ed6d084e5d75";
-
-// ID da voz do ElevenLabs (Rachel = voz feminina padrão, soa natural em pt)
-// Outras opções de vozes em pt-BR no ElevenLabs:
-//   "21m00Tcm4TlvDq8ikWAM"  Rachel (feminina, calorosa)
-//   "EXAVITQu4vr4xnSDxMaL"  Bella (feminina, suave)
-//   "AZnzlk1XvdvUeBnXmlld"  Domi (feminina, jovem)
-const VOZ_ID = "21m00Tcm4TlvDq8ikWAM";
-
-// Modelos
-const MODELO_CEREBRAS = "llama-3.3-70b";
 const MODELO_VISAO = "pixtral-12b-2409";
 
 const EXPRESSOES = {
@@ -48,6 +35,12 @@ const SISTEMA_VISAO = SISTEMA_PROMPT + ` Você está vendo o utilizador agora pe
 
 export default function Sexta({ onVoltar }) {
   const [mounted, setMounted] = useState(false);
+  // Reconhecimento de voz por navegador só existe no Chrome/Android — no
+  // Safari/iOS a API nem existe. Por enquanto a Sexta por voz fica restrita
+  // a quem tem suporte, em vez de abrir uma tela que nunca vai ouvir nada.
+  const [suportado] = useState(
+    () => typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition)
+  );
   const [expressao, setExpressao] = useState('neutra');
   const [estaFalando, setEstaFalando] = useState(false);
   const [estaOuvindo, setEstaOuvindo] = useState(false);
@@ -61,7 +54,7 @@ export default function Sexta({ onVoltar }) {
   const [logs, setLogs] = useState([]);
   const [painelAberto, setPainelAberto] = useState(true);
   const [volumeMic, setVolumeMic] = useState(0);
-  const [usarVozNativa, setUsarVozNativa] = useState(false); // fallback se ElevenLabs falhar
+  const [usarVozNativa, setUsarVozNativa] = useState(false); // fallback se o Google TTS falhar
 
   const log = useCallback((tipo, mensagem) => {
     const agora = new Date().toLocaleTimeString('pt-BR');
@@ -107,9 +100,8 @@ export default function Sexta({ onVoltar }) {
       log('CHAVE', `${nome}: ${ok ? `OK (${k.slice(0, 8)}...)` : 'EM FALTA ✗'}`);
       return ok;
     };
-    ck(CEREBRAS_API_KEY, 'Cerebras');
     ck(MISTRAL_API_KEY, 'Mistral');
-    ck(ELEVENLABS_API_KEY, 'ElevenLabs');
+    log('CHAVE', 'Cérebro (OpenRouter) e Voz (Google TTS): chaves no servidor, ver /api/fn/sextaChat e sextaTts');
   }, [log]);
 
   // ==========================================
@@ -230,13 +222,10 @@ export default function Sexta({ onVoltar }) {
   }, [log]);
 
   // ==========================================
-  // CÉREBRO — Cerebras (Llama 3.3 70B, ultra-rápido)
+  // CÉREBRO — OpenRouter (via api/fn/sextaChat no servidor)
   // ==========================================
-  const chamarCerebras = useCallback(async (texto, historico, descricaoVisual) => {
-    if (!CEREBRAS_API_KEY || CEREBRAS_API_KEY.includes('COLA_AQUI')) {
-      throw new Error('Chave Cerebras em falta');
-    }
-    log('CÉREBRO', `A chamar Cerebras Llama 3.3 70B`);
+  const chamarCerebro = useCallback(async (texto, historico, descricaoVisual) => {
+    log('CÉREBRO', 'A chamar o cérebro (OpenRouter)...');
 
     const mensagens = [
       { role: 'system', content: descricaoVisual ? SISTEMA_VISAO : SISTEMA_PROMPT }
@@ -259,33 +248,15 @@ export default function Sexta({ onVoltar }) {
     mensagens.push({ role: 'user', content: texto });
 
     const t0 = performance.now();
-    const res = await fetch('https://api.cerebras.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${CEREBRAS_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: MODELO_CEREBRAS,
-        messages: mensagens,
-        max_tokens: 220,
-        temperature: 0.85,
-      })
-    });
-    const dt = Math.round(performance.now() - t0);
-    log('CÉREBRO', `HTTP ${res.status} em ${dt}ms`);
-
-    if (!res.ok) {
-      const corpo = await res.text();
-      log('CÉREBRO', `ERRO: ${corpo.slice(0, 120)}`);
-      if (res.status === 401) throw new Error('chave Cerebras inválida');
-      if (res.status === 404) throw new Error('modelo não encontrado');
-      if (res.status === 429) throw new Error('limite Cerebras atingido');
-      throw new Error(`HTTP ${res.status}`);
+    let resposta;
+    try {
+      resposta = await chamarCerebroSexta(mensagens);
+    } catch (e) {
+      log('CÉREBRO', `ERRO: ${e.message}`);
+      throw e;
     }
-    const data = await res.json();
-    const resposta = (data?.choices?.[0]?.message?.content || '').trim();
-    log('CÉREBRO', `"${resposta.slice(0, 60)}${resposta.length > 60 ? '...' : ''}"`);
+    const dt = Math.round(performance.now() - t0);
+    log('CÉREBRO', `Resposta em ${dt}ms: "${resposta.slice(0, 60)}${resposta.length > 60 ? '...' : ''}"`);
     return resposta;
   }, [log]);
 
@@ -310,7 +281,7 @@ export default function Sexta({ onVoltar }) {
 
     let resposta = '';
     try {
-      resposta = await chamarCerebras(textoUtilizador, historicoRef.current.slice(-8), descricaoVisual);
+      resposta = await chamarCerebro(textoUtilizador, historicoRef.current.slice(-8), descricaoVisual);
     } catch (e) {
       log('FLUXO', `Erro: ${e.message}`);
       falar(`Tive um problema: ${e.message}`);
@@ -339,7 +310,7 @@ export default function Sexta({ onVoltar }) {
     ].slice(-12);
     setStatus('');
     falar(resposta);
-  }, [camaraAtiva, chamarCerebras, capturarFrame, descreverCena, log]);
+  }, [camaraAtiva, chamarCerebro, capturarFrame, descreverCena, log]);
 
   // ==========================================
   // RECONHECIMENTO DE FALA (STT do navegador)
@@ -523,58 +494,32 @@ export default function Sexta({ onVoltar }) {
     if (!vozAtiva) { setStatus(texto); return; }
     pararFala();
 
-    // Se utilizador escolheu voz nativa OU chave EL em falta, usa navegador
-    if (usarVozNativa || !ELEVENLABS_API_KEY || ELEVENLABS_API_KEY.includes('COLA_AQUI')) {
+    // Se utilizador escolheu voz nativa, usa direto o navegador
+    if (usarVozNativa) {
       falarComNavegador(texto);
       return;
     }
 
-    // ElevenLabs
-    log('VOZ-OUT', `ElevenLabs: "${texto.slice(0, 40)}..."`);
+    // Google Cloud TTS (via api/fn/sextaTts no servidor)
+    log('VOZ-OUT', `Google TTS: "${texto.slice(0, 40)}..."`);
     try {
       const t0 = performance.now();
-      const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOZ_ID}`, {
-        method: 'POST',
-        headers: {
-          'xi-api-key': ELEVENLABS_API_KEY,
-          'Content-Type': 'application/json',
-          'Accept': 'audio/mpeg',
-        },
-        body: JSON.stringify({
-          text: texto,
-          model_id: 'eleven_multilingual_v2', // suporta pt-BR muito bem
-          voice_settings: {
-            stability: 0.45,
-            similarity_boost: 0.75,
-            style: 0.35,
-            use_speaker_boost: true,
-          }
-        })
-      });
+      const dataUrl = await sintetizarVozSexta(texto);
       const dt = Math.round(performance.now() - t0);
-      log('VOZ-OUT', `EL HTTP ${res.status} em ${dt}ms`);
+      log('VOZ-OUT', `Áudio recebido em ${dt}ms`);
 
-      if (!res.ok) {
-        const c = await res.text();
-        log('VOZ-OUT', `EL erro: ${c.slice(0, 80)} — usando voz nativa`);
-        falarComNavegador(texto);
-        return;
-      }
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
       if (!audioRef.current) {
         log('VOZ-OUT', 'audioRef em falta');
         falarComNavegador(texto);
         return;
       }
-      audioRef.current.src = url;
+      audioRef.current.src = dataUrl;
       audioRef.current.onplay = () => { log('VOZ-OUT', 'A tocar ✓'); animarBoca(); };
-      audioRef.current.onended = () => { acabarFala(); URL.revokeObjectURL(url); };
+      audioRef.current.onended = () => { acabarFala(); };
       audioRef.current.onerror = () => { log('VOZ-OUT', 'Erro a tocar — usando voz nativa'); falarComNavegador(texto); };
       await audioRef.current.play();
     } catch (e) {
-      log('VOZ-OUT', `Erro EL: ${e.message} — usando voz nativa`);
+      log('VOZ-OUT', `Erro Google TTS: ${e.message} — usando voz nativa`);
       falarComNavegador(texto);
     }
   }, [vozAtiva, usarVozNativa, log, animarBoca, acabarFala, falarComNavegador, pararFala]);
@@ -584,6 +529,7 @@ export default function Sexta({ onVoltar }) {
   // ==========================================
   useEffect(() => {
     setMounted(true);
+    if (!suportado) return;
     document.body.style.overflow = 'hidden';
     log('FLUXO', 'A iniciar Sexta-feira...');
     iniciarCamera();
@@ -650,7 +596,7 @@ export default function Sexta({ onVoltar }) {
               </button>
               <button style={est.menuItem} onClick={() => setUsarVozNativa(!usarVozNativa)}>
                 <Volume2 size={16} />
-                <span>{usarVozNativa ? 'Voz do navegador' : 'Voz ElevenLabs'}</span>
+                <span>{usarVozNativa ? 'Voz do navegador' : 'Voz Google Cloud'}</span>
               </button>
               <button style={est.menuItem} onClick={() => {
                 const novo = !micAtivo; setMicAtivo(novo); vadAtivoRef.current = novo;
@@ -736,8 +682,20 @@ export default function Sexta({ onVoltar }) {
     </div>
   );
 
+  const semSuporte = (
+    <div style={est.fundo}>
+      <button onClick={onVoltar} style={est.voltar}>← Voltar</button>
+      <div style={est.semSuporte}>
+        <p style={est.semSuporteTitulo}>Ainda não disponível neste aparelho</p>
+        <p style={est.semSuporteTexto}>
+          A Sexta-feira por voz funciona hoje só no Android (Chrome). Estamos trabalhando pra trazer pro iPhone em breve.
+        </p>
+      </div>
+    </div>
+  );
+
   if (!mounted) return null;
-  return createPortal(conteudo, document.body);
+  return createPortal(suportado ? conteudo : semSuporte, document.body);
 }
 
 const est = {
@@ -776,4 +734,7 @@ const est = {
   logs: { flex: 1, overflowY: 'auto', padding: '4px 14px 10px', display: 'flex', flexDirection: 'column' },
   logVazio: { color: '#555', fontSize: 11, textAlign: 'center', marginTop: 20 },
   logLinha: { padding: '2px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', lineHeight: 1.3 },
+  semSuporte: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, height: '100%', padding: '0 40px', textAlign: 'center' },
+  semSuporteTitulo: { color: '#EBEBF5', fontSize: 17, fontWeight: 600, margin: 0 },
+  semSuporteTexto: { color: '#8E8E93', fontSize: 14, lineHeight: 1.5, margin: 0, maxWidth: 320 },
 };
