@@ -24,10 +24,10 @@ const FELIZ = {
   boca:  'M 393 882 Q 473 952 545 886',
 };
 const TRISTE = {
-  // Olhos caídos e "quase fechando", IGUAIS entre si — o esquerdo é uma
-  // cópia do direito com a mesma orientação (não espelhada).
-  olhoE: 'M 354 776 Q 392 772 432 793',
-  olhoD: 'M 508 776 Q 546 772 586 793',
+  // Os dois olhos são a mesma "lentinha" quase fechada (almôndega horizontal):
+  // o olhoD é uma cópia do olhoE deslocada para a direita.
+  olhoE: 'M 372 788 C 384 774 414 773 424 783 C 414 791 388 794 372 788 Z',
+  olhoD: 'M 516 788 C 528 774 558 773 568 783 C 558 791 532 794 516 788 Z',
   boca:  'M 397 918 Q 473 872 549 918',
 };
 
