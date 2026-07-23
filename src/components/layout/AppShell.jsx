@@ -189,7 +189,7 @@ export default function AppShell() {
             </Link>
           </div>
 
-          <span className="relative z-10 flex-1 flex items-center justify-center px-2 select-none">
+          <span className="relative z-10 flex-1 flex items-center justify-center px-2 select-none translate-x-1 translate-y-0.5">
             {/* Tema claro: logo preto · Tema escuro: logo branco */}
             <img src="/brand/alps-prime-black.webp" alt="Alps Prime" className="h-6 w-auto object-contain dark:hidden" decoding="async" fetchpriority="high" />
             <img src="/brand/alps-prime-white.webp" alt="Alps Prime" className="h-6 w-auto object-contain hidden dark:block" decoding="async" fetchpriority="high" />
