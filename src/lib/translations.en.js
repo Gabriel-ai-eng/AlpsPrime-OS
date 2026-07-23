@@ -351,10 +351,11 @@ export const EN = {
   'Buscar': 'Search',
   'Home': 'Home',
 
-  // ── Rosto da Sexta-feira (feliz/triste) ──
+  // ── Rosto da Sexta-feira (feliz/triste/brava) ──
   'Alternar expressão': 'Toggle expression',
   'Feliz': 'Happy',
   'Triste': 'Sad',
+  'Brava': 'Angry',
 
   // ── FKW (placeholder de acesso antecipado) ──
   'Acesso antecipado': 'Early access',
