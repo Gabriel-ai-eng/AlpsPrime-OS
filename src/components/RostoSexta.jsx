@@ -10,24 +10,30 @@ gsap.registerPlugin(MorphSVGPlugin);
 // ============================================================
 // ROSTO DA SEXTA-FEIRA — carinha em neon vetorial que se DEFORMA de
 // verdade entre "feliz" (padrão) e "triste", usando GSAP MorphSVGPlugin.
-// Cada traço (olho esquerdo, olho direito, boca) existe em 3 camadas de
-// neon (halo difuso, brilho médio e núcleo nítido). O morph anima o
-// atributo `d` das três camadas ao mesmo tempo, então o brilho acompanha
-// a deformação. Os `d` iniciais no JSX são os da carinha FELIZ; a partir
-// daí o GSAP passa a controlar os caminhos.
+// Cada traço (2 olhos + boca) existe em 3 camadas de neon (halo difuso,
+// brilho médio e núcleo nítido). O morph anima o atributo `d` das três
+// camadas ao mesmo tempo, então o brilho acompanha a deformação. Os `d`
+// iniciais no JSX são os da carinha FELIZ; a partir daí o GSAP passa a
+// controlar os caminhos.
+//
+// IMPORTANTE — "esquerdo"/"direito" é do PONTO DE VISTA DA PRÓPRIA IA (como
+// se ela estivesse olhando para fora da tela), não de quem está vendo o
+// rosto. Por isso fica espelhado: o olho DIREITO da IA aparece do lado
+// ESQUERDO da tela, e o olho ESQUERDO da IA aparece do lado DIREITO da
+// tela. Mantenha essa convenção em qualquer alteração futura.
 // ============================================================
 
 // viewBox 941x1672 · rosto centrado em (470,813), raio 193.
 const FELIZ = {
-  olhoE: 'M 398 740 C 411.8 740 423 757.9 423 780 C 423 802.1 411.8 820 398 820 C 384.2 820 373 802.1 373 780 C 373 757.9 384.2 740 398 740 Z',
-  olhoD: 'M 506 795 Q 546 753 586 794',
+  olhoDireitoIA: 'M 398 740 C 411.8 740 423 757.9 423 780 C 423 802.1 411.8 820 398 820 C 384.2 820 373 802.1 373 780 C 373 757.9 384.2 740 398 740 Z', // lado esquerdo da tela
+  olhoEsquerdoIA: 'M 542 740 C 555.8 740 567 757.9 567 780 C 567 802.1 555.8 820 542 820 C 528.2 820 517 802.1 517 780 C 517 757.9 528.2 740 542 740 Z', // lado direito da tela — mesmo oval aberto, espelhado
   boca:  'M 393 882 Q 473 952 545 886',
 };
 const TRISTE = {
   // Os dois olhos são a mesma "lentinha" quase fechada (almôndega horizontal):
-  // o olhoD é uma cópia do olhoE deslocada para a direita.
-  olhoE: 'M 372 788 C 384 774 414 773 424 783 C 414 791 388 794 372 788 Z',
-  olhoD: 'M 516 788 C 528 774 558 773 568 783 C 558 791 532 794 516 788 Z',
+  // olhoEsquerdoIA é uma cópia de olhoDireitoIA deslocada para o lado direito da tela.
+  olhoDireitoIA: 'M 372 788 C 384 774 414 773 424 783 C 414 791 388 794 372 788 Z', // lado esquerdo da tela
+  olhoEsquerdoIA: 'M 516 788 C 528 774 558 773 568 783 C 558 791 532 794 516 788 Z', // lado direito da tela
   boca:  'M 397 918 Q 473 872 549 918',
 };
 
@@ -47,11 +53,11 @@ export default function RostoSexta({ onVoltar }) {
     animandoRef.current = true;
     // Cada feição tem 3 cópias (uma por camada de neon) — o morph atinge as
     // três de uma vez para o brilho deformar junto com o traço.
-    gsap.to(svg.querySelectorAll('.f-olhoE'), {
-      duration: dur * 0.85, morphSVG: alvo.olhoE, ease: 'power2.inOut',
+    gsap.to(svg.querySelectorAll('.f-olhoDireitoIA'), {
+      duration: dur * 0.85, morphSVG: alvo.olhoDireitoIA, ease: 'power2.inOut',
     });
-    gsap.to(svg.querySelectorAll('.f-olhoD'), {
-      duration: dur * 0.85, morphSVG: alvo.olhoD, ease: 'power2.inOut',
+    gsap.to(svg.querySelectorAll('.f-olhoEsquerdoIA'), {
+      duration: dur * 0.85, morphSVG: alvo.olhoEsquerdoIA, ease: 'power2.inOut',
     });
     gsap.to(svg.querySelectorAll('.f-boca'), {
       duration: dur, morphSVG: alvo.boca, ease: reduz ? 'none' : 'back.out(1.6)',
@@ -108,22 +114,22 @@ export default function RostoSexta({ onVoltar }) {
         {/* HALO difuso */}
         <g filter="url(#rs-haloBig)" opacity="0.42" fill="none" stroke="#edcca2" strokeLinecap="round">
           <circle cx="470" cy="813" r="193" strokeWidth="11"/>
-          <path className="f-olhoE" d={FELIZ.olhoE} strokeWidth="7"/>
-          <path className="f-olhoD" d={FELIZ.olhoD} strokeWidth="9"/>
+          <path className="f-olhoDireitoIA" d={FELIZ.olhoDireitoIA} strokeWidth="7"/>
+          <path className="f-olhoEsquerdoIA" d={FELIZ.olhoEsquerdoIA} strokeWidth="7"/>
           <path className="f-boca"  d={FELIZ.boca}  strokeWidth="9"/>
         </g>
         {/* brilho MÉDIO */}
         <g filter="url(#rs-haloSoft)" fill="none" stroke="url(#rs-gold)" strokeLinecap="round">
           <circle cx="470" cy="813" r="193" strokeWidth="5.5"/>
-          <path className="f-olhoE" d={FELIZ.olhoE} strokeWidth="4"/>
-          <path className="f-olhoD" d={FELIZ.olhoD} strokeWidth="4.6"/>
+          <path className="f-olhoDireitoIA" d={FELIZ.olhoDireitoIA} strokeWidth="4"/>
+          <path className="f-olhoEsquerdoIA" d={FELIZ.olhoEsquerdoIA} strokeWidth="4"/>
           <path className="f-boca"  d={FELIZ.boca}  strokeWidth="4.6"/>
         </g>
         {/* NÚCLEO nítido */}
         <g fill="none" stroke="#fffdf6" strokeLinecap="round" opacity="0.95">
           <circle cx="470" cy="813" r="193" strokeWidth="2.4"/>
-          <path className="f-olhoE" d={FELIZ.olhoE} strokeWidth="1.8"/>
-          <path className="f-olhoD" d={FELIZ.olhoD} strokeWidth="2.2"/>
+          <path className="f-olhoDireitoIA" d={FELIZ.olhoDireitoIA} strokeWidth="1.8"/>
+          <path className="f-olhoEsquerdoIA" d={FELIZ.olhoEsquerdoIA} strokeWidth="1.8"/>
           <path className="f-boca"  d={FELIZ.boca}  strokeWidth="2.2"/>
         </g>
       </svg>
