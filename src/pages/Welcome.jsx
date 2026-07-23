@@ -113,7 +113,7 @@ const PRODUTOS = [
     titulo: 'Projeto Armor',
     subtitulo: 'Conheça a nova geração da ação e sobrevivência.',
     img: '/apps/armor-hero.webp',
-    quadrado: true,
+    quadrado: false,
     disponivel: true,
   },
   {
