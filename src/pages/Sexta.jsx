@@ -54,6 +54,10 @@ export default function Sexta({ onVoltar }) {
   const [logs, setLogs] = useState([]);
   const [painelAberto, setPainelAberto] = useState(true);
   const [volumeMic, setVolumeMic] = useState(0);
+  // Só pede câmera/microfone quando o usuário toca no botão — não abre a
+  // câmera sozinha ao montar o componente.
+  const [iniciado, setIniciado] = useState(false);
+  const [carregando, setCarregando] = useState(false);
 
   const log = useCallback((tipo, mensagem) => {
     const agora = new Date().toLocaleTimeString('pt-BR');
@@ -491,17 +495,73 @@ export default function Sexta({ onVoltar }) {
   }, [vozAtiva, falarComNavegador, pararFala]);
 
   // ==========================================
+  // SAUDAÇÃO INICIAL — comenta a aparência do usuário pela câmera,
+  // assim que ele entra e concede as permissões.
+  // ==========================================
+  const gerarSaudacaoInicial = useCallback(async () => {
+    log('FLUXO', 'Preparando saudação inicial...');
+    setStatus('Te vendo...');
+
+    let descricaoVisual = null;
+    if (streamVideoRef.current) {
+      const frame = capturarFrame();
+      if (frame) {
+        descricaoVisual = await descreverCena(frame);
+        if (descricaoVisual) {
+          ultimaDescricaoVisualRef.current = { texto: descricaoVisual, quando: Date.now() };
+        }
+      }
+    }
+
+    const instrucao = descricaoVisual
+      ? 'Este é o primeiro contato: cumprimente o usuário agora, de um jeito criativo, caloroso e bem pessoal — comente algo genuíno e específico sobre a aparência ou o visual dele que você está vendo pela câmera agora (pode ser roupa, sorriso, estilo, penteado, o ambiente), como um elogio sincero, sem exagero. Termine perguntando como ele está.'
+      : 'Este é o primeiro contato: cumprimente o usuário agora de um jeito criativo, caloroso e curto, perguntando como ele está.';
+
+    let saudacao = '';
+    try {
+      saudacao = await chamarCerebro(instrucao, [], descricaoVisual);
+    } catch (e) {
+      log('FLUXO', `Erro na saudação: ${e.message}`);
+    }
+
+    saudacao = (saudacao || '')
+      .replace(/<think>[\s\S]*?<\/think>/gi, '')
+      .replace(/```[\s\S]*?```/g, '')
+      .replace(/\*+/g, '')
+      .replace(/#+\s/g, '')
+      .trim();
+
+    if (!saudacao) saudacao = 'Oi! Que bom te ver por aqui — como você está?';
+
+    historicoRef.current = [{ role: 'assistant', content: saudacao }];
+    setStatus('');
+    falar(saudacao);
+  }, [capturarFrame, descreverCena, chamarCerebro, falar, log]);
+
+  // Único botão da tela inicial: pede câmera + microfone e já entra
+  // conversando (a saudação comenta o que a câmera está vendo).
+  const iniciarConversa = useCallback(async () => {
+    if (carregando || iniciado) return;
+    setCarregando(true);
+    document.body.style.overflow = 'hidden';
+    log('FLUXO', 'Usuário tocou em começar — a pedir câmera e microfone...');
+    try {
+      await iniciarCamera();
+      await iniciarVAD();
+      // dá um tempinho pro vídeo ter um frame de verdade antes de capturar
+      await new Promise((r) => setTimeout(r, 700));
+      await gerarSaudacaoInicial();
+    } finally {
+      setIniciado(true);
+      setCarregando(false);
+    }
+  }, [carregando, iniciado, iniciarCamera, iniciarVAD, gerarSaudacaoInicial, log]);
+
+  // ==========================================
   // INICIALIZAÇÃO
   // ==========================================
   useEffect(() => {
     setMounted(true);
-    if (!suportado) return;
-    document.body.style.overflow = 'hidden';
-    log('FLUXO', 'A iniciar Sexta-feira...');
-    iniciarCamera();
-    iniciarVAD();
-    setTimeout(() => falar('Oi! Pode falar comigo.'), 1500);
-
     return () => {
       document.body.style.overflow = 'auto';
       vadAtivoRef.current = false;
@@ -513,6 +573,14 @@ export default function Sexta({ onVoltar }) {
     };
     // eslint-disable-next-line
   }, []);
+
+  // Ao trocar da tela inicial pra tela de conversa, o React monta um <video>
+  // novo — reconecta o stream da câmera já aberto a esse elemento novo.
+  useEffect(() => {
+    if (videoRef.current && streamVideoRef.current) {
+      videoRef.current.srcObject = streamVideoRef.current;
+    }
+  }, [iniciado]);
 
   const testarTudo = () => {
     log('TESTE', '=== TESTE ===');
@@ -612,7 +680,7 @@ export default function Sexta({ onVoltar }) {
       {painelAberto && (
         <div style={est.painelDiag}>
           <div style={est.painelHeader}>
-            <span style={est.painelTitulo}>CEREBRAS + MISTRAL + ELEVENLABS</span>
+            <span style={est.painelTitulo}>OPENROUTER + MISTRAL + VOZ NATIVA</span>
             <div style={est.painelBotoes}>
               <button onClick={testarTudo} style={est.btTeste}>Testar</button>
               <button onClick={() => setLogs([])} style={est.btLimpar}>Limpar</button>
@@ -655,8 +723,44 @@ export default function Sexta({ onVoltar }) {
     </div>
   );
 
+  // Tela inicial: só um botão. A câmera/mic precisam existir no DOM aqui
+  // também, porque iniciarConversa() liga a câmera ANTES de "iniciado" virar
+  // true (é só depois da saudação que trocamos pra tela de conversa).
+  const telaInicial = (
+    <div style={est.fundo}>
+      <video ref={videoRef} autoPlay playsInline muted style={est.oculto} />
+      <canvas ref={canvasRef} style={est.oculto} />
+      <button onClick={onVoltar} style={est.voltar}>← Voltar</button>
+
+      <div style={est.inicioWrapper}>
+        <div style={est.rostoWrapper}>
+          <svg viewBox="0 0 1536 1536" style={est.svg}>
+            <circle cx="768" cy="756" r="424" fill="#F7D89C" />
+            <circle cx="768" cy="756" r="414" fill="#000000" />
+            <path d={EXPRESSOES.neutra.olhoE} fill="#F5D599" />
+            <path d={EXPRESSOES.neutra.olhoD} fill="#F5D599" />
+            <path d={EXPRESSOES.neutra.boca} fill="#F5D599" />
+          </svg>
+        </div>
+        <p style={est.inicioTexto}>
+          {carregando
+            ? 'Te vendo e te ouvindo...'
+            : 'Ela vai pedir acesso à câmera e ao microfone pra te ver e te ouvir.'}
+        </p>
+        <button
+          onClick={iniciarConversa}
+          disabled={carregando}
+          style={{ ...est.botaoIniciar, opacity: carregando ? 0.6 : 1, cursor: carregando ? 'default' : 'pointer' }}
+        >
+          {carregando ? 'Só um instante...' : 'Falar com a Sexta-feira'}
+        </button>
+      </div>
+    </div>
+  );
+
   if (!mounted) return null;
-  return createPortal(suportado ? conteudo : semSuporte, document.body);
+  if (!suportado) return createPortal(semSuporte, document.body);
+  return createPortal(iniciado ? conteudo : telaInicial, document.body);
 }
 
 const est = {
@@ -698,4 +802,7 @@ const est = {
   semSuporte: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, height: '100%', padding: '0 40px', textAlign: 'center' },
   semSuporteTitulo: { color: '#EBEBF5', fontSize: 17, fontWeight: 600, margin: 0 },
   semSuporteTexto: { color: '#8E8E93', fontSize: 14, lineHeight: 1.5, margin: 0, maxWidth: 320 },
+  inicioWrapper: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28, padding: '0 32px', textAlign: 'center' },
+  inicioTexto: { color: '#8E8E93', fontSize: 14, lineHeight: 1.5, margin: 0, maxWidth: 300 },
+  botaoIniciar: { background: '#F0D290', color: '#000', border: 'none', borderRadius: 999, padding: '15px 30px', fontSize: 15, fontWeight: 600, cursor: 'pointer', opacity: 1, transition: 'opacity 0.2s' },
 };
