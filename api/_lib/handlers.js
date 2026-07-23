@@ -161,9 +161,10 @@ export const handlers = {
     return { url, revised_prompt: data?.data?.[0]?.revised_prompt || prompt };
   },
 
-  // --- Sexta-feira: cérebro (OpenRouter) e voz (Google Cloud TTS) ---
-  // As chaves ficam só aqui no servidor (env vars OpenRouter / GoogleCloudTTS
-  // na Vercel) — nunca chegam ao navegador do usuário.
+  // --- Sexta-feira: cérebro (OpenRouter) ---
+  // A chave fica só aqui no servidor (env var OpenRouter na Vercel) — nunca
+  // chega ao navegador do usuário. A voz usa o SpeechSynthesis nativo do
+  // navegador, sem chamada de servidor.
   async sextaChat({ body }) {
     const { mensagens } = body || {};
     if (!Array.isArray(mensagens) || !mensagens.length) {
@@ -196,33 +197,6 @@ export const handlers = {
     const data = await response.json();
     const resposta = (data?.choices?.[0]?.message?.content || '').trim();
     return { resposta };
-  },
-
-  async sextaTts({ body }) {
-    const { texto } = body || {};
-    if (!texto || typeof texto !== 'string') {
-      const e = new Error('texto is required (string)'); e.status = 400; throw e;
-    }
-    const apiKey = process.env.GoogleCloudTTS;
-    if (!apiKey) { const e = new Error('GoogleCloudTTS not configured'); e.status = 500; throw e; }
-
-    const response = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        input: { text: texto },
-        voice: { languageCode: 'pt-BR', name: 'pt-BR-Wavenet-A' },
-        audioConfig: { audioEncoding: 'MP3' },
-      }),
-    });
-    if (!response.ok) {
-      const t = await response.text();
-      console.error('Google TTS error:', response.status, t);
-      const e = new Error(`Google TTS API error: ${response.status}`); e.status = 502; throw e;
-    }
-    const data = await response.json();
-    if (!data?.audioContent) { const e = new Error('No audio returned by Google TTS'); e.status = 500; throw e; }
-    return { audio_base64: data.audioContent };
   },
 
   // --- Analytics do perfil (tela Profile, planos Pro/Unlimited) ---

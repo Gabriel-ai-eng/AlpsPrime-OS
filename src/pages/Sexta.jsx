@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { MoreHorizontal, X, Eye, EyeOff, Volume2, VolumeX, Mic, MicOff, Activity } from 'lucide-react';
-import { chamarCerebroSexta, sintetizarVozSexta } from '@/lib/sextaApi';
+import { chamarCerebroSexta } from '@/lib/sextaApi';
 
 // ============================================================
 // CHAVES
 // ============================================================
-// O cérebro (OpenRouter) e a voz (Google Cloud TTS) rodam no servidor
-// (api/fn/sextaChat e api/fn/sextaTts) — as chaves ficam só na Vercel
-// (env vars "OpenRouter" e "GoogleCloudTTS"), nunca no navegador.
+// O cérebro (OpenRouter) roda no servidor (api/fn/sextaChat) — a chave fica
+// só na Vercel (env var "OpenRouter"), nunca no navegador.
+// A voz usa o SpeechSynthesis nativo do navegador (grátis, sem chave).
 //
 // A visão (Mistral, câmera) ainda chama a API direto do navegador — não foi
 // migrada para o servidor nesta rodada.
@@ -54,7 +54,6 @@ export default function Sexta({ onVoltar }) {
   const [logs, setLogs] = useState([]);
   const [painelAberto, setPainelAberto] = useState(true);
   const [volumeMic, setVolumeMic] = useState(0);
-  const [usarVozNativa, setUsarVozNativa] = useState(false); // fallback se o Google TTS falhar
 
   const log = useCallback((tipo, mensagem) => {
     const agora = new Date().toLocaleTimeString('pt-BR');
@@ -64,7 +63,6 @@ export default function Sexta({ onVoltar }) {
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const audioRef = useRef(null);              // <audio> para tocar ElevenLabs
   const streamVideoRef = useRef(null);
   const streamAudioRef = useRef(null);
   const bocaRef = useRef(null);
@@ -101,7 +99,7 @@ export default function Sexta({ onVoltar }) {
       return ok;
     };
     ck(MISTRAL_API_KEY, 'Mistral');
-    log('CHAVE', 'Cérebro (OpenRouter) e Voz (Google TTS): chaves no servidor, ver /api/fn/sextaChat e sextaTts');
+    log('CHAVE', 'Cérebro (OpenRouter): chave no servidor, ver /api/fn/sextaChat');
   }, [log]);
 
   // ==========================================
@@ -434,14 +432,10 @@ export default function Sexta({ onVoltar }) {
   }, [dispararReconhecimento, log]);
 
   // ==========================================
-  // FALAR — ElevenLabs (voz humana) com fallback para nativa
+  // FALAR — voz nativa do navegador (SpeechSynthesis)
   // ==========================================
   const pararFala = useCallback(() => {
     window.speechSynthesis?.cancel();
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = '';
-    }
     clearInterval(animacaoBocaRef.current);
     if (bocaRef.current) bocaRef.current.style.transform = 'scaleY(1)';
     setEstaFalando(false);
@@ -489,40 +483,12 @@ export default function Sexta({ onVoltar }) {
     window.speechSynthesis.speak(u);
   }, [log, animarBoca, acabarFala]);
 
-  const falar = useCallback(async (texto) => {
+  const falar = useCallback((texto) => {
     if (!texto) return;
     if (!vozAtiva) { setStatus(texto); return; }
     pararFala();
-
-    // Se utilizador escolheu voz nativa, usa direto o navegador
-    if (usarVozNativa) {
-      falarComNavegador(texto);
-      return;
-    }
-
-    // Google Cloud TTS (via api/fn/sextaTts no servidor)
-    log('VOZ-OUT', `Google TTS: "${texto.slice(0, 40)}..."`);
-    try {
-      const t0 = performance.now();
-      const dataUrl = await sintetizarVozSexta(texto);
-      const dt = Math.round(performance.now() - t0);
-      log('VOZ-OUT', `Áudio recebido em ${dt}ms`);
-
-      if (!audioRef.current) {
-        log('VOZ-OUT', 'audioRef em falta');
-        falarComNavegador(texto);
-        return;
-      }
-      audioRef.current.src = dataUrl;
-      audioRef.current.onplay = () => { log('VOZ-OUT', 'A tocar ✓'); animarBoca(); };
-      audioRef.current.onended = () => { acabarFala(); };
-      audioRef.current.onerror = () => { log('VOZ-OUT', 'Erro a tocar — usando voz nativa'); falarComNavegador(texto); };
-      await audioRef.current.play();
-    } catch (e) {
-      log('VOZ-OUT', `Erro Google TTS: ${e.message} — usando voz nativa`);
-      falarComNavegador(texto);
-    }
-  }, [vozAtiva, usarVozNativa, log, animarBoca, acabarFala, falarComNavegador, pararFala]);
+    falarComNavegador(texto);
+  }, [vozAtiva, falarComNavegador, pararFala]);
 
   // ==========================================
   // INICIALIZAÇÃO
@@ -567,7 +533,6 @@ export default function Sexta({ onVoltar }) {
     <div style={est.fundo}>
       <video ref={videoRef} autoPlay playsInline muted style={est.oculto} />
       <canvas ref={canvasRef} style={est.oculto} />
-      <audio ref={audioRef} style={est.oculto} />
       <button onClick={onVoltar} style={est.voltar}>← Voltar</button>
       <button onClick={() => setPainelAberto(!painelAberto)} style={est.botaoDiag}>
         <Activity size={18} color={painelAberto ? '#4CAF50' : '#8E8E93'} />
@@ -593,10 +558,6 @@ export default function Sexta({ onVoltar }) {
               <button style={est.menuItem} onClick={() => setVozAtiva(!vozAtiva)}>
                 {vozAtiva ? <Volume2 size={16} /> : <VolumeX size={16} />}
                 <span>{vozAtiva ? 'Voz ativa' : 'Voz desativada'}</span>
-              </button>
-              <button style={est.menuItem} onClick={() => setUsarVozNativa(!usarVozNativa)}>
-                <Volume2 size={16} />
-                <span>{usarVozNativa ? 'Voz do navegador' : 'Voz Google Cloud'}</span>
               </button>
               <button style={est.menuItem} onClick={() => {
                 const novo = !micAtivo; setMicAtivo(novo); vadAtivoRef.current = novo;
