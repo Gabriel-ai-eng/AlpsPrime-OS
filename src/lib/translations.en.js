@@ -207,6 +207,7 @@ export const EN = {
   'Saiba mais': 'Learn more',
   'Privacidade': 'Privacy',
   'Pagamento': 'Payment',
+  'Copyright © 2026. Todos os direitos reservados.': 'Copyright © 2026. All rights reserved.',
 
   // ── Acesso restrito (HotmartGate) ──
   'Acesso restrito': 'Access restricted',

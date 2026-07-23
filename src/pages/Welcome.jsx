@@ -406,7 +406,7 @@ export default function Welcome() {
             </Link>
           </div>
 
-          <p className="mt-4 text-[11px] text-black/30">© {new Date().getFullYear()} Alps OS</p>
+          <p className="mt-4 text-[11px] text-black/30">{t('Copyright © 2026. Todos os direitos reservados.')}</p>
         </div>
       </footer>
     </div>
