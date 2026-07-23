@@ -48,12 +48,25 @@ const BRAVA = {
   olhoEsquerdoIA: 'M 517 792 C 528 782 553 768 567 766 C 553 778 530 790 517 792 Z', // lado direito da tela ("/")
   boca:  'M 397 916 Q 473 866 549 916',
 };
+const NEUTRA = {
+  // Olhos redondos e relaxados (nem arregalados como o feliz, nem semicerrados) e boca reta.
+  olhoDireitoIA: 'M 398 755 C 410.9 755 421 765.7 421 780 C 421 794.3 410.9 805 398 805 C 385.1 805 375 794.3 375 780 C 375 765.7 385.1 755 398 755 Z',
+  olhoEsquerdoIA: 'M 542 755 C 554.9 755 565 765.7 565 780 C 565 794.3 554.9 805 542 805 C 529.1 805 519 794.3 519 780 C 519 765.7 529.1 755 542 755 Z',
+  boca:  'M 397 903 Q 473 903 549 903',
+};
+const ENTEDIADA = {
+  // Pálpebras pesadas e caídas (mais altas que o semicerrar triste) e boca
+  // reta e assimétrica, com um canto mais baixo — o "tédio" clássico.
+  olhoDireitoIA: 'M 372 780 C 384 770 414 770 424 780 C 414 786 388 788 372 780 Z',
+  olhoEsquerdoIA: 'M 516 780 C 528 770 558 770 568 780 C 558 786 532 788 516 780 Z',
+  boca:  'M 397 906 Q 473 900 549 908',
+};
 
 // Ciclo do botão e o que cada estado mostra.
-const ORDEM = ['feliz', 'triste', 'brava'];
-const FORMAS = { feliz: FELIZ, triste: TRISTE, brava: BRAVA };
-const COR_PONTO = { feliz: '#e6b64c', triste: '#9db2d4', brava: '#d46b5a' };
-const ROTULO = { feliz: 'Feliz', triste: 'Triste', brava: 'Brava' };
+const ORDEM = ['feliz', 'triste', 'brava', 'neutra', 'entediada'];
+const FORMAS = { feliz: FELIZ, triste: TRISTE, brava: BRAVA, neutra: NEUTRA, entediada: ENTEDIADA };
+const COR_PONTO = { feliz: '#e6b64c', triste: '#9db2d4', brava: '#d46b5a', neutra: '#b9b2a6', entediada: '#a79bc9' };
+const ROTULO = { feliz: 'Feliz', triste: 'Triste', brava: 'Brava', neutra: 'Neutra', entediada: 'Entediada' };
 
 export default function RostoSexta({ onVoltar }) {
   const svgRef = useRef(null);
