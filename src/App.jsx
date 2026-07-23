@@ -18,12 +18,15 @@ import Welcome from '@/pages/Welcome';
 import Home from '@/pages/Home';
 import HotmartGate from '@/components/access/HotmartGate';
 import { LOGO_URL } from '@/lib/branding';
+// Também sempre no bundle inicial: o ícone de hambúrguer do cabeçalho (visível
+// em toda a navegação) abre Configurações direto — sem isso, o primeiro toque
+// dependia do pré-carregamento ocioso já ter rodado (ou não) pra abrir na hora.
+import Settings from '@/pages/Settings';
 
 const ImageGen = lazy(() => import('@/pages/ImageGen'));
 const Profile = lazy(() => import('@/pages/Profile'));
 const Search = lazy(() => import('@/pages/Search'));
 const Verified = lazy(() => import('@/pages/Verified'));
-const Settings = lazy(() => import('@/pages/Settings'));
 const Notifications = lazy(() => import('@/pages/Notifications'));
 const Todos = lazy(() => import('@/pages/Todos'));
 const Categorias = lazy(() => import('@/pages/Categorias'));
@@ -41,7 +44,6 @@ const Favoritos = lazy(() => import('@/pages/Favoritos'));
 const preCarregarSecoes = () => {
   [
     () => import('@/pages/Suporte'),
-    () => import('@/pages/Settings'),
     () => import('@/pages/Profile'),
     () => import('@/pages/Search'),
     () => import('@/pages/Notifications'),
