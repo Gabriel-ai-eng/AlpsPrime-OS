@@ -350,4 +350,9 @@ export const EN = {
   'Ver Perfil': 'View Profile',
   'Buscar': 'Search',
   'Home': 'Home',
+
+  // ── Rosto da Sexta-feira (feliz/triste) ──
+  'Alternar expressão': 'Toggle expression',
+  'Feliz': 'Happy',
+  'Triste': 'Sad',
 };

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { List, GalleryVerticalEnd, Grid3x3, Star, ChevronLeft } from 'lucide-react';
+import { List, GalleryVerticalEnd, Grid3x3, Star } from 'lucide-react';
 import { useT } from '@/lib/i18n';
 import { useFavorites } from '@/lib/useFavorites';
 import { APPS, BLOQUEADOS } from '@/lib/apps';
+import RostoSexta from '@/components/RostoSexta';
 
 // Ícone de cronômetro (selo "em breve") recriado em SVG — corpo sólido,
 // coroa no topo, botão lateral e o mostrador em forma de "fatia" (ponteiro
@@ -252,25 +253,9 @@ export default function Categorias() {
         )}
       </div>
 
-      {/* TELA DA SEXTA-FEIRA — o rosto da IA (SVG vetorial) em tela cheia,
-          aberto ao tocar no bloco da Sexta-feira. */}
-      {sextaAberta && (
-        <div className="fixed inset-0 z-[999999] bg-[#f1ece5]">
-          <img
-            src="/apps/sexta-face.svg"
-            alt="Sexta-feira"
-            draggable="false"
-            className="w-full h-full object-cover select-none"
-          />
-          <button
-            onClick={() => setSextaAberta(false)}
-            aria-label={t('Voltar')}
-            className="absolute top-6 left-5 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-black/[0.06] backdrop-blur-sm text-black/50 hover:text-black/80 active:scale-90 transition"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-        </div>
-      )}
+      {/* TELA DA SEXTA-FEIRA — o rosto da IA (SVG vetorial que se deforma
+          entre feliz/triste com GSAP), aberto ao tocar no bloco da Sexta. */}
+      {sextaAberta && <RostoSexta onVoltar={() => setSextaAberta(false)} />}
 
     </div>
   );
