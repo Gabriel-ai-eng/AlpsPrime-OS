@@ -24,9 +24,9 @@ const FELIZ = {
   boca:  'M 393 882 Q 473 952 545 886',
 };
 const TRISTE = {
-  // Olhos simétricos, caídos e "quase fechando" — o esquerdo espelha o
-  // direito (arco que decai para o canto externo).
-  olhoE: 'M 432 776 Q 394 772 354 793',
+  // Olhos caídos e "quase fechando", IGUAIS entre si — o esquerdo é uma
+  // cópia do direito com a mesma orientação (não espelhada).
+  olhoE: 'M 354 776 Q 392 772 432 793',
   olhoD: 'M 508 776 Q 546 772 586 793',
   boca:  'M 397 918 Q 473 872 549 918',
 };
