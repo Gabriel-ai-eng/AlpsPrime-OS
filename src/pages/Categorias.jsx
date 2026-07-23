@@ -194,9 +194,9 @@ export default function Categorias() {
           ))
         ) : (
           appsVisiveis.map((app) => {
-            // FKW, Projeto Armor e Sexta-feira são cards "hero": a arte ocupa
+            // FKW, Wonderbound e Sexta-feira são cards "hero": a arte ocupa
             // a altura inteira do card, colada na borda esquerda (sem padding).
-            const hero = app.id === 'fkw' || app.id === 'armor' || app.id === 'sexta';
+            const hero = app.id === 'fkw' || app.id === 'wonderbound' || app.id === 'sexta';
             return (
               <div
                 key={app.id}

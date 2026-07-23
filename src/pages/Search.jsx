@@ -5,13 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useT } from '@/lib/i18n';
 
 // id = chave usada na navegação (openApp → telaAtual no Home). `status: 'soon'`
-// marca os apps ainda não lançados. Projeto Armor (id 'armor') vem primeiro.
+// marca os apps ainda não lançados. Wonderbound (id 'wonderbound') vem primeiro.
 // `url` = apps servidos fora do SPA (proxy do vercel.json): clique navega
 // direto pra lá, em vez de passar pelo openApp/telaAtual do Home.
 const SUB_APPS = [
   {
-    id: 'armor',
-    name: 'Projeto Armor',
+    id: 'wonderbound',
+    name: 'Wonderbound',
     image: '/apps/armor-logo-square.webp',
     status: 'live',
   },
@@ -48,7 +48,7 @@ export default function Search() {
     return SUB_APPS
       .filter((app) => normalize(app.name).includes(q))
       .sort((a, b) => {
-        // Quem começa com o texto digitado aparece primeiro (ex.: "Pro" → Projeto Armor).
+        // Quem começa com o texto digitado aparece primeiro (ex.: "Won" → Wonderbound).
         const aStarts = normalize(a.name).startsWith(q);
         const bStarts = normalize(b.name).startsWith(q);
         if (aStarts !== bStarts) return aStarts ? -1 : 1;

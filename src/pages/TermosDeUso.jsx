@@ -34,7 +34,7 @@ export default function TermosDeUso() {
           <p>
             O Alps OS ("Alps", "Plataforma", "nós") é um ecossistema digital que
             reúne, sob um único login, diversos aplicativos e jogos
-            ("Sub-apps"), entre eles Projeto Armor e Sexta-feira. O
+            ("Sub-apps"), entre eles Wonderbound e Sexta-feira. O
             serviço é disponibilizado no endereço https://alpsprime.com.br e
             operado por Apex Prime Studios / Alps Prime.
           </p>

@@ -8,14 +8,14 @@ import React, { useEffect, useRef, useState } from 'react';
  *  1. localStorage (base64): imagens pequenas (avatar/capa) ficam disponíveis
  *     de forma SÍNCRONA, antes da primeira pintura — aparecem na hora.
  *  2. Cache Storage (window.caches): imagens grandes que estouram a cota do
- *     localStorage (ex.: o fundo do Projeto Armor, ~5 MB) são guardadas aqui e
+ *     localStorage (ex.: o fundo do Wonderbound, ~5 MB) são guardadas aqui e
  *     servidas do disco no reload, sem ir à rede.
  *  3. Fallback: se o navegador bloquear o fetch (CORS) ou os caches falharem, o
  *     componente usa a URL direta — sem regressão em relação a um <img> normal.
  *
  * Revalidação (stale-while-revalidate):
  *  O cache é indexado pela URL. Como as imagens estáticas do app (fundo do
- *  Armor, slides do Home…) mantêm o MESMO nome de arquivo entre publicações,
+ *  Wonderbound, slides do Home…) mantêm o MESMO nome de arquivo entre publicações,
  *  guardar por URL sem revalidar fazia uma imagem trocada na `main` NUNCA
  *  aparecer para quem já tinha visitado (era preciso renomear o arquivo p/
  *  furar o cache). Agora, depois de pintar a versão em cache, o componente

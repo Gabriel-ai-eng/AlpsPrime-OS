@@ -4,11 +4,11 @@ import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import CachedImage from '@/components/CachedImage';
 
 const Sexta = lazy(() => import('./Sexta'));
-// Projeto Armor continua num repositório/deploy próprio, mas é servido SOB o
+// Wonderbound continua num repositório/deploy próprio, mas é servido SOB o
 // domínio da plataforma (rewrite/proxy da Vercel em /jogo). Por ser a mesma
 // origem, o jogo reaproveita a sessão de login já feita aqui — o jogador não
 // precisa logar/cadastrar de novo e o progresso fica salvo na mesma conta.
-const PROJETO_ARMOR_URL = '/jogo';
+const WONDERBOUND_URL = '/jogo';
 
 const LoadingScreen = () => (
   <div className="absolute inset-0 z-[200000] flex flex-col items-center justify-center bg-white backdrop-blur-xl">
@@ -45,9 +45,9 @@ export default function Home() {
     const app = location.state?.openApp;
     // Sexta-feira está indisponível: nunca abrir, mesmo que algum
     // fluxo tente navegar com esse openApp.
-    if (app === 'armor') {
+    if (app === 'wonderbound') {
       // jogo externo: redireciona na mesma aba
-      window.location.href = PROJETO_ARMOR_URL;
+      window.location.href = WONDERBOUND_URL;
     } else if (app && app !== 'sexta') {
       setTelaAtual(app);
       window.history.replaceState({}, document.title);
@@ -193,15 +193,15 @@ export default function Home() {
               </button>
             </div>
 
-            {/* APP — Projeto Armor (bloco quadrado, largura total, sem cantos arredondados) */}
+            {/* APP — Wonderbound (bloco quadrado, largura total, sem cantos arredondados) */}
             <div
-              onClick={() => { window.location.href = PROJETO_ARMOR_URL; }}
+              onClick={() => { window.location.href = WONDERBOUND_URL; }}
               className="w-full aspect-square overflow-hidden cursor-pointer active:scale-[0.99] transition-transform duration-300 group"
             >
               <CachedImage
                 src="/apps/armor-bg.webp"
                 cacheKey="armor_bg"
-                alt="Projeto Armor"
+                alt="Wonderbound"
                 decoding="async"
                 fetchpriority="high"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"

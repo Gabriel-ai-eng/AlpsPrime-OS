@@ -77,7 +77,7 @@ export default function Privacidade() {
           </h3>
           <ul className="ml-5 list-disc space-y-1">
             <li>
-              Uso e desempenho: progresso e pontuação em jogos (Projeto Armor),
+              Uso e desempenho: progresso e pontuação em jogos (Wonderbound),
               tempo de uso e métricas de utilização, registros técnicos (logs),
               identificadores de dispositivo/sessão.
             </li>
@@ -99,7 +99,7 @@ export default function Privacidade() {
               Sexta-feira: conversas e mensagens com a IA; suas preferências de
               uso.
             </li>
-            <li>Projeto Armor: progresso e pontuação no jogo.</li>
+            <li>Wonderbound: progresso e pontuação no jogo.</li>
           </ul>
         </Section>
 

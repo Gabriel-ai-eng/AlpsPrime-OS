@@ -8,7 +8,7 @@ const PREFS_KEY = 'alps_prefs_v1';
 export const DEFAULT_PREFS = {
   // Notificações por sub-app
   notif_sexta: true,
-  notif_armor: true,
+  notif_wonderbound: true,
   // Não perturbe
   dnd_enabled: false,
   dnd_from: '22:00',

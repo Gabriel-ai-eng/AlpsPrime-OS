@@ -35,7 +35,7 @@ pessoais.**
   nome de perfil e preferências.
 
 ### 3.2. Dados coletados automaticamente
-- **Uso e desempenho:** progresso e pontuação em jogos (Projeto Armor), tempo de
+- **Uso e desempenho:** progresso e pontuação em jogos (Wonderbound), tempo de
   uso e métricas de utilização, registros técnicos (logs), identificadores de
   dispositivo/sessão.
 - **Notificações:** status da permissão de notificações do navegador (por
@@ -45,7 +45,7 @@ pessoais.**
 
 ### 3.3. O que cada Sub-app acessa
 - **Sexta-feira:** conversas e mensagens com a IA; suas preferências de uso.
-- **Projeto Armor:** progresso e pontuação no jogo.
+- **Wonderbound:** progresso e pontuação no jogo.
 
 ## 4. Para que usamos os dados (finalidades)
 

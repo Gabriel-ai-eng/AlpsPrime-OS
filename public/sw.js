@@ -112,7 +112,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // só o próprio site
 
-  // Backend e sub-apps (Projeto Armor, FKW): o SW não se mete.
+  // Backend e sub-apps (Wonderbound, FKW): o SW não se mete.
   if (
     url.pathname.startsWith('/api/') ||
     url.pathname.startsWith('/jogo') ||

@@ -28,12 +28,12 @@ const LABEL_BY_TYPE = {
 };
 
 // Qual sub-app gerou a notificação. Hoje a marca é a Sexta-feira; o campo
-// `app` (quando existir) deixa armor pronto para o futuro.
+// `app` (quando existir) deixa wonderbound pronto para o futuro.
 function notifApp(n) {
   return n?.app || 'sexta';
 }
 function appPref(prefs, app) {
-  if (app === 'armor') return prefs.notif_armor;
+  if (app === 'wonderbound') return prefs.notif_wonderbound;
   return prefs.notif_sexta;
 }
 

@@ -108,9 +108,9 @@ const PRODUTOS = [
     disponivel: false,
   },
   {
-    id: 'armor',
+    id: 'wonderbound',
     eyebrow: 'Jogo de ação',
-    titulo: 'Projeto Armor',
+    titulo: 'Wonderbound',
     subtitulo: 'Conheça a nova geração da ação e sobrevivência.',
     img: '/apps/armor-hero.webp',
     quadrado: false,
@@ -169,7 +169,7 @@ function FaqItem({ q, a }) {
 const ORBIT_ICONS = [
   { id: 'sexta', src: '/apps/sexta-logo-square.webp', radius: 0.36, ellipse: 0.58, speed: 1, phase: 0 },
   { id: 'fkw', src: '/apps/fkw-logo-square.webp', radius: 0.4, ellipse: 0.58, speed: 0.82, phase: 120 },
-  { id: 'armor', src: '/apps/armor-logo-square.webp', radius: 0.385, ellipse: 0.58, speed: 1.18, phase: 240 },
+  { id: 'wonderbound', src: '/apps/armor-logo-square.webp', radius: 0.385, ellipse: 0.58, speed: 1.18, phase: 240 },
 ];
 
 const ORBIT_SCROLL_RANGE = 220; // px de scroll até a órbita parar de vez
