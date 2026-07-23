@@ -1,9 +1,10 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, LogOut, LogIn } from 'lucide-react';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { useT } from '@/lib/i18n';
+import { CIRCULO, ESPIRAL, COIL, ONDA, RISCO } from './rostoSextaKeyframes';
 
 gsap.registerPlugin(MorphSVGPlugin);
 
@@ -21,6 +22,14 @@ gsap.registerPlugin(MorphSVGPlugin);
 // rosto. Por isso fica espelhado: o olho DIREITO da IA aparece do lado
 // ESQUERDO da tela, e o olho ESQUERDO da IA aparece do lado DIREITO da
 // tela. Mantenha essa convenção em qualquer alteração futura.
+//
+// SAÍDA / ENTRADA ("Sair"/"Entrar") — o anel do rosto é um `path` de 140
+// pontos (o CIRCULO de rostoSextaKeyframes, visualmente idêntico ao antigo
+// <circle>). O botão "Sair" toca um timeline que desenrola esse fio de luz
+// como no sprite sheet: CIRCULO → ESPIRAL → COIL → ONDA → RISCO (some para
+// a direita), enquanto os olhos/boca se dissolvem. "Entrar" é o MESMO
+// timeline tocado ao contrário (reverse), então a IA volta exatamente como
+// saiu. Nada disso altera a aparência em repouso.
 // ============================================================
 
 // viewBox 941x1672 · rosto centrado em (470,813), raio 193.
@@ -39,12 +48,55 @@ const TRISTE = {
 
 export default function RostoSexta({ onVoltar }) {
   const svgRef = useRef(null);
-  const animandoRef = useRef(false);
+  const animandoRef = useRef(false);   // morph feliz/triste em andamento
+  const saidaTlRef = useRef(null);     // timeline de saída/entrada
+  const saidaAtivaRef = useRef(false); // saída/entrada em andamento
   const [estado, setEstado] = useState('feliz');
+  const [saiu, setSaiu] = useState(false);
   const t = useT();
 
+  // Monta o timeline da saída uma vez (fica pausado no início = rosto presente).
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const ctx = gsap.context(() => {
+      const q = gsap.utils.selector(svg);
+      const est = q('.estela');          // anel (3 camadas de neon)
+      const feats = q('.exit-feature');  // olhos + boca (9 = 3 traços × 3 camadas)
+      const grupo = q('.rosto-grupo');   // wrapper p/ o "respiro" da saída
+      const reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const k = reduz ? 0 : 1; // encolhe as durações se o usuário pediu menos animação
+      const mo = (shape) => ({ shape, type: 'linear', shapeIndex: 0 });
+
+      const tl = gsap.timeline({
+        paused: true,
+        onComplete: () => { saidaAtivaRef.current = false; setSaiu(true); },
+        onReverseComplete: () => { saidaAtivaRef.current = false; setSaiu(false); },
+      });
+
+      // "respiro" sutil do rosto antes de desenrolar (frames 1–5 do sprite)
+      tl.to(grupo, { scale: 1.04, duration: 0.35 * k, ease: 'sine.out', svgOrigin: '470 813' }, 0)
+        .to(grupo, { scale: 1.0, duration: 1.85 * k, ease: 'sine.inOut', svgOrigin: '470 813' }, 0.35 * k);
+
+      // olhos e boca se dissolvem enquanto o anel começa a desenrolar
+      tl.to(feats, { opacity: 0, duration: 0.4 * k, ease: 'power1.in' }, 0.2 * k);
+
+      // o fio de luz se rearranja: círculo → espiral → coil+cauda → onda → risco
+      tl.to(est, { morphSVG: mo(ESPIRAL), duration: 0.6 * k, ease: 'power1.inOut' }, 0.3 * k)
+        .to(est, { morphSVG: mo(COIL),    duration: 0.5 * k, ease: 'power1.inOut' }, `>${-0.05 * k}`)
+        .to(est, { morphSVG: mo(ONDA),    duration: 0.5 * k, ease: 'power1.inOut' }, `>${-0.05 * k}`)
+        .to(est, { morphSVG: mo(RISCO),   duration: 0.6 * k, ease: 'power2.in'   }, `>${-0.05 * k}`);
+
+      // o risco de luz se apaga ao voar para a direita
+      tl.to(est, { opacity: 0, duration: 0.5 * k, ease: 'power1.in' }, `>${-0.55 * k}`);
+
+      saidaTlRef.current = tl;
+    }, svgRef);
+    return () => ctx.revert();
+  }, []);
+
   const alternar = useCallback(() => {
-    if (animandoRef.current || !svgRef.current) return;
+    if (animandoRef.current || saidaAtivaRef.current || saiu || !svgRef.current) return;
     const alvo = estado === 'feliz' ? TRISTE : FELIZ;
     const svg = svgRef.current;
     const reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -64,7 +116,16 @@ export default function RostoSexta({ onVoltar }) {
       onComplete: () => { animandoRef.current = false; },
     });
     setEstado((e) => (e === 'feliz' ? 'triste' : 'feliz'));
-  }, [estado]);
+  }, [estado, saiu]);
+
+  // "Sair" toca o timeline; "Entrar" toca o MESMO timeline ao contrário.
+  const sairEntrar = useCallback(() => {
+    const tl = saidaTlRef.current;
+    if (!tl || saidaAtivaRef.current || animandoRef.current) return;
+    saidaAtivaRef.current = true;
+    if (!saiu) tl.play();
+    else tl.reverse();
+  }, [saiu]);
 
   const conteudo = (
     <div className="fixed inset-0 z-[999999] bg-[#f1ece5] overflow-hidden">
@@ -111,26 +172,29 @@ export default function RostoSexta({ onVoltar }) {
         <rect x="120" y="1196" width="700" height="6" rx="3" fill="#fff8ec" opacity="0.5" filter="url(#rs-haloSoft)"/>
         <rect width="941" height="1672" fill="url(#rs-vig)"/>
 
-        {/* HALO difuso */}
-        <g filter="url(#rs-haloBig)" opacity="0.42" fill="none" stroke="#edcca2" strokeLinecap="round">
-          <circle cx="470" cy="813" r="193" strokeWidth="11"/>
-          <path className="f-olhoDireitoIA" d={FELIZ.olhoDireitoIA} strokeWidth="7"/>
-          <path className="f-olhoEsquerdoIA" d={FELIZ.olhoEsquerdoIA} strokeWidth="7"/>
-          <path className="f-boca"  d={FELIZ.boca}  strokeWidth="9"/>
-        </g>
-        {/* brilho MÉDIO */}
-        <g filter="url(#rs-haloSoft)" fill="none" stroke="url(#rs-gold)" strokeLinecap="round">
-          <circle cx="470" cy="813" r="193" strokeWidth="5.5"/>
-          <path className="f-olhoDireitoIA" d={FELIZ.olhoDireitoIA} strokeWidth="4"/>
-          <path className="f-olhoEsquerdoIA" d={FELIZ.olhoEsquerdoIA} strokeWidth="4"/>
-          <path className="f-boca"  d={FELIZ.boca}  strokeWidth="4.6"/>
-        </g>
-        {/* NÚCLEO nítido */}
-        <g fill="none" stroke="#fffdf6" strokeLinecap="round" opacity="0.95">
-          <circle cx="470" cy="813" r="193" strokeWidth="2.4"/>
-          <path className="f-olhoDireitoIA" d={FELIZ.olhoDireitoIA} strokeWidth="1.8"/>
-          <path className="f-olhoEsquerdoIA" d={FELIZ.olhoEsquerdoIA} strokeWidth="1.8"/>
-          <path className="f-boca"  d={FELIZ.boca}  strokeWidth="2.2"/>
+        {/* rosto (wrapper p/ o "respiro" da saída) */}
+        <g className="rosto-grupo">
+          {/* HALO difuso */}
+          <g filter="url(#rs-haloBig)" opacity="0.42" fill="none" stroke="#edcca2" strokeLinecap="round" strokeLinejoin="round">
+            <path className="estela" d={CIRCULO} strokeWidth="11"/>
+            <path className="f-olhoDireitoIA exit-feature" d={FELIZ.olhoDireitoIA} strokeWidth="7"/>
+            <path className="f-olhoEsquerdoIA exit-feature" d={FELIZ.olhoEsquerdoIA} strokeWidth="7"/>
+            <path className="f-boca exit-feature" d={FELIZ.boca} strokeWidth="9"/>
+          </g>
+          {/* brilho MÉDIO */}
+          <g filter="url(#rs-haloSoft)" fill="none" stroke="url(#rs-gold)" strokeLinecap="round" strokeLinejoin="round">
+            <path className="estela" d={CIRCULO} strokeWidth="5.5"/>
+            <path className="f-olhoDireitoIA exit-feature" d={FELIZ.olhoDireitoIA} strokeWidth="4"/>
+            <path className="f-olhoEsquerdoIA exit-feature" d={FELIZ.olhoEsquerdoIA} strokeWidth="4"/>
+            <path className="f-boca exit-feature" d={FELIZ.boca} strokeWidth="4.6"/>
+          </g>
+          {/* NÚCLEO nítido */}
+          <g fill="none" stroke="#fffdf6" strokeLinecap="round" strokeLinejoin="round" opacity="0.95">
+            <path className="estela" d={CIRCULO} strokeWidth="2.4"/>
+            <path className="f-olhoDireitoIA exit-feature" d={FELIZ.olhoDireitoIA} strokeWidth="1.8"/>
+            <path className="f-olhoEsquerdoIA exit-feature" d={FELIZ.olhoEsquerdoIA} strokeWidth="1.8"/>
+            <path className="f-boca exit-feature" d={FELIZ.boca} strokeWidth="2.2"/>
+          </g>
         </g>
       </svg>
 
@@ -143,19 +207,35 @@ export default function RostoSexta({ onVoltar }) {
         <ChevronLeft className="w-6 h-6" />
       </button>
 
-      {/* Alternar expressão — abaixo do rosto */}
-      <button
-        onClick={alternar}
-        aria-label={t('Alternar expressão')}
-        className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5 rounded-full border border-black/10 bg-white/70 backdrop-blur px-6 py-3 text-[15px] font-medium text-black/70 shadow-sm active:scale-95 transition"
+      {/* Botões abaixo do rosto: alternar expressão + sair/entrar */}
+      <div
+        className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3"
         style={{ top: '66%' }}
       >
-        <span
-          className="w-2.5 h-2.5 rounded-full transition-colors"
-          style={{ backgroundColor: estado === 'feliz' ? '#e6b64c' : '#9db2d4' }}
-        />
-        {estado === 'feliz' ? t('Feliz') : t('Triste')}
-      </button>
+        <button
+          onClick={alternar}
+          disabled={saiu}
+          aria-label={t('Alternar expressão')}
+          className="flex items-center gap-2.5 rounded-full border border-black/10 bg-white/70 backdrop-blur px-5 py-3 text-[15px] font-medium text-black/70 shadow-sm active:scale-95 transition disabled:opacity-40 disabled:pointer-events-none"
+        >
+          <span
+            className="w-2.5 h-2.5 rounded-full transition-colors"
+            style={{ backgroundColor: estado === 'feliz' ? '#e6b64c' : '#9db2d4' }}
+          />
+          {estado === 'feliz' ? t('Feliz') : t('Triste')}
+        </button>
+
+        {/* Rótulos literais (o dicionário mapeia "Sair"/"Entrar" para o sentido
+            de autenticação — aqui é sair/voltar do rosto, então não usamos t()). */}
+        <button
+          onClick={sairEntrar}
+          aria-label={saiu ? 'Entrar' : 'Sair'}
+          className="flex items-center gap-2 rounded-full border border-black/10 bg-white/70 backdrop-blur px-5 py-3 text-[15px] font-medium text-black/70 shadow-sm active:scale-95 transition"
+        >
+          {saiu ? <LogIn className="w-4 h-4" /> : <LogOut className="w-4 h-4" />}
+          {saiu ? 'Entrar' : 'Sair'}
+        </button>
+      </div>
     </div>
   );
 
