@@ -125,6 +125,15 @@ const PRODUTOS = [
     quadrado: false,
     disponivel: false,
   },
+  {
+    id: 'sexta',
+    eyebrow: 'Sexta-feira',
+    titulo: 'Sexta-feira',
+    subtitulo: 'O app social da Alps Prime.',
+    img: '/apps/sexta-hero.webp',
+    quadrado: false,
+    disponivel: false,
+  },
 ];
 
 const FAQ = [
@@ -343,6 +352,26 @@ export default function Welcome() {
                       className="block w-full object-cover"
                     />
                     <span className="absolute left-1/2 top-[13%] -translate-x-1/2 rounded-full bg-black px-10 py-3.5 text-lg text-white sm:px-12 sm:py-4 sm:text-xl">
+                      {t('Em breve')}
+                    </span>
+                  </div>
+                );
+              }
+
+              if (p.id === 'sexta') {
+                return (
+                  <div key={p.id} className="relative block w-full bg-black">
+                    <img
+                      src={p.img}
+                      alt={p.titulo}
+                      loading="lazy"
+                      decoding="async"
+                      className="block w-full object-cover"
+                    />
+                    <span
+                      className="absolute left-1/2 top-[13%] -translate-x-1/2 rounded-full px-10 py-3.5 text-lg text-white sm:px-12 sm:py-4 sm:text-xl"
+                      style={{ backgroundColor: '#0071E3' }}
+                    >
                       {t('Em breve')}
                     </span>
                   </div>
