@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { List, GalleryVerticalEnd, Grid3x3, Star } from 'lucide-react';
+import { List, GalleryVerticalEnd, Grid3x3, Star, ChevronLeft } from 'lucide-react';
 import { useT } from '@/lib/i18n';
 import { useFavorites } from '@/lib/useFavorites';
 import { APPS, BLOQUEADOS } from '@/lib/apps';
@@ -65,12 +65,28 @@ export default function Categorias() {
   const t = useT();
   const [filtro, setFiltro] = useState('todos');
   const [modoVisual, setModoVisual] = useState(lerModoVisualSalvo);
+  const [sextaAberta, setSextaAberta] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
 
   const selecionarModoVisual = (id) => {
     setModoVisual(id);
     try { localStorage.setItem(MODO_VISUAL_KEY, id); } catch {}
   };
+
+  // Clique num card de app. A Sexta-feira abre a tela do rosto (SVG) aqui
+  // mesmo; os demais seguem o fluxo normal (bloqueados não fazem nada,
+  // apps com `url` externa navegam, e o resto vai para o Home).
+  const aoClicarApp = (app) => {
+    if (app.id === 'sexta') { setSextaAberta(true); return; }
+    if (BLOQUEADOS.has(app.id)) return;
+    if (app.url) { window.location.href = app.url; return; }
+    navigate('/home');
+  };
+
+  // Card tem feedback de toque quando é acionável: a Sexta-feira agora abre
+  // a tela do rosto, então também conta como clicável (mesmo estando em
+  // BLOQUEADOS, que segue valendo para o FKW).
+  const clicavel = (app) => app.id === 'sexta' || !BLOQUEADOS.has(app.id);
 
   const appsVisiveis =
     filtro === 'todos' ? APPS
@@ -135,12 +151,8 @@ export default function Categorias() {
           appsVisiveis.map((app) => (
             <div
               key={app.id}
-              onClick={() => {
-                if (BLOQUEADOS.has(app.id)) return;
-                if (app.url) { window.location.href = app.url; return; }
-                navigate('/home');
-              }}
-              className={`relative aspect-square w-full rounded-3xl bg-card border border-border overflow-hidden transition-all ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
+              onClick={() => aoClicarApp(app)}
+              className={`relative aspect-square w-full rounded-3xl bg-card border border-border overflow-hidden transition-all ${clicavel(app) ? 'active:scale-[0.98] cursor-pointer' : ''}`}
             >
               <img
                 src={app.logoQuadrado || app.logo}
@@ -168,12 +180,8 @@ export default function Categorias() {
           appsVisiveis.map((app) => (
             <div
               key={app.id}
-              onClick={() => {
-                if (BLOQUEADOS.has(app.id)) return;
-                if (app.url) { window.location.href = app.url; return; }
-                navigate('/home');
-              }}
-              className={`relative aspect-square w-full rounded-3xl bg-card border border-border overflow-hidden transition-all ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
+              onClick={() => aoClicarApp(app)}
+              className={`relative aspect-square w-full rounded-3xl bg-card border border-border overflow-hidden transition-all ${clicavel(app) ? 'active:scale-[0.98] cursor-pointer' : ''}`}
             >
               <img
                 src={app.logoQuadrado || app.logo}
@@ -200,12 +208,8 @@ export default function Categorias() {
             return (
               <div
                 key={app.id}
-                onClick={() => {
-                  if (BLOQUEADOS.has(app.id)) return;
-                  if (app.url) { window.location.href = app.url; return; }
-                  navigate('/home');
-                }}
-                className={`relative flex items-center gap-4 rounded-3xl bg-card border border-border transition-all overflow-hidden ${hero ? '' : 'p-4'} ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
+                onClick={() => aoClicarApp(app)}
+                className={`relative flex items-center gap-4 rounded-3xl bg-card border border-border transition-all overflow-hidden ${hero ? '' : 'p-4'} ${clicavel(app) ? 'active:scale-[0.98] cursor-pointer' : ''}`}
               >
                 <div className={hero
                   ? 'relative w-20 self-stretch flex-shrink-0'
@@ -247,6 +251,26 @@ export default function Categorias() {
           </p>
         )}
       </div>
+
+      {/* TELA DA SEXTA-FEIRA — o rosto da IA (SVG vetorial) em tela cheia,
+          aberto ao tocar no bloco da Sexta-feira. */}
+      {sextaAberta && (
+        <div className="fixed inset-0 z-[999999] bg-[#f1ece5]">
+          <img
+            src="/apps/sexta-face.svg"
+            alt="Sexta-feira"
+            draggable="false"
+            className="w-full h-full object-cover select-none"
+          />
+          <button
+            onClick={() => setSextaAberta(false)}
+            aria-label={t('Voltar')}
+            className="absolute top-6 left-5 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-black/[0.06] backdrop-blur-sm text-black/50 hover:text-black/80 active:scale-90 transition"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        </div>
+      )}
 
     </div>
   );
