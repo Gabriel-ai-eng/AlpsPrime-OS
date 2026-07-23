@@ -355,4 +355,9 @@ export const EN = {
   'Alternar expressão': 'Toggle expression',
   'Feliz': 'Happy',
   'Triste': 'Sad',
+
+  // ── FKW (placeholder de acesso antecipado) ──
+  'Acesso antecipado': 'Early access',
+  'O jogo ainda está em construção. Como testador beta, você será um dos primeiros a jogar assim que ele estiver pronto.':
+    'The game is still under construction. As a beta tester, you will be one of the first to play as soon as it is ready.',
 };

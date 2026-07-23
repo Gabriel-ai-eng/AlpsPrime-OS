@@ -2,6 +2,7 @@
  * Preferências locais do Alps OS (notificações por app, bem-estar, beta, etc.)
  * e rastreamento simples de tempo de uso — tudo no localStorage do dispositivo.
  */
+import { useEffect, useState } from 'react';
 
 const PREFS_KEY = 'alps_prefs_v1';
 
@@ -42,6 +43,24 @@ export function setPref(key, value) {
     window.dispatchEvent(new CustomEvent('alps:prefchange', { detail: { key, value } }));
   }
   return p;
+}
+
+/**
+ * Se "Recursos beta" está ativado neste aparelho — usado para liberar o
+ * acesso a apps ainda em construção (ex.: FKW, Sexta-feira) para quem topou
+ * testar antes de todo mundo. Reage em tempo real à mudança feita em
+ * Configurações, sem precisar recarregar a página.
+ */
+export function useBetaFeatures() {
+  const [beta, setBeta] = useState(() => getPrefs().beta_features);
+  useEffect(() => {
+    const aoMudar = (e) => {
+      if (e.detail?.key === 'beta_features') setBeta(!!e.detail.value);
+    };
+    window.addEventListener('alps:prefchange', aoMudar);
+    return () => window.removeEventListener('alps:prefchange', aoMudar);
+  }, []);
+  return beta;
 }
 
 /* ── Tempo de uso ── */

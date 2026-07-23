@@ -1,21 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Trash2, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useT } from '@/lib/i18n';
 import { useFavorites } from '@/lib/useFavorites';
 import { APPS, BLOQUEADOS } from '@/lib/apps';
+import { useBetaFeatures } from '@/lib/appPrefs';
+import RostoSexta from '@/components/RostoSexta';
+import FkwPlaceholder from '@/components/FkwPlaceholder';
 
 export default function Favoritos() {
   const navigate = useNavigate();
   const t = useT();
   const { favoriteIds, toggleFavorite } = useFavorites();
+  const [sextaAberta, setSextaAberta] = useState(false);
+  const [fkwAberta, setFkwAberta] = useState(false);
+  const betaAtivo = useBetaFeatures();
 
   // Apps favoritados: mesmo catálogo usado em Categorias, filtrado pelos ids
   // salvos no aparelho — favoritar lá já aparece aqui na hora.
   const favorites = APPS.filter((app) => favoriteIds.includes(app.id));
 
+  // Um app em BLOQUEADOS só fica acessível para quem ativou "Recursos beta".
+  const clicavel = (app) => !BLOQUEADOS.has(app.id) || betaAtivo;
+
   const abrirApp = (app) => {
+    if (app.id === 'sexta') { if (betaAtivo) setSextaAberta(true); return; }
+    if (app.id === 'fkw') { if (betaAtivo) setFkwAberta(true); return; }
     if (BLOQUEADOS.has(app.id)) return;
     if (app.url) { window.location.href = app.url; return; }
     navigate('/home');
@@ -55,7 +66,7 @@ export default function Favoritos() {
                   exit={{ opacity: 0, scale: 0.95, x: -20 }}
                   transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.2), ease: [0.22, 1, 0.36, 1] }}
                   onClick={() => abrirApp(app)}
-                  className={`group relative flex items-center justify-between p-4 sm:p-5 rounded-[28px] bg-card border border-border hover:border-gold/20 backdrop-blur-2xl hover:bg-muted/60 transition-all duration-500 overflow-hidden ${BLOQUEADOS.has(app.id) ? '' : 'cursor-pointer'}`}
+                  className={`group relative flex items-center justify-between p-4 sm:p-5 rounded-[28px] bg-card border border-border hover:border-gold/20 backdrop-blur-2xl hover:bg-muted/60 transition-all duration-500 overflow-hidden ${clicavel(app) ? 'cursor-pointer' : ''}`}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-gold/0 via-gold/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
@@ -72,7 +83,7 @@ export default function Favoritos() {
                         {t(app.desc)}
                       </p>
                       <div className="flex items-center gap-2 mt-1.5">
-                        {app.status === 'soon' && (
+                        {app.status === 'soon' && !clicavel(app) && (
                           <span className="text-[10px] uppercase tracking-wider font-semibold text-gold bg-gold/10 px-2 py-0.5 rounded-full">
                             {t('Em breve')}
                           </span>
@@ -95,7 +106,7 @@ export default function Favoritos() {
                     </button>
 
                     {/* Botão de Abrir App */}
-                    {!BLOQUEADOS.has(app.id) && (
+                    {clicavel(app) && (
                       <button
                         className="hidden sm:flex w-10 h-10 rounded-full items-center justify-center bg-muted border border-border text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-all duration-300 outline-none group/btn"
                         title={t('Acessar')}
@@ -127,6 +138,9 @@ export default function Favoritos() {
           )}
         </AnimatePresence>
       </div>
+
+      {sextaAberta && <RostoSexta onVoltar={() => setSextaAberta(false)} />}
+      {fkwAberta && <FkwPlaceholder onVoltar={() => setFkwAberta(false)} />}
     </div>
   );
 }

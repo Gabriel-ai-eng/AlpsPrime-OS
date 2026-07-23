@@ -1,19 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Sparkles, Gamepad2, Grip } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useT } from '@/lib/i18n';
+import { useBetaFeatures } from '@/lib/appPrefs';
+import RostoSexta from '@/components/RostoSexta';
 
 const APPS = [
   { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', icon: Sparkles, corIcone: 'text-[#C9A24F]', bgIcone: 'bg-[#C9A24F]/10' },
   { id: 'wonderbound', nome: 'Wonderbound', desc: 'Jogo de ação e sobrevivência com gravidade.', icon: Gamepad2, corIcone: 'text-blue-400', bgIcone: 'bg-blue-500/10' },
 ];
 
-// Apps indisponíveis: aparecem na lista, mas clicar neles NÃO faz nada.
+// Apps indisponíveis: só ficam acessíveis para quem ativou "Recursos beta".
 const BLOQUEADOS = new Set(['sexta']);
 
 export default function Todos() {
   const navigate = useNavigate();
   const t = useT();
+  const [sextaAberta, setSextaAberta] = useState(false);
+  const betaAtivo = useBetaFeatures();
+  const clicavel = (app) => !BLOQUEADOS.has(app.id) || betaAtivo;
 
   return (
     <div className="w-full min-h-screen bg-background text-foreground font-sans overflow-x-hidden flex flex-col">
@@ -35,8 +40,12 @@ export default function Todos() {
           return (
             <div
               key={app.id}
-              onClick={() => { if (BLOQUEADOS.has(app.id)) return; navigate('/home'); }} // bloqueados não fazem nada
-              className={`flex items-center gap-4 p-4 rounded-3xl bg-card border border-border shadow-sm transition-all ${BLOQUEADOS.has(app.id) ? '' : 'active:scale-[0.98] cursor-pointer'}`}
+              onClick={() => {
+                if (app.id === 'sexta') { if (betaAtivo) setSextaAberta(true); return; }
+                if (BLOQUEADOS.has(app.id)) return;
+                navigate('/home');
+              }}
+              className={`flex items-center gap-4 p-4 rounded-3xl bg-card border border-border shadow-sm transition-all ${clicavel(app) ? 'active:scale-[0.98] cursor-pointer' : ''}`}
             >
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${app.bgIcone}`}>
                 <Icon className={`w-7 h-7 ${app.corIcone}`} />
@@ -49,6 +58,8 @@ export default function Todos() {
           );
         })}
       </div>
+
+      {sextaAberta && <RostoSexta onVoltar={() => setSextaAberta(false)} />}
 
     </div>
   );

@@ -43,8 +43,10 @@ export default function Home() {
 
   useEffect(() => {
     const app = location.state?.openApp;
-    // Sexta-feira está indisponível: nunca abrir, mesmo que algum
-    // fluxo tente navegar com esse openApp.
+    // Sexta-feira (a IA de voz/câmera completa deste componente) segue fora
+    // do fluxo de navegação: quem abre o card da Sexta-feira em qualquer
+    // tela (Categorias, Busca, Favoritos, Todos) vê o rosto SVG simples
+    // (RostoSexta), liberado só com "Recursos beta" — nunca esta rota.
     if (app === 'wonderbound') {
       // jogo externo: redireciona na mesma aba
       window.location.href = WONDERBOUND_URL;

@@ -4,7 +4,9 @@ import { List, GalleryVerticalEnd, Grid3x3, Star } from 'lucide-react';
 import { useT } from '@/lib/i18n';
 import { useFavorites } from '@/lib/useFavorites';
 import { APPS, BLOQUEADOS } from '@/lib/apps';
+import { useBetaFeatures } from '@/lib/appPrefs';
 import RostoSexta from '@/components/RostoSexta';
+import FkwPlaceholder from '@/components/FkwPlaceholder';
 
 // Ícone de cronômetro (selo "em breve") recriado em SVG — corpo sólido,
 // coroa no topo, botão lateral e o mostrador em forma de "fatia" (ponteiro
@@ -67,6 +69,8 @@ export default function Categorias() {
   const [filtro, setFiltro] = useState('todos');
   const [modoVisual, setModoVisual] = useState(lerModoVisualSalvo);
   const [sextaAberta, setSextaAberta] = useState(false);
+  const [fkwAberta, setFkwAberta] = useState(false);
+  const betaAtivo = useBetaFeatures();
   const { isFavorite, toggleFavorite } = useFavorites();
 
   const selecionarModoVisual = (id) => {
@@ -74,20 +78,20 @@ export default function Categorias() {
     try { localStorage.setItem(MODO_VISUAL_KEY, id); } catch {}
   };
 
-  // Clique num card de app. A Sexta-feira abre a tela do rosto (SVG) aqui
-  // mesmo; os demais seguem o fluxo normal (bloqueados não fazem nada,
-  // apps com `url` externa navegam, e o resto vai para o Home).
+  // Um app em BLOQUEADOS (Sexta-feira, FKW) só fica acessível para quem
+  // ativou "Recursos beta" em Configurações — os demais seguem bloqueados.
+  const clicavel = (app) => !BLOQUEADOS.has(app.id) || betaAtivo;
+
+  // Clique num card de app. Sexta-feira e FKW abrem a tela deles aqui mesmo
+  // (e só se liberados pelo beta); os demais seguem o fluxo normal (apps
+  // com `url` externa navegam, e o resto vai para o Home).
   const aoClicarApp = (app) => {
-    if (app.id === 'sexta') { setSextaAberta(true); return; }
+    if (app.id === 'sexta') { if (betaAtivo) setSextaAberta(true); return; }
+    if (app.id === 'fkw') { if (betaAtivo) setFkwAberta(true); return; }
     if (BLOQUEADOS.has(app.id)) return;
     if (app.url) { window.location.href = app.url; return; }
     navigate('/home');
   };
-
-  // Card tem feedback de toque quando é acionável: a Sexta-feira agora abre
-  // a tela do rosto, então também conta como clicável (mesmo estando em
-  // BLOQUEADOS, que segue valendo para o FKW).
-  const clicavel = (app) => app.id === 'sexta' || !BLOQUEADOS.has(app.id);
 
   const appsVisiveis =
     filtro === 'todos' ? APPS
@@ -162,7 +166,7 @@ export default function Categorias() {
                 decoding="async"
                 fetchpriority="high"
               />
-              {app.status === 'soon' && (
+              {app.status === 'soon' && !clicavel(app) && (
                 <span className="absolute top-3 left-3 text-[10px] font-semibold uppercase tracking-wider text-gold bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded-full leading-none">
                   {t('Em breve')}
                 </span>
@@ -220,7 +224,7 @@ export default function Categorias() {
                 <div className={`flex-1 min-w-0 ${hero ? 'py-4 pr-14' : 'pr-10'}`}>
                   <div className="flex items-center gap-2 mb-0.5">
                     <h3 className="text-[17px] font-semibold text-foreground">{app.nome}</h3>
-                    {!hero && app.status === 'soon' && (
+                    {!hero && app.status === 'soon' && !clicavel(app) && (
                       <span className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-wider text-gold bg-gold/10 border border-gold/20 px-2 py-0.5 rounded-full">
                         {t('Em breve')}
                       </span>
@@ -236,7 +240,7 @@ export default function Categorias() {
                 >
                   <Star className={`w-4 h-4 ${isFavorite(app.id) ? 'text-gold fill-gold' : hero ? 'text-white' : 'text-muted-foreground'}`} />
                 </button>
-                {hero && app.status === 'soon' && (
+                {hero && app.status === 'soon' && !clicavel(app) && (
                   <span className="absolute top-[50px] right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center bg-black/60 backdrop-blur-sm">
                     <TimerIcon className="w-4 h-4 text-white" />
                   </span>
@@ -256,6 +260,10 @@ export default function Categorias() {
       {/* TELA DA SEXTA-FEIRA — o rosto da IA (SVG vetorial que se deforma
           entre feliz/triste com GSAP), aberto ao tocar no bloco da Sexta. */}
       {sextaAberta && <RostoSexta onVoltar={() => setSextaAberta(false)} />}
+
+      {/* TELA DO FKW — placeholder de acesso antecipado (o jogo em si ainda
+          não existe), aberto ao tocar no bloco do FKW. */}
+      {fkwAberta && <FkwPlaceholder onVoltar={() => setFkwAberta(false)} />}
 
     </div>
   );

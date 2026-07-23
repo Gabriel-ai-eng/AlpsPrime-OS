@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Search as SearchIcon, X, Command } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useT } from '@/lib/i18n';
+import { useBetaFeatures } from '@/lib/appPrefs';
+import RostoSexta from '@/components/RostoSexta';
+import FkwPlaceholder from '@/components/FkwPlaceholder';
 
 // id = chave usada na navegação (openApp → telaAtual no Home). `status: 'soon'`
 // marca os apps ainda não lançados. Wonderbound (id 'wonderbound') vem primeiro.
@@ -29,8 +32,8 @@ const SUB_APPS = [
   }
 ];
 
-// Apps indisponíveis: continuam aparecendo na lista, mas clicar neles NÃO faz
-// nada (o usuário não consegue acessar Sexta-feira nem Free Kick World).
+// Apps indisponíveis: continuam aparecendo na lista, mas só ficam clicáveis
+// para quem ativou "Recursos beta" em Configurações — ver useBetaFeatures.
 const BLOQUEADOS = new Set(['sexta', 'fkw']);
 
 // minúsculas + sem acentos, para a busca casar "Projeto" com "projeto" etc.
@@ -39,8 +42,14 @@ const normalize = (s) =>
 
 export default function Search() {
   const [query, setQuery] = useState('');
+  const [sextaAberta, setSextaAberta] = useState(false);
+  const [fkwAberta, setFkwAberta] = useState(false);
   const navigate = useNavigate();
+  const betaAtivo = useBetaFeatures();
   const t = useT();
+
+  // Um app em BLOQUEADOS só fica acessível para quem ativou "Recursos beta".
+  const clicavel = (app) => !BLOQUEADOS.has(app.id) || betaAtivo;
 
   const filteredApps = useMemo(() => {
     const q = normalize(query.trim());
@@ -109,14 +118,17 @@ export default function Search() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-                  // Apps bloqueados (Sexta-feira, Free Kick World): clicar não
-                  // faz nada. Os demais mandam o id no estado pro Home abrir.
+                  // Sexta-feira e FKW abrem a tela deles aqui mesmo, só se
+                  // liberados pelo beta. Os demais mandam o id no estado pro
+                  // Home abrir (ou navegam direto, se tiverem `url`).
                   onClick={() => {
+                    if (app.id === 'sexta') { if (betaAtivo) setSextaAberta(true); return; }
+                    if (app.id === 'fkw') { if (betaAtivo) setFkwAberta(true); return; }
                     if (BLOQUEADOS.has(app.id)) return;
                     if (app.url) { window.location.href = app.url; return; }
                     navigate('/home', { state: { openApp: app.id } });
                   }}
-                  className={`w-full rounded-[32px] overflow-hidden relative aspect-square group transition-all outline-none ${BLOQUEADOS.has(app.id) ? '' : 'cursor-pointer active:scale-95'}`}
+                  className={`w-full rounded-[32px] overflow-hidden relative aspect-square group transition-all outline-none ${clicavel(app) ? 'cursor-pointer active:scale-95' : ''}`}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <img
@@ -125,8 +137,8 @@ export default function Search() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
                   />
 
-                  {/* Selo minimalista para apps ainda não lançados */}
-                  {app.status === 'soon' && (
+                  {/* Selo minimalista para apps ainda não lançados (só quem não tem beta vê) */}
+                  {app.status === 'soon' && !clicavel(app) && (
                     <div className="absolute top-3.5 right-3.5 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur-md border border-white/15">
                       <span className="w-1.5 h-1.5 rounded-full bg-gold" />
                       <span className="text-[10px] font-semibold uppercase tracking-wider text-white/90">{t('Em breve')}</span>
@@ -148,6 +160,9 @@ export default function Search() {
         </div>
 
       </div>
+
+      {sextaAberta && <RostoSexta onVoltar={() => setSextaAberta(false)} />}
+      {fkwAberta && <FkwPlaceholder onVoltar={() => setFkwAberta(false)} />}
     </div>
   );
 }
