@@ -1,9 +1,13 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft } from 'lucide-react';
+import { gsap } from 'gsap';
+import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { useT } from '@/lib/i18n';
 import { CIRCULO } from './rostoSextaKeyframes';
 import { chamarCerebroSexta } from '@/lib/sextaApi';
+
+gsap.registerPlugin(MorphSVGPlugin);
 
 // ============================================================
 // ROSTO DA SEXTA-FEIRA — carinha em neon vetorial + assistente de voz.
@@ -25,6 +29,14 @@ const FELIZ = {
   olhoEsquerdoIA: 'M 542 740 C 555.8 740 567 757.9 567 780 C 567 802.1 555.8 820 542 820 C 528.2 820 517 802.1 517 780 C 517 757.9 528.2 740 542 740 Z', // lado direito da tela — mesmo oval aberto, espelhado
   boca:  'M 393 882 Q 473 952 545 886',
 };
+
+// Bocas para o "lip-sync" — FECHADA e ABERTA têm A MESMA estrutura (M Q Q Z,
+// dois cantos + dois pontos de controle), então o MorphSVG interpola entre
+// elas de forma linear e suave. Enquanto ela fala, a abertura (0..1) é
+// dirigida pelo ritmo da fala e trocamos a boca sorriso (FELIZ.boca) por
+// estas; ao terminar, voltamos ao sorriso.
+const BOCA_FECHADA = 'M 400 886 Q 470 894 540 886 Q 470 898 400 886 Z';
+const BOCA_ABERTA  = 'M 400 886 Q 470 862 540 886 Q 470 928 400 886 Z';
 
 // Chave da visão (Mistral) fica no navegador mesmo — não migrada pro
 // servidor. O cérebro (OpenRouter) roda em api/fn/sextaChat.
@@ -61,7 +73,10 @@ export default function RostoSexta({ onVoltar }) {
   const vadAtivoRef = useRef(false);
   const reconhecendoRef = useRef(false);
   const falandoRef = useRef(false);
-  const animacaoBocaRef = useRef(null);
+  const morphBocaRef = useRef(null);   // tween pausado (fechada→aberta), dirigido por .progress()
+  const rafBocaRef = useRef(null);     // loop de animação da boca
+  const aberturaRef = useRef(0);       // abertura suavizada da boca (0..1)
+  const picoBocaRef = useRef(0);       // "sotaque" que sobe a cada início de palavra (boundary)
   const historicoRef = useRef([]);
   const tempoComecouFalarRef = useRef(0);
   const ignorarMicAteRef = useRef(0);
@@ -300,33 +315,64 @@ export default function RostoSexta({ onVoltar }) {
   // ==========================================
   // FALAR — voz nativa do navegador (SpeechSynthesis), com boca animada
   // ==========================================
-  const pararFala = useCallback(() => {
-    window.speechSynthesis?.cancel();
-    clearInterval(animacaoBocaRef.current);
-    svgRef.current?.querySelectorAll('.f-boca').forEach((el) => { el.style.transform = 'scaleY(1)'; });
-    setEstaFalando(false);
+  // Para a animação da boca. `voltarSorriso` faz ela voltar ao sorriso de repouso.
+  const pararMorphBoca = useCallback((voltarSorriso) => {
+    if (rafBocaRef.current) { cancelAnimationFrame(rafBocaRef.current); rafBocaRef.current = null; }
+    if (morphBocaRef.current) { morphBocaRef.current.kill(); morphBocaRef.current = null; }
+    aberturaRef.current = 0;
+    picoBocaRef.current = 0;
+    const els = svgRef.current?.querySelectorAll('.f-boca');
+    if (els?.length && voltarSorriso) {
+      gsap.to(els, { morphSVG: { shape: FELIZ.boca, type: 'linear', shapeIndex: 0 }, duration: 0.25, ease: 'power2.out' });
+    }
   }, []);
 
+  const pararFala = useCallback(() => {
+    window.speechSynthesis?.cancel();
+    pararMorphBoca(true);
+    setEstaFalando(false);
+  }, [pararMorphBoca]);
+
+  // Boca "falando": MorphSVG entre FECHADA e ABERTA, com a abertura (progress
+  // 0..1) dirigida por um envelope que imita sílabas moduladas por um ritmo de
+  // palavras — e um "pico" a cada evento de boundary (início real de palavra).
   const animarBoca = useCallback(() => {
     setEstaFalando(true);
     tempoComecouFalarRef.current = performance.now();
-    let fase = 0;
-    animacaoBocaRef.current = setInterval(() => {
-      fase++;
-      const escala = 0.6 + Math.abs(Math.sin(fase * 0.45)) * 0.4;
-      svgRef.current?.querySelectorAll('.f-boca').forEach((el) => {
-        el.style.transform = `scaleY(${escala})`;
-        el.style.transformOrigin = '473px 917px';
-      });
-    }, 85);
+    const els = svgRef.current?.querySelectorAll('.f-boca');
+    const reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!els?.length || reduz) return;
+
+    if (rafBocaRef.current) cancelAnimationFrame(rafBocaRef.current);
+    if (morphBocaRef.current) morphBocaRef.current.kill();
+
+    // baseline fechada + tween pausado até a boca aberta (progress = abertura)
+    gsap.set(els, { attr: { d: BOCA_FECHADA } });
+    morphBocaRef.current = gsap.to(els, {
+      morphSVG: { shape: BOCA_ABERTA, type: 'linear', shapeIndex: 0 },
+      duration: 1, paused: true, ease: 'none',
+    });
+
+    let fase = Math.random() * 10;
+    const loop = () => {
+      fase += 0.9;
+      const silaba = Math.sin(fase * 0.55) * 0.5 + 0.5;            // vai e volta rápido (sílabas)
+      const palavra = 0.4 + 0.6 * Math.abs(Math.sin(fase * 0.13)); // envelope mais lento (palavras/frases)
+      let alvo = silaba * palavra + picoBocaRef.current;
+      picoBocaRef.current *= 0.85;                                 // o pico do boundary decai
+      alvo = Math.max(0, Math.min(1, alvo));
+      aberturaRef.current += (alvo - aberturaRef.current) * 0.35;  // suaviza (sem pulos)
+      morphBocaRef.current?.progress(aberturaRef.current);
+      rafBocaRef.current = requestAnimationFrame(loop);
+    };
+    rafBocaRef.current = requestAnimationFrame(loop);
   }, []);
 
   const acabarFala = useCallback(() => {
-    clearInterval(animacaoBocaRef.current);
-    svgRef.current?.querySelectorAll('.f-boca').forEach((el) => { el.style.transform = 'scaleY(1)'; });
+    pararMorphBoca(true);
     setEstaFalando(false);
     ignorarMicAteRef.current = performance.now() + 400;
-  }, []);
+  }, [pararMorphBoca]);
 
   const falarComNavegador = useCallback((texto) => {
     window.speechSynthesis.cancel();
@@ -340,6 +386,10 @@ export default function RostoSexta({ onVoltar }) {
       || vozes.find(v => v.lang.includes('pt'));
     if (voz) u.voice = voz;
     u.onstart = animarBoca;
+    // A cada início de palavra (quando o navegador suporta boundary), dá um
+    // "sotaque" na boca — abre um pouco mais, deixando o movimento no ritmo
+    // real das palavras que ela está falando.
+    u.onboundary = () => { picoBocaRef.current = 0.55; };
     u.onend = acabarFala;
     u.onerror = () => acabarFala();
     window.speechSynthesis.speak(u);
@@ -414,6 +464,8 @@ export default function RostoSexta({ onVoltar }) {
       document.body.style.overflow = 'auto';
       vadAtivoRef.current = false;
       window.speechSynthesis?.cancel();
+      if (rafBocaRef.current) cancelAnimationFrame(rafBocaRef.current);
+      if (morphBocaRef.current) morphBocaRef.current.kill();
       if (streamVideoRef.current) streamVideoRef.current.getTracks().forEach(t => t.stop());
       if (streamAudioRef.current) streamAudioRef.current.getTracks().forEach(t => t.stop());
       if (audioCtxRef.current) audioCtxRef.current.close();
