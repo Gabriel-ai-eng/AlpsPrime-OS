@@ -4,13 +4,13 @@ import { Search as SearchIcon, X, Command } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useT } from '@/lib/i18n';
 import { useBetaFeatures } from '@/lib/appPrefs';
-import RostoSexta from '@/components/RostoSexta';
 import FkwPlaceholder from '@/components/FkwPlaceholder';
 
 // id = chave usada na navegação (openApp → telaAtual no Home). `status: 'soon'`
 // marca os apps ainda não lançados. Wonderbound (id 'wonderbound') vem primeiro.
 // `url` = apps servidos fora do SPA (proxy do vercel.json): clique navega
 // direto pra lá, em vez de passar pelo openApp/telaAtual do Home.
+// Sexta-feira não aparece aqui — só é acessível pelo bloco dela em Categorias.
 const SUB_APPS = [
   {
     id: 'wonderbound',
@@ -24,17 +24,11 @@ const SUB_APPS = [
     image: '/apps/fkw-logo-square.webp',
     status: 'soon',
   },
-  {
-    id: 'sexta',
-    name: 'Sexta-feira',
-    image: '/apps/sexta-logo-square.webp',
-    status: 'soon',
-  }
 ];
 
 // Apps indisponíveis: continuam aparecendo na lista, mas só ficam clicáveis
 // para quem ativou "Recursos beta" em Configurações — ver useBetaFeatures.
-const BLOQUEADOS = new Set(['sexta', 'fkw']);
+const BLOQUEADOS = new Set(['fkw']);
 
 // minúsculas + sem acentos, para a busca casar "Projeto" com "projeto" etc.
 const normalize = (s) =>
@@ -42,7 +36,6 @@ const normalize = (s) =>
 
 export default function Search() {
   const [query, setQuery] = useState('');
-  const [sextaAberta, setSextaAberta] = useState(false);
   const [fkwAberta, setFkwAberta] = useState(false);
   const navigate = useNavigate();
   const betaAtivo = useBetaFeatures();
@@ -118,11 +111,10 @@ export default function Search() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 30 }}
-                  // Sexta-feira e FKW abrem a tela deles aqui mesmo, só se
-                  // liberados pelo beta. Os demais mandam o id no estado pro
-                  // Home abrir (ou navegam direto, se tiverem `url`).
+                  // FKW abre a tela dele aqui mesmo, só se liberado pelo
+                  // beta. Os demais mandam o id no estado pro Home abrir
+                  // (ou navegam direto, se tiverem `url`).
                   onClick={() => {
-                    if (app.id === 'sexta') { if (betaAtivo) setSextaAberta(true); return; }
                     if (app.id === 'fkw') { if (betaAtivo) setFkwAberta(true); return; }
                     if (BLOQUEADOS.has(app.id)) return;
                     if (app.url) { window.location.href = app.url; return; }
@@ -161,7 +153,6 @@ export default function Search() {
 
       </div>
 
-      {sextaAberta && <RostoSexta onVoltar={() => setSextaAberta(false)} />}
       {fkwAberta && <FkwPlaceholder onVoltar={() => setFkwAberta(false)} />}
     </div>
   );

@@ -1,23 +1,13 @@
-import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import CachedImage from '@/components/CachedImage';
 
-const Sexta = lazy(() => import('./Sexta'));
 // Wonderbound continua num repositório/deploy próprio, mas é servido SOB o
 // domínio da plataforma (rewrite/proxy da Vercel em /jogo). Por ser a mesma
 // origem, o jogo reaproveita a sessão de login já feita aqui — o jogador não
 // precisa logar/cadastrar de novo e o progresso fica salvo na mesma conta.
 const WONDERBOUND_URL = '/jogo';
-
-const LoadingScreen = () => (
-  <div className="absolute inset-0 z-[200000] flex flex-col items-center justify-center bg-white backdrop-blur-xl">
-    <Loader2 className="w-8 h-8 text-muted-foreground animate-spin mb-4" />
-    <span className="text-muted-foreground text-xs tracking-[0.2em] uppercase font-medium">
-      Iniciando
-    </span>
-  </div>
-);
 
 const SLIDES = [
   { id: 'alps', bg: null, titulo: true },
@@ -43,10 +33,8 @@ export default function Home() {
 
   useEffect(() => {
     const app = location.state?.openApp;
-    // Sexta-feira (a IA de voz/câmera completa deste componente) segue fora
-    // do fluxo de navegação: quem abre o card da Sexta-feira em qualquer
-    // tela (Categorias, Busca, Favoritos, Todos) vê o rosto SVG simples
-    // (RostoSexta), liberado só com "Recursos beta" — nunca esta rota.
+    // Sexta-feira não passa por aqui: quem abre o bloco dela em Categorias
+    // vê o rosto SVG (RostoSexta) direto, liberado só com "Recursos beta".
     if (app === 'wonderbound') {
       // jogo externo: redireciona na mesma aba
       window.location.href = WONDERBOUND_URL;
@@ -212,10 +200,6 @@ export default function Home() {
           </div>
         </>
       )}
-
-      <Suspense fallback={<LoadingScreen />}>
-        {telaAtual === 'sexta' && <Sexta onVoltar={() => setTelaAtual('hub')} />}
-      </Suspense>
     </div>
   );
 }

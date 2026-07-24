@@ -1,22 +1,20 @@
-import React, { useState } from 'react';
-import { Sparkles, Gamepad2, Grip } from 'lucide-react';
+import React from 'react';
+import { Gamepad2, Grip } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useT } from '@/lib/i18n';
 import { useBetaFeatures } from '@/lib/appPrefs';
-import RostoSexta from '@/components/RostoSexta';
 
+// Sexta-feira não aparece aqui — só é acessível pelo bloco dela em Categorias.
 const APPS = [
-  { id: 'sexta', nome: 'Sexta-feira', desc: 'Sua assistente de inteligência artificial.', icon: Sparkles, corIcone: 'text-[#C9A24F]', bgIcone: 'bg-[#C9A24F]/10' },
   { id: 'wonderbound', nome: 'Wonderbound', desc: 'Jogo de ação e sobrevivência com gravidade.', icon: Gamepad2, corIcone: 'text-blue-400', bgIcone: 'bg-blue-500/10' },
 ];
 
 // Apps indisponíveis: só ficam acessíveis para quem ativou "Recursos beta".
-const BLOQUEADOS = new Set(['sexta']);
+const BLOQUEADOS = new Set();
 
 export default function Todos() {
   const navigate = useNavigate();
   const t = useT();
-  const [sextaAberta, setSextaAberta] = useState(false);
   const betaAtivo = useBetaFeatures();
   const clicavel = (app) => !BLOQUEADOS.has(app.id) || betaAtivo;
 
@@ -41,7 +39,6 @@ export default function Todos() {
             <div
               key={app.id}
               onClick={() => {
-                if (app.id === 'sexta') { if (betaAtivo) setSextaAberta(true); return; }
                 if (BLOQUEADOS.has(app.id)) return;
                 navigate('/home');
               }}
@@ -58,8 +55,6 @@ export default function Todos() {
           );
         })}
       </div>
-
-      {sextaAberta && <RostoSexta onVoltar={() => setSextaAberta(false)} />}
 
     </div>
   );

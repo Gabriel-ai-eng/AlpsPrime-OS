@@ -6,14 +6,12 @@ import { useT } from '@/lib/i18n';
 import { useFavorites } from '@/lib/useFavorites';
 import { APPS, BLOQUEADOS } from '@/lib/apps';
 import { useBetaFeatures } from '@/lib/appPrefs';
-import RostoSexta from '@/components/RostoSexta';
 import FkwPlaceholder from '@/components/FkwPlaceholder';
 
 export default function Favoritos() {
   const navigate = useNavigate();
   const t = useT();
   const { favoriteIds, toggleFavorite } = useFavorites();
-  const [sextaAberta, setSextaAberta] = useState(false);
   const [fkwAberta, setFkwAberta] = useState(false);
   const betaAtivo = useBetaFeatures();
 
@@ -24,8 +22,11 @@ export default function Favoritos() {
   // Um app em BLOQUEADOS só fica acessível para quem ativou "Recursos beta".
   const clicavel = (app) => !BLOQUEADOS.has(app.id) || betaAtivo;
 
+  // Sexta-feira aparece aqui se o usuário favoritou, mas só abre pelo bloco
+  // dela em Categorias — aqui o clique não faz nada (como qualquer app
+  // bloqueado sem tela própria).
   const abrirApp = (app) => {
-    if (app.id === 'sexta') { if (betaAtivo) setSextaAberta(true); return; }
+    if (app.id === 'sexta') return;
     if (app.id === 'fkw') { if (betaAtivo) setFkwAberta(true); return; }
     if (BLOQUEADOS.has(app.id)) return;
     if (app.url) { window.location.href = app.url; return; }
@@ -139,7 +140,6 @@ export default function Favoritos() {
         </AnimatePresence>
       </div>
 
-      {sextaAberta && <RostoSexta onVoltar={() => setSextaAberta(false)} />}
       {fkwAberta && <FkwPlaceholder onVoltar={() => setFkwAberta(false)} />}
     </div>
   );
