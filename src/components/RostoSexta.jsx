@@ -4,6 +4,7 @@ import { ChevronLeft, MessageCircle, Send, X, Volume2, MessageSquare, Settings, 
 import { interpolate as flubberInterpolate } from 'flubber';
 import { useT } from '@/lib/i18n';
 import { CIRCULO } from './rostoSextaKeyframes';
+import { MOUTH_FRAMES } from './mouthFrames';
 import { chamarCerebroSexta } from '@/lib/sextaApi';
 
 // ============================================================
@@ -24,28 +25,17 @@ import { chamarCerebroSexta } from '@/lib/sextaApi';
 const FELIZ = {
   olhoDireitoIA: 'M 398 740 C 411.8 740 423 757.9 423 780 C 423 802.1 411.8 820 398 820 C 384.2 820 373 802.1 373 780 C 373 757.9 384.2 740 398 740 Z', // lado esquerdo da tela
   olhoEsquerdoIA: 'M 542 740 C 555.8 740 567 757.9 567 780 C 567 802.1 555.8 820 542 820 C 528.2 820 517 802.1 517 780 C 517 757.9 528.2 740 542 740 Z', // lado direito da tela — mesmo oval aberto, espelhado
-  boca:  'M 393 882 Q 473 952 545 886',
 };
 
-// VISEMAS — conjunto de formas de boca (não só aberta/fechada). O Flubber
-// (lib "flubber") morfa entre elas de forma contínua e suave, mesmo com
-// número de pontos diferente (a "o" arredondada tem mais pontos que as
-// outras). Enquanto ela fala, o loop troca de visema no ritmo das sílabas/
-// palavras e o Flubber faz a deformação gradual — nunca um corte de forma.
+// MOUTH_FRAMES (mouthFrames.js) — 193 frames extraídos de um sprite sheet de
+// referência (rastreados automaticamente e normalizados pra escala/posição
+// da nossa boca). Tocados EM SEQUÊNCIA, como um flipbook, enquanto ela fala
+// — reproduz a mesma animação do sprite de referência — com o Flubber
+// interpolando suavemente entre um frame e o próximo (nunca um corte).
 //
-// Obs.: sem Rhubarb/áudio real, o timing é sintético (ritmo de fala +
-// eventos de início de palavra), não fonema-a-fonema. Mas dá bastante
-// variedade e organicidade ao movimento.
-const VISEMAS = [
-  'M 393 882 Q 473 950 545 886 Q 473 958 393 882 Z',                                  // 0 REPOUSO (sorriso fechado)
-  'M 405 888 Q 473 906 541 890 Q 473 922 405 888 Z',                                  // 1 PEQUENA (mal abre)
-  'M 400 884 Q 473 946 540 888 Q 473 1000 400 884 Z',                                 // 2 MÉDIA (meio sorriso aberto)
-  'M 393 882 Q 473 948 545 886 Q 473 1055 393 882 Z',                                 // 3 ABERTA (sorriso bem aberto)
-  'M 383 884 Q 473 918 553 888 Q 473 930 383 884 Z',                                  // 4 LARGA ("iii", esticada)
-  'M 473 900 Q 512 906 512 935 Q 512 966 473 972 Q 434 966 434 935 Q 434 906 473 900 Z', // 5 REDONDA ("ó/u")
-];
-const VIS_ABERTAS = [2, 3, 4, 5]; // formas "abertas" (média, aberta, larga, redonda)
-const VIS_FECHADAS = [0, 1];      // formas "fechadas/pequenas"
+// Obs.: sem Rhubarb/áudio real, o AVANÇO entre frames é por tempo (não por
+// fonema) — a sequência/forma de cada frame é fiel ao sprite, só o timing
+// de quando trocar de frame é sintético.
 
 // Chave da visão (Mistral) fica no navegador mesmo — não migrada pro
 // servidor. O cérebro (OpenRouter) roda em api/fn/sextaChat.
@@ -113,9 +103,8 @@ export default function RostoSexta({ onVoltar }) {
   const bocaInterpRef = useRef(null);    // função do Flubber: t(0..1) -> path atual (from -> to)
   const bocaProgRef = useRef(1);         // progresso da transição atual (0..1)
   const bocaPathRef = useRef(null);      // path exibido agora (usado como "from" na próxima troca)
-  const bocaVisemaRef = useRef(0);       // índice do visema-alvo atual
-  const bocaProxTrocaRef = useRef(0);    // quando trocar de visema de novo (timestamp)
-  const bocaAbriuRef = useRef(false);    // alterna aberta/fechada pra dar ritmo de fala
+  const bocaFrameIdxRef = useRef(0);     // índice do frame atual em MOUTH_FRAMES
+  const bocaProxFrameRef = useRef(0);    // quando avançar pro próximo frame (timestamp)
   const historicoRef = useRef([]);
   const tempoComecouFalarRef = useRef(0);
   const ignorarMicAteRef = useRef(0);
@@ -375,44 +364,44 @@ export default function RostoSexta({ onVoltar }) {
   // ==========================================
   // A boca é dirigida por UM só loop de requestAnimationFrame (nunca dois
   // concorrentes) e pelo Flubber, que morfa o path continuamente entre os
-  // VISEMAS. Enquanto fala, o loco troca de visema no ritmo das sílabas e,
-  // a cada troca, cria um interpolador do path exibido AGORA para o novo
-  // visema — então mesmo trocando no meio de uma transição, parte de onde
-  // está (sem salto). Ao parar de falar, volta pro sorriso de repouso
-  // também morfando, e só então o loop encerra.
+  // MOUTH_FRAMES tocados em sequência (flipbook), como no sprite de referência.
+  // A cada troca de frame, cria um interpolador do path exibido AGORA pro
+  // PRÓXIMO frame — então mesmo trocando no meio de uma transição, parte de
+  // onde está (sem salto). Ao parar de falar, caminha pelos frames seguintes
+  // até o frame 0 (repouso, sorriso quase fechado) e só então o loop encerra.
+  const FRAME_MS = 60; // ritmo de avanço entre frames do sprite (~16-17 fps)
   const iniciarLoopBoca = useCallback(() => {
     const reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduz) return;
-    if (!bocaPathRef.current) bocaPathRef.current = VISEMAS[0];
+    if (!bocaPathRef.current) bocaPathRef.current = MOUTH_FRAMES[0];
     if (rafBocaRef.current) return; // já rodando
 
     const aplicar = (d) => {
       const els = svgRef.current?.querySelectorAll('.f-boca');
       if (els) els.forEach((el) => el.setAttribute('d', d));
     };
-    const irParaVisema = (idx) => {
-      const from = bocaPathRef.current || VISEMAS[0];
+    const irParaFrame = (idx) => {
+      const from = bocaPathRef.current || MOUTH_FRAMES[0];
       try {
-        bocaInterpRef.current = flubberInterpolate(from, VISEMAS[idx], { maxSegmentLength: 3 });
+        bocaInterpRef.current = flubberInterpolate(from, MOUTH_FRAMES[idx], { maxSegmentLength: 3 });
       } catch {
-        bocaInterpRef.current = () => VISEMAS[idx];
+        bocaInterpRef.current = () => MOUTH_FRAMES[idx];
       }
       bocaProgRef.current = 0;
-      bocaVisemaRef.current = idx;
+      bocaFrameIdxRef.current = idx;
     };
 
     const loop = () => {
       const agora = performance.now();
       if (falandoRef.current) {
-        if (agora >= bocaProxTrocaRef.current) {
-          // alterna aberta/fechada pra imitar o abre-fecha da fala
-          const pool = bocaAbriuRef.current ? VIS_FECHADAS : VIS_ABERTAS;
-          bocaAbriuRef.current = !bocaAbriuRef.current;
-          irParaVisema(pool[(Math.random() * pool.length) | 0]);
-          bocaProxTrocaRef.current = agora + 105 + Math.random() * 95; // ~1 sílaba
+        if (agora >= bocaProxFrameRef.current) {
+          // avança pro próximo frame do sprite, em loop
+          const proximo = (bocaFrameIdxRef.current + 1) % MOUTH_FRAMES.length;
+          irParaFrame(proximo);
+          bocaProxFrameRef.current = agora + FRAME_MS;
         }
-      } else if (bocaVisemaRef.current !== 0 && bocaProgRef.current >= 1) {
-        irParaVisema(0); // relaxa pro sorriso de repouso
+      } else if (bocaFrameIdxRef.current !== 0 && bocaProgRef.current >= 1) {
+        irParaFrame(0); // caminha de volta pro repouso
       }
 
       if (bocaInterpRef.current) {
@@ -423,7 +412,7 @@ export default function RostoSexta({ onVoltar }) {
         aplicar(bocaPathRef.current);
       }
 
-      if (!falandoRef.current && bocaVisemaRef.current === 0 && bocaProgRef.current >= 1) {
+      if (!falandoRef.current && bocaFrameIdxRef.current === 0 && bocaProgRef.current >= 1) {
         rafBocaRef.current = null;
         return; // em repouso e assentado — encerra até a próxima fala
       }
@@ -439,13 +428,12 @@ export default function RostoSexta({ onVoltar }) {
     iniciarLoopBoca(); // segue rodando só até relaxar suavemente no sorriso
   }, [iniciarLoopBoca]);
 
-  // onstart da fala: liga "está falando" e manda abrir já no primeiro frame.
+  // onstart da fala: liga "está falando" — o flipbook de MOUTH_FRAMES
+  // continua de onde estava (ou começa do frame 0) e avança sozinho.
   const animarBoca = useCallback(() => {
     falandoRef.current = true;
     setEstaFalando(true);
     tempoComecouFalarRef.current = performance.now();
-    bocaAbriuRef.current = false;   // próxima troca é uma forma ABERTA
-    bocaProxTrocaRef.current = 0;   // troca já no primeiro frame
     iniciarLoopBoca();
   }, [iniciarLoopBoca]);
 
@@ -468,10 +456,6 @@ export default function RostoSexta({ onVoltar }) {
       || vozes.find(v => v.lang.includes('pt'));
     if (voz) u.voice = voz;
     u.onstart = animarBoca;
-    // A cada início de palavra (quando o navegador suporta boundary), força
-    // uma abertura AGORA — assim as aberturas caem no ritmo real das palavras
-    // que ela está falando (o único "timing real" que a voz nativa nos dá).
-    u.onboundary = () => { bocaAbriuRef.current = false; bocaProxTrocaRef.current = 0; };
     u.onend = acabarFala;
     u.onerror = () => acabarFala();
     window.speechSynthesis.speak(u);
@@ -638,21 +622,21 @@ export default function RostoSexta({ onVoltar }) {
             <path className="estela" d={CIRCULO} strokeWidth="11"/>
             <path d={FELIZ.olhoDireitoIA} strokeWidth="7"/>
             <path d={FELIZ.olhoEsquerdoIA} strokeWidth="7"/>
-            <path className="f-boca" d={FELIZ.boca} strokeWidth="9"/>
+            <path className="f-boca" d={MOUTH_FRAMES[0]} strokeWidth="9"/>
           </g>
           {/* brilho MÉDIO */}
           <g filter="url(#rs-haloSoft)" fill="none" stroke="url(#rs-gold)" strokeLinecap="round" strokeLinejoin="round">
             <path className="estela" d={CIRCULO} strokeWidth="5.5"/>
             <path d={FELIZ.olhoDireitoIA} strokeWidth="4"/>
             <path d={FELIZ.olhoEsquerdoIA} strokeWidth="4"/>
-            <path className="f-boca" d={FELIZ.boca} strokeWidth="4.6"/>
+            <path className="f-boca" d={MOUTH_FRAMES[0]} strokeWidth="4.6"/>
           </g>
           {/* NÚCLEO nítido */}
           <g fill="none" stroke="#fffdf6" strokeLinecap="round" strokeLinejoin="round" opacity="0.95">
             <path className="estela" d={CIRCULO} strokeWidth="2.4"/>
             <path d={FELIZ.olhoDireitoIA} strokeWidth="1.8"/>
             <path d={FELIZ.olhoEsquerdoIA} strokeWidth="1.8"/>
-            <path className="f-boca" d={FELIZ.boca} strokeWidth="2.2"/>
+            <path className="f-boca" d={MOUTH_FRAMES[0]} strokeWidth="2.2"/>
           </g>
         </g>
       </svg>
