@@ -35,8 +35,14 @@ const FELIZ = {
 // elas de forma linear e suave. Enquanto ela fala, a abertura (0..1) é
 // dirigida pelo ritmo da fala e trocamos a boca sorriso (FELIZ.boca) por
 // estas; ao terminar, voltamos ao sorriso.
-const BOCA_FECHADA = 'M 400 886 Q 470 894 540 886 Q 470 898 400 886 Z';
-const BOCA_ABERTA  = 'M 400 886 Q 470 862 540 886 Q 470 928 400 886 Z';
+//
+// A deformação imita a do rosto de referência (vídeo): a boca abre como um
+// sorriso aberto (crescente). Os dois cantos ficam pra cima (sorriso) e a
+// LINHA DE CIMA quase não mexe (mesmo ponto de controle 473,950 nas duas
+// formas) — só o LÁBIO DE BAIXO desce (473,958 → 473,1045). É assim que uma
+// boca humana feliz se abre ao falar, e é exatamente o movimento do vídeo.
+const BOCA_FECHADA = 'M 393 882 Q 473 950 545 886 Q 473 958 393 882 Z';
+const BOCA_ABERTA  = 'M 393 882 Q 473 950 545 886 Q 473 1045 393 882 Z';
 
 // Chave da visão (Mistral) fica no navegador mesmo — não migrada pro
 // servidor. O cérebro (OpenRouter) roda em api/fn/sextaChat.
@@ -401,13 +407,13 @@ export default function RostoSexta({ onVoltar }) {
 
     let fase = Math.random() * 10;
     const loop = () => {
-      fase += 0.9;
-      const silaba = Math.sin(fase * 0.55) * 0.5 + 0.5;            // vai e volta rápido (sílabas)
-      const palavra = 0.4 + 0.6 * Math.abs(Math.sin(fase * 0.13)); // envelope mais lento (palavras/frases)
+      fase += 0.72;                                                // ritmo natural, sem tremer
+      const silaba = Math.sin(fase * 0.5) * 0.5 + 0.5;            // vai e volta (sílabas)
+      const palavra = 0.4 + 0.6 * Math.abs(Math.sin(fase * 0.12)); // envelope mais lento (palavras/frases)
       let alvo = silaba * palavra + picoBocaRef.current;
-      picoBocaRef.current *= 0.85;                                 // o pico do boundary decai
+      picoBocaRef.current *= 0.86;                                 // o pico do boundary decai
       alvo = Math.max(0, Math.min(1, alvo));
-      aberturaRef.current += (alvo - aberturaRef.current) * 0.35;  // suaviza (sem pulos)
+      aberturaRef.current += (alvo - aberturaRef.current) * 0.28;  // suaviza (deformação fluida)
       morphBocaRef.current?.progress(aberturaRef.current);
       rafBocaRef.current = requestAnimationFrame(loop);
     };
