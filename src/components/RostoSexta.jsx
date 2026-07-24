@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft, MessageCircle, Send, X, Volume2, MessageSquare } from 'lucide-react';
+import { ChevronLeft, MessageCircle, Send, X, Volume2, MessageSquare, Settings, Trash2 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { useT } from '@/lib/i18n';
@@ -43,9 +43,20 @@ const BOCA_ABERTA  = 'M 400 886 Q 470 862 540 886 Q 470 928 400 886 Z';
 const MISTRAL_API_KEY = "MnfXDbULqv5vx0dcexB8yyXUd7goL0tw";
 const MODELO_VISAO = "pixtral-12b-2409";
 
-const SISTEMA_PROMPT = `Você é a Sexta-feira, uma IA com presença humana real, calorosa e direta. Conversa em português do Brasil de forma natural e curta (1 a 2 frases). NUNCA diga frases genéricas como "Estou ouvindo", "Pode falar", "Como posso ajudar". Responda SEMPRE ao que a pessoa acabou de dizer, comentando, perguntando ou opinando especificamente sobre isso. Sem markdown, sem listas, sem asteriscos — apenas fala direta como num diálogo humano.`;
+const SISTEMA_PROMPT = `Você é a Sexta-feira, uma IA com presença humana real, calorosa e direta. Conversa em português do Brasil de forma natural e curta (1 a 2 frases). NUNCA diga frases genéricas como "Estou ouvindo", "Pode falar", "Como posso ajudar". Responda SEMPRE ao que a pessoa acabou de dizer, comentando, perguntando ou opinando especificamente sobre isso. Você SABE a data e a hora atuais (são informadas no contexto do sistema a cada mensagem) — quando perguntarem que dia é hoje, as horas, o dia da semana, responda com confiança usando esse contexto, sem dizer que não tem acesso a isso. Sem markdown, sem listas, sem asteriscos — apenas fala direta como num diálogo humano.`;
 
 const SISTEMA_VISAO = SISTEMA_PROMPT + ` Você está vendo o utilizador agora pela câmera. Descreva uma observação visual genuína (roupa, ambiente, expressão) numa frase curta se isso enriquecer a resposta. Não force a observação se não fizer sentido.`;
+
+// Monta um bloco de contexto REAL (data, hora, nome) pra IA — LLMs não têm
+// relógio nem calendário próprios; sem isto ela não sabe nem que dia é hoje.
+function contextoAtual(nome) {
+  const agora = new Date();
+  const data = agora.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const hora = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  let ctx = `CONTEXTO REAL DE AGORA (você SABE destas informações, use com confiança): hoje é ${data}; agora são ${hora}.`;
+  if (nome && nome.trim()) ctx += ` A pessoa com quem você conversa se chama ${nome.trim()} — chame-a pelo nome de vez em quando, com naturalidade.`;
+  return ctx;
+}
 
 export default function RostoSexta({ onVoltar }) {
   const svgRef = useRef(null);
@@ -69,6 +80,14 @@ export default function RostoSexta({ onVoltar }) {
   // Como ela RESPONDE: 'voz' fala em voz alta; 'texto' só escreve no chat.
   const [modoResposta, setModoResposta] = useState('voz');
   const modoRespostaRef = useRef('voz');
+  // Configurações (persistem no aparelho).
+  const [configAberto, setConfigAberto] = useState(false);
+  const [nome, setNome] = useState(() => { try { return localStorage.getItem('sf_sexta_nome') || ''; } catch { return ''; } });
+  const [velocidadeVoz, setVelocidadeVoz] = useState(() => {
+    try { const v = parseFloat(localStorage.getItem('sf_sexta_voz_rate')); return v > 0 ? v : 1.0; } catch { return 1.0; }
+  });
+  const nomeRef = useRef(nome);
+  const velocidadeVozRef = useRef(velocidadeVoz);
 
   const log = useCallback((tipo, mensagem) => { console.log(`[${tipo}] ${mensagem}`); }, []);
 
@@ -93,6 +112,8 @@ export default function RostoSexta({ onVoltar }) {
 
   useEffect(() => { falandoRef.current = estaFalando; }, [estaFalando]);
   useEffect(() => { modoRespostaRef.current = modoResposta; }, [modoResposta]);
+  useEffect(() => { nomeRef.current = nome; try { localStorage.setItem('sf_sexta_nome', nome); } catch {} }, [nome]);
+  useEffect(() => { velocidadeVozRef.current = velocidadeVoz; try { localStorage.setItem('sf_sexta_voz_rate', String(velocidadeVoz)); } catch {} }, [velocidadeVoz]);
   // Rola o chat pro fim quando chega mensagem nova.
   useEffect(() => {
     if (chatAberto) chatFimRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -160,7 +181,8 @@ export default function RostoSexta({ onVoltar }) {
   // ==========================================
   const chamarCerebro = useCallback(async (texto, historico, descricaoVisual) => {
     const mensagens = [
-      { role: 'system', content: descricaoVisual ? SISTEMA_VISAO : SISTEMA_PROMPT }
+      { role: 'system', content: descricaoVisual ? SISTEMA_VISAO : SISTEMA_PROMPT },
+      { role: 'system', content: contextoAtual(nomeRef.current) },
     ];
     if (descricaoVisual) {
       mensagens.push({ role: 'system', content: `[O que você vê agora pela câmera: ${descricaoVisual}]` });
@@ -402,7 +424,7 @@ export default function RostoSexta({ onVoltar }) {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(texto);
     u.lang = 'pt-BR';
-    u.rate = 1.0;
+    u.rate = velocidadeVozRef.current || 1.0;
     u.pitch = 1.05;
     const vozes = window.speechSynthesis.getVoices();
     const voz = vozes.find(v => v.name.includes('Google') && v.lang.includes('pt-BR'))
@@ -472,6 +494,13 @@ export default function RostoSexta({ onVoltar }) {
     pararFala(); // interrompe qualquer fala em andamento
     await processarMensagem(texto);
   }, [entrada, pensando, processarMensagem, pararFala]);
+
+  const limparConversa = useCallback(() => {
+    pararFala();
+    historicoRef.current = [];
+    ultimaDescricaoVisualRef.current = null;
+    setMensagens([]);
+  }, [pararFala]);
 
   // Único botão da tela: pede câmera + microfone e já entra conversando
   // (a saudação comenta o que a câmera está vendo).
@@ -602,14 +631,23 @@ export default function RostoSexta({ onVoltar }) {
         <ChevronLeft className="w-6 h-6" />
       </button>
 
-      {/* Abrir chat por texto */}
-      <button
-        onClick={() => setChatAberto(true)}
-        aria-label="Abrir chat"
-        className="absolute top-6 right-5 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-black/[0.06] backdrop-blur-sm text-black/50 hover:text-black/80 active:scale-90 transition"
-      >
-        <MessageCircle className="w-6 h-6" />
-      </button>
+      {/* Ações do topo: configurações + chat */}
+      <div className="absolute top-6 right-5 z-10 flex items-center gap-2">
+        <button
+          onClick={() => setConfigAberto(true)}
+          aria-label="Configurações"
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-black/[0.06] backdrop-blur-sm text-black/50 hover:text-black/80 active:scale-90 transition"
+        >
+          <Settings className="w-6 h-6" />
+        </button>
+        <button
+          onClick={() => setChatAberto(true)}
+          aria-label="Abrir chat"
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-black/[0.06] backdrop-blur-sm text-black/50 hover:text-black/80 active:scale-90 transition"
+        >
+          <MessageCircle className="w-6 h-6" />
+        </button>
+      </div>
 
       {/* Único botão da tela: falar com ela */}
       <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-3" style={{ top: '66%' }}>
@@ -626,6 +664,77 @@ export default function RostoSexta({ onVoltar }) {
           </button>
         )}
       </div>
+
+      {/* CONFIGURAÇÕES */}
+      {configAberto && (
+        <div className="absolute inset-0 z-30 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-black/20" onClick={() => setConfigAberto(false)} />
+          <div className="relative flex flex-col w-full max-h-[88%] bg-[#f6f2ec] rounded-t-3xl border-t border-black/10 shadow-[0_-10px_40px_rgba(0,0,0,0.18)]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-black/10">
+              <h2 className="text-[17px] font-semibold text-black/80">Configurações</h2>
+              <button onClick={() => setConfigAberto(false)} aria-label="Fechar" className="w-9 h-9 flex items-center justify-center rounded-full text-black/40 hover:text-black/70 hover:bg-black/[0.05] transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-6" style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}>
+              {/* Seu nome */}
+              <div className="flex flex-col gap-2">
+                <label className="text-[13px] font-semibold text-black/55 uppercase tracking-wide">Seu nome</label>
+                <input
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  placeholder="Como ela deve te chamar?"
+                  className="h-11 px-4 rounded-2xl bg-white border border-black/10 text-[14px] text-black/80 placeholder:text-black/35 outline-none focus:border-[#e6b64c]/60"
+                />
+                <p className="text-[12px] text-black/40">Ela usa seu nome na conversa. E já sabe a data e a hora de agora.</p>
+              </div>
+
+              {/* Modo de resposta */}
+              <div className="flex flex-col gap-2">
+                <span className="text-[13px] font-semibold text-black/55 uppercase tracking-wide">Como ela responde</span>
+                <div className="flex items-center gap-1 bg-black/[0.05] rounded-full p-1 self-start">
+                  <button onClick={() => setModoResposta('voz')} className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium transition ${modoResposta === 'voz' ? 'bg-white text-black/80 shadow-sm' : 'text-black/45'}`}>
+                    <Volume2 className="w-3.5 h-3.5" /> Voz
+                  </button>
+                  <button onClick={() => setModoResposta('texto')} className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-medium transition ${modoResposta === 'texto' ? 'bg-white text-black/80 shadow-sm' : 'text-black/45'}`}>
+                    <MessageSquare className="w-3.5 h-3.5" /> Texto
+                  </button>
+                </div>
+              </div>
+
+              {/* Velocidade da voz */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-semibold text-black/55 uppercase tracking-wide">Velocidade da voz</span>
+                  <span className="text-[13px] text-black/50">{velocidadeVoz.toFixed(1)}x</span>
+                </div>
+                <input type="range" min="0.7" max="1.4" step="0.1" value={velocidadeVoz} onChange={(e) => setVelocidadeVoz(parseFloat(e.target.value))} className="w-full accent-[#e6b64c]" />
+              </div>
+
+              {/* Integrações */}
+              <div className="flex flex-col gap-2">
+                <span className="text-[13px] font-semibold text-black/55 uppercase tracking-wide">Integrações</span>
+                <p className="text-[12px] text-black/40 -mt-1">Conectar a Sexta-feira a outros apps e serviços. Em desenvolvimento.</p>
+                {[['Agenda / Google Calendar', 'ver e criar compromissos'], ['Clima', 'previsão do tempo da sua cidade'], ['Busca na web', 'responder sobre fatos e notícias atuais']].map(([titulo, desc]) => (
+                  <div key={titulo} className="flex items-center justify-between px-4 py-3 rounded-2xl bg-white/60 border border-black/[0.06] opacity-70">
+                    <div className="flex flex-col pr-3">
+                      <span className="text-[14px] text-black/70">{titulo}</span>
+                      <span className="text-[12px] text-black/40">{desc}</span>
+                    </div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#b98a2e] bg-[#e6b64c]/15 px-2 py-1 rounded-full flex-shrink-0">Em breve</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Limpar conversa */}
+              <button onClick={limparConversa} className="flex items-center justify-center gap-2 h-11 rounded-2xl border border-red-300/60 text-red-500/90 text-[14px] font-medium active:scale-[0.98] transition">
+                <Trash2 className="w-4 h-4" /> Limpar conversa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CHAT POR TEXTO */}
       {chatAberto && (
