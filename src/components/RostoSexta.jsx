@@ -106,9 +106,11 @@ export default function RostoSexta({ onVoltar }) {
   const vadAtivoRef = useRef(false);
   const reconhecendoRef = useRef(false);
   const falandoRef = useRef(false);
-  const morphBocaRef = useRef(null);   // tween pausado (fechada→aberta), dirigido por .progress()
+  const bocaTweenRef = useRef(null);   // ÚNICO tween (fechada→aberta), criado 1x, nunca morto/recriado
   const rafBocaRef = useRef(null);     // loop de animação da boca
-  const aberturaRef = useRef(0);       // abertura suavizada da boca (0..1)
+  const aberturaAtualRef = useRef(0);  // abertura suavizada da boca (0..1) — o que de fato é desenhado
+  const aberturaAlvoRef = useRef(0);   // abertura-alvo (pra onde a atual está indo)
+  const faseBocaRef = useRef(0);
   const picoBocaRef = useRef(0);       // "sotaque" que sobe a cada início de palavra (boundary)
   const historicoRef = useRef([]);
   const tempoComecouFalarRef = useRef(0);
@@ -367,64 +369,79 @@ export default function RostoSexta({ onVoltar }) {
   // ==========================================
   // FALAR — voz nativa do navegador (SpeechSynthesis), com boca animada
   // ==========================================
-  // Para a animação da boca. `voltarSorriso` faz ela voltar ao sorriso de repouso.
-  const pararMorphBoca = useCallback((voltarSorriso) => {
-    if (rafBocaRef.current) { cancelAnimationFrame(rafBocaRef.current); rafBocaRef.current = null; }
-    if (morphBocaRef.current) { morphBocaRef.current.kill(); morphBocaRef.current = null; }
-    aberturaRef.current = 0;
-    picoBocaRef.current = 0;
-    const els = svgRef.current?.querySelectorAll('.f-boca');
-    if (els?.length && voltarSorriso) {
-      gsap.to(els, { morphSVG: { shape: FELIZ.boca, type: 'linear', shapeIndex: 0 }, duration: 0.25, ease: 'power2.out' });
+  // Só existe UM tween de morph pra boca, criado uma única vez (na primeira
+  // vez que ela fala) e NUNCA mais morto/recriado — é só isso que evita a
+  // corrida de dois tweens brigando pelo mesmo atributo `d` quando uma fala
+  // nova começa antes da anterior terminar de "fechar a boca" (bug que
+  // causava o salto abrupto). O loop em requestAnimationFrame roda o tempo
+  // todo enquanto há movimento: se estaFalando é true, a abertura-alvo segue
+  // o envelope da fala; senão, a alvo é 0 e a atual relaxa suavemente até lá
+  // — fechar também é uma interpolação, nunca um corte.
+  const garantirLoopBoca = useCallback(() => {
+    if (!bocaTweenRef.current) {
+      const els = svgRef.current?.querySelectorAll('.f-boca');
+      if (!els?.length) return;
+      gsap.set(els, { attr: { d: BOCA_FECHADA } });
+      bocaTweenRef.current = gsap.to(els, {
+        morphSVG: { shape: BOCA_ABERTA, type: 'linear', shapeIndex: 0 },
+        duration: 1, paused: true, ease: 'none',
+      });
     }
-  }, []);
+    if (rafBocaRef.current) return; // já está rodando
 
-  const pararFala = useCallback(() => {
-    window.speechSynthesis?.cancel();
-    pararMorphBoca(true);
-    setEstaFalando(false);
-  }, [pararMorphBoca]);
-
-  // Boca "falando": MorphSVG entre FECHADA e ABERTA, com a abertura (progress
-  // 0..1) dirigida por um envelope que imita sílabas moduladas por um ritmo de
-  // palavras — e um "pico" a cada evento de boundary (início real de palavra).
-  const animarBoca = useCallback(() => {
-    setEstaFalando(true);
-    tempoComecouFalarRef.current = performance.now();
-    const els = svgRef.current?.querySelectorAll('.f-boca');
     const reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!els?.length || reduz) return;
+    if (reduz) return; // sem movimento — respeita a preferência do sistema
 
-    if (rafBocaRef.current) cancelAnimationFrame(rafBocaRef.current);
-    if (morphBocaRef.current) morphBocaRef.current.kill();
-
-    // baseline fechada + tween pausado até a boca aberta (progress = abertura)
-    gsap.set(els, { attr: { d: BOCA_FECHADA } });
-    morphBocaRef.current = gsap.to(els, {
-      morphSVG: { shape: BOCA_ABERTA, type: 'linear', shapeIndex: 0 },
-      duration: 1, paused: true, ease: 'none',
-    });
-
-    let fase = Math.random() * 10;
     const loop = () => {
-      fase += 0.72;                                                // ritmo natural, sem tremer
-      const silaba = Math.sin(fase * 0.5) * 0.5 + 0.5;            // vai e volta (sílabas)
-      const palavra = 0.4 + 0.6 * Math.abs(Math.sin(fase * 0.12)); // envelope mais lento (palavras/frases)
-      let alvo = silaba * palavra + picoBocaRef.current;
-      picoBocaRef.current *= 0.86;                                 // o pico do boundary decai
-      alvo = Math.max(0, Math.min(1, alvo));
-      aberturaRef.current += (alvo - aberturaRef.current) * 0.28;  // suaviza (deformação fluida)
-      morphBocaRef.current?.progress(aberturaRef.current);
+      if (falandoRef.current) {
+        // ritmo calmo e comedido (perto do vídeo de referência): sílabas
+        // lentas moduladas por um envelope de palavras ainda mais lento.
+        faseBocaRef.current += 0.42;
+        const silaba = Math.sin(faseBocaRef.current * 0.38) * 0.5 + 0.5;
+        const palavra = 0.45 + 0.55 * Math.abs(Math.sin(faseBocaRef.current * 0.08));
+        aberturaAlvoRef.current = Math.max(0, Math.min(1, silaba * palavra + picoBocaRef.current));
+        picoBocaRef.current *= 0.9; // o "sotaque" do boundary decai devagar (sem pico brusco)
+      } else {
+        aberturaAlvoRef.current = 0;
+      }
+      // suavização generosa (baixo fator) — a boca tem inércia, como um
+      // lábio de verdade, em vez de perseguir o alvo com precisão.
+      aberturaAtualRef.current += (aberturaAlvoRef.current - aberturaAtualRef.current) * 0.14;
+      bocaTweenRef.current?.progress(aberturaAtualRef.current);
+
+      if (!falandoRef.current && aberturaAtualRef.current < 0.002) {
+        aberturaAtualRef.current = 0;
+        bocaTweenRef.current?.progress(0);
+        rafBocaRef.current = null;
+        return; // já fechou de vez — para o loop até a próxima fala
+      }
       rafBocaRef.current = requestAnimationFrame(loop);
     };
     rafBocaRef.current = requestAnimationFrame(loop);
   }, []);
 
+  const pararFala = useCallback(() => {
+    window.speechSynthesis?.cancel();
+    falandoRef.current = false;
+    setEstaFalando(false);
+    garantirLoopBoca(); // segue rodando só até relaxar suavemente até fechada
+  }, [garantirLoopBoca]);
+
+  // Chamado no onstart da fala — só liga a chave "está falando"; quem
+  // desenha é sempre o mesmo loop/tween persistente (garantirLoopBoca).
+  const animarBoca = useCallback(() => {
+    falandoRef.current = true;
+    setEstaFalando(true);
+    tempoComecouFalarRef.current = performance.now();
+    garantirLoopBoca();
+  }, [garantirLoopBoca]);
+
   const acabarFala = useCallback(() => {
-    pararMorphBoca(true);
+    falandoRef.current = false;
     setEstaFalando(false);
     ignorarMicAteRef.current = performance.now() + 400;
-  }, [pararMorphBoca]);
+    garantirLoopBoca(); // garante que o loop está de pé pra fechar suavemente
+  }, [garantirLoopBoca]);
 
   const falarComNavegador = useCallback((texto) => {
     window.speechSynthesis.cancel();
@@ -534,7 +551,7 @@ export default function RostoSexta({ onVoltar }) {
       vadAtivoRef.current = false;
       window.speechSynthesis?.cancel();
       if (rafBocaRef.current) cancelAnimationFrame(rafBocaRef.current);
-      if (morphBocaRef.current) morphBocaRef.current.kill();
+      if (bocaTweenRef.current) bocaTweenRef.current.kill();
       if (streamVideoRef.current) streamVideoRef.current.getTracks().forEach(t => t.stop());
       if (streamAudioRef.current) streamAudioRef.current.getTracks().forEach(t => t.stop());
       if (audioCtxRef.current) audioCtxRef.current.close();
