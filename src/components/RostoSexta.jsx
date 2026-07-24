@@ -1,13 +1,10 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, MessageCircle, Send, X, Volume2, MessageSquare, Settings, Trash2 } from 'lucide-react';
-import { gsap } from 'gsap';
-import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
+import { interpolate as flubberInterpolate } from 'flubber';
 import { useT } from '@/lib/i18n';
 import { CIRCULO } from './rostoSextaKeyframes';
 import { chamarCerebroSexta } from '@/lib/sextaApi';
-
-gsap.registerPlugin(MorphSVGPlugin);
 
 // ============================================================
 // ROSTO DA SEXTA-FEIRA — carinha em neon vetorial + assistente de voz.
@@ -30,19 +27,25 @@ const FELIZ = {
   boca:  'M 393 882 Q 473 952 545 886',
 };
 
-// Bocas para o "lip-sync" — FECHADA e ABERTA têm A MESMA estrutura (M Q Q Z,
-// dois cantos + dois pontos de controle), então o MorphSVG interpola entre
-// elas de forma linear e suave. Enquanto ela fala, a abertura (0..1) é
-// dirigida pelo ritmo da fala e trocamos a boca sorriso (FELIZ.boca) por
-// estas; ao terminar, voltamos ao sorriso.
+// VISEMAS — conjunto de formas de boca (não só aberta/fechada). O Flubber
+// (lib "flubber") morfa entre elas de forma contínua e suave, mesmo com
+// número de pontos diferente (a "o" arredondada tem mais pontos que as
+// outras). Enquanto ela fala, o loop troca de visema no ritmo das sílabas/
+// palavras e o Flubber faz a deformação gradual — nunca um corte de forma.
 //
-// A deformação imita a do rosto de referência (vídeo): a boca abre como um
-// sorriso aberto (crescente). Os dois cantos ficam pra cima (sorriso) e a
-// LINHA DE CIMA quase não mexe (mesmo ponto de controle 473,950 nas duas
-// formas) — só o LÁBIO DE BAIXO desce (473,958 → 473,1045). É assim que uma
-// boca humana feliz se abre ao falar, e é exatamente o movimento do vídeo.
-const BOCA_FECHADA = 'M 393 882 Q 473 950 545 886 Q 473 958 393 882 Z';
-const BOCA_ABERTA  = 'M 393 882 Q 473 950 545 886 Q 473 1045 393 882 Z';
+// Obs.: sem Rhubarb/áudio real, o timing é sintético (ritmo de fala +
+// eventos de início de palavra), não fonema-a-fonema. Mas dá bastante
+// variedade e organicidade ao movimento.
+const VISEMAS = [
+  'M 393 882 Q 473 950 545 886 Q 473 958 393 882 Z',                                  // 0 REPOUSO (sorriso fechado)
+  'M 405 888 Q 473 906 541 890 Q 473 922 405 888 Z',                                  // 1 PEQUENA (mal abre)
+  'M 400 884 Q 473 946 540 888 Q 473 1000 400 884 Z',                                 // 2 MÉDIA (meio sorriso aberto)
+  'M 393 882 Q 473 948 545 886 Q 473 1055 393 882 Z',                                 // 3 ABERTA (sorriso bem aberto)
+  'M 383 884 Q 473 918 553 888 Q 473 930 383 884 Z',                                  // 4 LARGA ("iii", esticada)
+  'M 473 900 Q 512 906 512 935 Q 512 966 473 972 Q 434 966 434 935 Q 434 906 473 900 Z', // 5 REDONDA ("ó/u")
+];
+const VIS_ABERTAS = [2, 3, 4, 5]; // formas "abertas" (média, aberta, larga, redonda)
+const VIS_FECHADAS = [0, 1];      // formas "fechadas/pequenas"
 
 // Chave da visão (Mistral) fica no navegador mesmo — não migrada pro
 // servidor. O cérebro (OpenRouter) roda em api/fn/sextaChat.
@@ -106,12 +109,13 @@ export default function RostoSexta({ onVoltar }) {
   const vadAtivoRef = useRef(false);
   const reconhecendoRef = useRef(false);
   const falandoRef = useRef(false);
-  const bocaTweenRef = useRef(null);   // ÚNICO tween (fechada→aberta), criado 1x, nunca morto/recriado
-  const rafBocaRef = useRef(null);     // loop de animação da boca
-  const aberturaAtualRef = useRef(0);  // abertura suavizada da boca (0..1) — o que de fato é desenhado
-  const aberturaAlvoRef = useRef(0);   // abertura-alvo (pra onde a atual está indo)
-  const faseBocaRef = useRef(0);
-  const picoBocaRef = useRef(0);       // "sotaque" que sobe a cada início de palavra (boundary)
+  const rafBocaRef = useRef(null);       // loop de animação da boca
+  const bocaInterpRef = useRef(null);    // função do Flubber: t(0..1) -> path atual (from -> to)
+  const bocaProgRef = useRef(1);         // progresso da transição atual (0..1)
+  const bocaPathRef = useRef(null);      // path exibido agora (usado como "from" na próxima troca)
+  const bocaVisemaRef = useRef(0);       // índice do visema-alvo atual
+  const bocaProxTrocaRef = useRef(0);    // quando trocar de visema de novo (timestamp)
+  const bocaAbriuRef = useRef(false);    // alterna aberta/fechada pra dar ritmo de fala
   const historicoRef = useRef([]);
   const tempoComecouFalarRef = useRef(0);
   const ignorarMicAteRef = useRef(0);
@@ -369,51 +373,59 @@ export default function RostoSexta({ onVoltar }) {
   // ==========================================
   // FALAR — voz nativa do navegador (SpeechSynthesis), com boca animada
   // ==========================================
-  // Só existe UM tween de morph pra boca, criado uma única vez (na primeira
-  // vez que ela fala) e NUNCA mais morto/recriado — é só isso que evita a
-  // corrida de dois tweens brigando pelo mesmo atributo `d` quando uma fala
-  // nova começa antes da anterior terminar de "fechar a boca" (bug que
-  // causava o salto abrupto). O loop em requestAnimationFrame roda o tempo
-  // todo enquanto há movimento: se estaFalando é true, a abertura-alvo segue
-  // o envelope da fala; senão, a alvo é 0 e a atual relaxa suavemente até lá
-  // — fechar também é uma interpolação, nunca um corte.
-  const garantirLoopBoca = useCallback(() => {
-    if (!bocaTweenRef.current) {
-      const els = svgRef.current?.querySelectorAll('.f-boca');
-      if (!els?.length) return;
-      gsap.set(els, { attr: { d: BOCA_FECHADA } });
-      bocaTweenRef.current = gsap.to(els, {
-        morphSVG: { shape: BOCA_ABERTA, type: 'linear', shapeIndex: 0 },
-        duration: 1, paused: true, ease: 'none',
-      });
-    }
-    if (rafBocaRef.current) return; // já está rodando
-
+  // A boca é dirigida por UM só loop de requestAnimationFrame (nunca dois
+  // concorrentes) e pelo Flubber, que morfa o path continuamente entre os
+  // VISEMAS. Enquanto fala, o loco troca de visema no ritmo das sílabas e,
+  // a cada troca, cria um interpolador do path exibido AGORA para o novo
+  // visema — então mesmo trocando no meio de uma transição, parte de onde
+  // está (sem salto). Ao parar de falar, volta pro sorriso de repouso
+  // também morfando, e só então o loop encerra.
+  const iniciarLoopBoca = useCallback(() => {
     const reduz = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduz) return; // sem movimento — respeita a preferência do sistema
+    if (reduz) return;
+    if (!bocaPathRef.current) bocaPathRef.current = VISEMAS[0];
+    if (rafBocaRef.current) return; // já rodando
+
+    const aplicar = (d) => {
+      const els = svgRef.current?.querySelectorAll('.f-boca');
+      if (els) els.forEach((el) => el.setAttribute('d', d));
+    };
+    const irParaVisema = (idx) => {
+      const from = bocaPathRef.current || VISEMAS[0];
+      try {
+        bocaInterpRef.current = flubberInterpolate(from, VISEMAS[idx], { maxSegmentLength: 3 });
+      } catch {
+        bocaInterpRef.current = () => VISEMAS[idx];
+      }
+      bocaProgRef.current = 0;
+      bocaVisemaRef.current = idx;
+    };
 
     const loop = () => {
+      const agora = performance.now();
       if (falandoRef.current) {
-        // ritmo calmo e comedido (perto do vídeo de referência): sílabas
-        // lentas moduladas por um envelope de palavras ainda mais lento.
-        faseBocaRef.current += 0.42;
-        const silaba = Math.sin(faseBocaRef.current * 0.38) * 0.5 + 0.5;
-        const palavra = 0.45 + 0.55 * Math.abs(Math.sin(faseBocaRef.current * 0.08));
-        aberturaAlvoRef.current = Math.max(0, Math.min(1, silaba * palavra + picoBocaRef.current));
-        picoBocaRef.current *= 0.9; // o "sotaque" do boundary decai devagar (sem pico brusco)
-      } else {
-        aberturaAlvoRef.current = 0;
+        if (agora >= bocaProxTrocaRef.current) {
+          // alterna aberta/fechada pra imitar o abre-fecha da fala
+          const pool = bocaAbriuRef.current ? VIS_FECHADAS : VIS_ABERTAS;
+          bocaAbriuRef.current = !bocaAbriuRef.current;
+          irParaVisema(pool[(Math.random() * pool.length) | 0]);
+          bocaProxTrocaRef.current = agora + 105 + Math.random() * 95; // ~1 sílaba
+        }
+      } else if (bocaVisemaRef.current !== 0 && bocaProgRef.current >= 1) {
+        irParaVisema(0); // relaxa pro sorriso de repouso
       }
-      // suavização generosa (baixo fator) — a boca tem inércia, como um
-      // lábio de verdade, em vez de perseguir o alvo com precisão.
-      aberturaAtualRef.current += (aberturaAlvoRef.current - aberturaAtualRef.current) * 0.14;
-      bocaTweenRef.current?.progress(aberturaAtualRef.current);
 
-      if (!falandoRef.current && aberturaAtualRef.current < 0.002) {
-        aberturaAtualRef.current = 0;
-        bocaTweenRef.current?.progress(0);
+      if (bocaInterpRef.current) {
+        bocaProgRef.current = Math.min(1, bocaProgRef.current + 0.16);
+        const t = bocaProgRef.current;
+        const p = t * t * (3 - 2 * t); // smoothstep = ease-in-out
+        bocaPathRef.current = bocaInterpRef.current(p);
+        aplicar(bocaPathRef.current);
+      }
+
+      if (!falandoRef.current && bocaVisemaRef.current === 0 && bocaProgRef.current >= 1) {
         rafBocaRef.current = null;
-        return; // já fechou de vez — para o loop até a próxima fala
+        return; // em repouso e assentado — encerra até a próxima fala
       }
       rafBocaRef.current = requestAnimationFrame(loop);
     };
@@ -424,24 +436,25 @@ export default function RostoSexta({ onVoltar }) {
     window.speechSynthesis?.cancel();
     falandoRef.current = false;
     setEstaFalando(false);
-    garantirLoopBoca(); // segue rodando só até relaxar suavemente até fechada
-  }, [garantirLoopBoca]);
+    iniciarLoopBoca(); // segue rodando só até relaxar suavemente no sorriso
+  }, [iniciarLoopBoca]);
 
-  // Chamado no onstart da fala — só liga a chave "está falando"; quem
-  // desenha é sempre o mesmo loop/tween persistente (garantirLoopBoca).
+  // onstart da fala: liga "está falando" e manda abrir já no primeiro frame.
   const animarBoca = useCallback(() => {
     falandoRef.current = true;
     setEstaFalando(true);
     tempoComecouFalarRef.current = performance.now();
-    garantirLoopBoca();
-  }, [garantirLoopBoca]);
+    bocaAbriuRef.current = false;   // próxima troca é uma forma ABERTA
+    bocaProxTrocaRef.current = 0;   // troca já no primeiro frame
+    iniciarLoopBoca();
+  }, [iniciarLoopBoca]);
 
   const acabarFala = useCallback(() => {
     falandoRef.current = false;
     setEstaFalando(false);
     ignorarMicAteRef.current = performance.now() + 400;
-    garantirLoopBoca(); // garante que o loop está de pé pra fechar suavemente
-  }, [garantirLoopBoca]);
+    iniciarLoopBoca();
+  }, [iniciarLoopBoca]);
 
   const falarComNavegador = useCallback((texto) => {
     window.speechSynthesis.cancel();
@@ -455,10 +468,10 @@ export default function RostoSexta({ onVoltar }) {
       || vozes.find(v => v.lang.includes('pt'));
     if (voz) u.voice = voz;
     u.onstart = animarBoca;
-    // A cada início de palavra (quando o navegador suporta boundary), dá um
-    // "sotaque" na boca — abre um pouco mais, deixando o movimento no ritmo
-    // real das palavras que ela está falando.
-    u.onboundary = () => { picoBocaRef.current = 0.55; };
+    // A cada início de palavra (quando o navegador suporta boundary), força
+    // uma abertura AGORA — assim as aberturas caem no ritmo real das palavras
+    // que ela está falando (o único "timing real" que a voz nativa nos dá).
+    u.onboundary = () => { bocaAbriuRef.current = false; bocaProxTrocaRef.current = 0; };
     u.onend = acabarFala;
     u.onerror = () => acabarFala();
     window.speechSynthesis.speak(u);
@@ -551,7 +564,6 @@ export default function RostoSexta({ onVoltar }) {
       vadAtivoRef.current = false;
       window.speechSynthesis?.cancel();
       if (rafBocaRef.current) cancelAnimationFrame(rafBocaRef.current);
-      if (bocaTweenRef.current) bocaTweenRef.current.kill();
       if (streamVideoRef.current) streamVideoRef.current.getTracks().forEach(t => t.stop());
       if (streamAudioRef.current) streamAudioRef.current.getTracks().forEach(t => t.stop());
       if (audioCtxRef.current) audioCtxRef.current.close();
