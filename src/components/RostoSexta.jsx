@@ -715,14 +715,22 @@ export default function RostoSexta({ onVoltar }) {
               {/* Integrações */}
               <div className="flex flex-col gap-2">
                 <span className="text-[13px] font-semibold text-black/55 uppercase tracking-wide">Integrações</span>
-                <p className="text-[12px] text-black/40 -mt-1">Conectar a Sexta-feira a outros apps e serviços. Em desenvolvimento.</p>
-                {[['Agenda / Google Calendar', 'ver e criar compromissos'], ['Clima', 'previsão do tempo da sua cidade'], ['Busca na web', 'responder sobre fatos e notícias atuais']].map(([titulo, desc]) => (
-                  <div key={titulo} className="flex items-center justify-between px-4 py-3 rounded-2xl bg-white/60 border border-black/[0.06] opacity-70">
+                <p className="text-[12px] text-black/40 -mt-1">Conectar a Sexta-feira a outros apps e serviços.</p>
+                {[
+                  { titulo: 'Busca na web', desc: 'ela busca sozinha fatos e notícias atuais', ativa: true },
+                  { titulo: 'Agenda / Google Calendar', desc: 'ver e criar compromissos', ativa: false },
+                  { titulo: 'Clima', desc: 'previsão do tempo da sua cidade', ativa: false },
+                ].map(({ titulo, desc, ativa }) => (
+                  <div key={titulo} className={`flex items-center justify-between px-4 py-3 rounded-2xl bg-white/60 border border-black/[0.06] ${ativa ? '' : 'opacity-70'}`}>
                     <div className="flex flex-col pr-3">
                       <span className="text-[14px] text-black/70">{titulo}</span>
                       <span className="text-[12px] text-black/40">{desc}</span>
                     </div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#b98a2e] bg-[#e6b64c]/15 px-2 py-1 rounded-full flex-shrink-0">Em breve</span>
+                    {ativa ? (
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-green-700 bg-green-500/15 px-2 py-1 rounded-full flex-shrink-0">Ativa</span>
+                    ) : (
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#b98a2e] bg-[#e6b64c]/15 px-2 py-1 rounded-full flex-shrink-0">Em breve</span>
+                    )}
                   </div>
                 ))}
               </div>

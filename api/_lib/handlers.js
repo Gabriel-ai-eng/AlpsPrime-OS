@@ -20,6 +20,38 @@ const publicUserFields = (u) => ({
 // Funções que NÃO exigem login (ex.: contagem mostrada na tela de Welcome).
 export const PUBLIC_FUNCTIONS = new Set(['getUsersCount']);
 
+// --- Busca na web (Tavily) — usada pela ferramenta "buscar_web" da Sexta ---
+// Precisa da env var TAVILY_API_KEY na Vercel. Sem ela, a ferramenta nem é
+// oferecida ao modelo (ele simplesmente responde sem buscar).
+async function buscarWeb(consulta) {
+  const key = process.env.TAVILY_API_KEY;
+  if (!key || !consulta) return 'Sem resultados.';
+  try {
+    const res = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: key,
+        query: consulta,
+        search_depth: 'basic',
+        max_results: 5,
+        include_answer: true,
+      }),
+    });
+    if (!res.ok) { console.error('Tavily error:', res.status); return 'Sem resultados (erro na busca).'; }
+    const data = await res.json();
+    let out = '';
+    if (data.answer) out += `Resumo: ${data.answer}\n\n`;
+    if (Array.isArray(data.results)) {
+      out += data.results.map((r, i) => `[${i + 1}] ${r.title}\n${r.content}\n(${r.url})`).join('\n\n');
+    }
+    return out.trim() || 'Sem resultados.';
+  } catch (e) {
+    console.error('Tavily fetch error:', e?.message);
+    return 'Sem resultados (falha de rede na busca).';
+  }
+}
+
 export const handlers = {
   async getUsersCount() {
     const { count, error } = await admin
@@ -161,10 +193,10 @@ export const handlers = {
     return { url, revised_prompt: data?.data?.[0]?.revised_prompt || prompt };
   },
 
-  // --- Sexta-feira: cérebro (OpenRouter) ---
-  // A chave fica só aqui no servidor (env var OpenRouter na Vercel) — nunca
-  // chega ao navegador do usuário. A voz usa o SpeechSynthesis nativo do
-  // navegador, sem chamada de servidor.
+  // --- Sexta-feira: cérebro (OpenRouter) com busca na web (Tavily) ---
+  // As chaves ficam só aqui no servidor (env vars OpenRouter e TAVILY_API_KEY
+  // na Vercel) — nunca chegam ao navegador. Se TAVILY_API_KEY não existir, a
+  // ferramenta de busca simplesmente não é oferecida (degrada sem quebrar).
   async sextaChat({ body }) {
     const { mensagens } = body || {};
     if (!Array.isArray(mensagens) || !mensagens.length) {
@@ -173,29 +205,73 @@ export const handlers = {
     const apiKey = process.env.OpenRouter;
     if (!apiKey) { const e = new Error('OpenRouter not configured'); e.status = 500; throw e; }
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://alpsprime.com.br',
-        'X-Title': 'Alps OS - Sexta-feira',
+    const temBusca = !!process.env.TAVILY_API_KEY;
+    const ferramentas = temBusca ? [{
+      type: 'function',
+      function: {
+        name: 'buscar_web',
+        description: 'Busca informações ATUAIS na internet (notícias, fatos recentes, dados que mudam com o tempo, preços, resultados esportivos, etc.). Use sempre que a pergunta pedir algo que você não saberia de cor ou que pode ter mudado recentemente.',
+        parameters: {
+          type: 'object',
+          properties: {
+            consulta: { type: 'string', description: 'O que buscar, em poucas palavras, como você digitaria no Google.' },
+          },
+          required: ['consulta'],
+        },
       },
-      body: JSON.stringify({
-        model: 'meta-llama/llama-3.3-70b-instruct',
-        provider: { sort: 'throughput' }, // prioriza o provedor mais rápido disponível
-        messages: mensagens,
-        max_tokens: 220,
-        temperature: 0.85,
-      }),
-    });
-    if (!response.ok) {
-      const t = await response.text();
-      console.error('OpenRouter error:', response.status, t);
-      const e = new Error(`OpenRouter API error: ${response.status}`); e.status = 502; throw e;
+    }] : undefined;
+
+    const chamarOpenRouter = async (msgs) => {
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://alpsprime.com.br',
+          'X-Title': 'Alps OS - Sexta-feira',
+        },
+        body: JSON.stringify({
+          model: 'meta-llama/llama-3.3-70b-instruct',
+          // require_parameters garante um provedor que suporta tools quando há busca.
+          provider: temBusca ? { sort: 'throughput', require_parameters: true } : { sort: 'throughput' },
+          messages: msgs,
+          max_tokens: 320,
+          temperature: 0.85,
+          ...(ferramentas ? { tools: ferramentas, tool_choice: 'auto' } : {}),
+        }),
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        console.error('OpenRouter error:', res.status, t);
+        const e = new Error(`OpenRouter API error: ${res.status}`); e.status = 502; throw e;
+      }
+      return res.json();
+    };
+
+    const conversa = [...mensagens];
+    let data = await chamarOpenRouter(conversa);
+    let msg = data?.choices?.[0]?.message;
+
+    // Se o modelo decidiu buscar na web, executa a busca e devolve o resultado
+    // pra ele formar a resposta final (no máximo 2 rodadas de busca).
+    let rodadas = 0;
+    while (msg?.tool_calls?.length && rodadas < 2) {
+      rodadas++;
+      conversa.push({ role: 'assistant', content: msg.content ?? '', tool_calls: msg.tool_calls });
+      for (const tc of msg.tool_calls) {
+        let resultado = 'Sem resultados.';
+        if (tc.function?.name === 'buscar_web') {
+          let consulta = '';
+          try { consulta = JSON.parse(tc.function.arguments || '{}').consulta || ''; } catch {}
+          resultado = await buscarWeb(consulta);
+        }
+        conversa.push({ role: 'tool', tool_call_id: tc.id, content: resultado });
+      }
+      data = await chamarOpenRouter(conversa);
+      msg = data?.choices?.[0]?.message;
     }
-    const data = await response.json();
-    const resposta = (data?.choices?.[0]?.message?.content || '').trim();
+
+    const resposta = (msg?.content || '').trim();
     return { resposta };
   },
 
