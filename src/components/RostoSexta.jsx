@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, MessageCircle, Send, X, Volume2, MessageSquare } from 'lucide-react';
 import { gsap } from 'gsap';
 import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { useT } from '@/lib/i18n';
@@ -61,6 +61,14 @@ export default function RostoSexta({ onVoltar }) {
   const [estaFalando, setEstaFalando] = useState(false);
   const [estaOuvindo, setEstaOuvindo] = useState(false);
   const [status, setStatus] = useState('');
+  // Chat por texto (alternativa/complemento à voz).
+  const [chatAberto, setChatAberto] = useState(false);
+  const [mensagens, setMensagens] = useState([]);          // histórico visível no chat: {role, content}
+  const [entrada, setEntrada] = useState('');              // caixa de texto do chat
+  const [pensando, setPensando] = useState(false);         // "digitando..." no chat
+  // Como ela RESPONDE: 'voz' fala em voz alta; 'texto' só escreve no chat.
+  const [modoResposta, setModoResposta] = useState('voz');
+  const modoRespostaRef = useRef('voz');
 
   const log = useCallback((tipo, mensagem) => { console.log(`[${tipo}] ${mensagem}`); }, []);
 
@@ -81,8 +89,14 @@ export default function RostoSexta({ onVoltar }) {
   const tempoComecouFalarRef = useRef(0);
   const ignorarMicAteRef = useRef(0);
   const ultimaDescricaoVisualRef = useRef(null);
+  const chatFimRef = useRef(null);
 
   useEffect(() => { falandoRef.current = estaFalando; }, [estaFalando]);
+  useEffect(() => { modoRespostaRef.current = modoResposta; }, [modoResposta]);
+  // Rola o chat pro fim quando chega mensagem nova.
+  useEffect(() => {
+    if (chatAberto) chatFimRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [mensagens, pensando, chatAberto]);
 
   // ==========================================
   // CÂMERA
@@ -164,8 +178,18 @@ export default function RostoSexta({ onVoltar }) {
     }
   }, [log]);
 
+  // Entrega a resposta dela conforme o modo escolhido: 'voz' fala em voz alta
+  // (e anima a boca); 'texto' só escreve no chat. Em ambos, aparece no chat.
+  const responder = useCallback((texto) => {
+    setMensagens(prev => [...prev, { role: 'assistant', content: texto }]);
+    if (modoRespostaRef.current === 'voz') falar(texto);
+    // eslint-disable-next-line
+  }, []);
+
   const processarMensagem = useCallback(async (textoUtilizador) => {
     setStatus('Pensando...');
+    setPensando(true);
+    setMensagens(prev => [...prev, { role: 'user', content: textoUtilizador }]);
 
     let descricaoVisual = ultimaDescricaoVisualRef.current?.texto || null;
     const agora = Date.now();
@@ -185,8 +209,8 @@ export default function RostoSexta({ onVoltar }) {
     try {
       resposta = await chamarCerebro(textoUtilizador, historicoRef.current.slice(-8), descricaoVisual);
     } catch (e) {
-      falar('Tive um problema pra pensar agora, tenta de novo.');
-      setStatus('');
+      setStatus(''); setPensando(false);
+      responder('Tive um problema pra pensar agora, tenta de novo.');
       return;
     }
 
@@ -197,17 +221,17 @@ export default function RostoSexta({ onVoltar }) {
       .replace(/#+\s/g, '')
       .trim();
 
-    if (!resposta) { falar('Não consegui formar uma resposta agora.'); setStatus(''); return; }
+    setStatus(''); setPensando(false);
+    if (!resposta) { responder('Não consegui formar uma resposta agora.'); return; }
 
     historicoRef.current = [
       ...historicoRef.current.slice(-8),
       { role: 'user', content: textoUtilizador },
       { role: 'assistant', content: resposta }
     ].slice(-12);
-    setStatus('');
-    falar(resposta);
+    responder(resposta);
     // eslint-disable-next-line
-  }, [chamarCerebro, capturarFrame, descreverCena]);
+  }, [chamarCerebro, capturarFrame, descreverCena, responder]);
 
   // ==========================================
   // RECONHECIMENTO DE FALA (STT do navegador)
@@ -435,9 +459,19 @@ export default function RostoSexta({ onVoltar }) {
     if (!saudacao) saudacao = 'Oi! Que bom te ver por aqui — como você está?';
 
     historicoRef.current = [{ role: 'assistant', content: saudacao }];
+    setMensagens([{ role: 'assistant', content: saudacao }]);
     setStatus('');
-    falar(saudacao);
+    if (modoRespostaRef.current === 'voz') falar(saudacao);
   }, [capturarFrame, descreverCena, chamarCerebro, falar]);
+
+  // Envia a mensagem digitada no chat pro mesmo fluxo da voz.
+  const enviarTexto = useCallback(async () => {
+    const texto = entrada.trim();
+    if (!texto || pensando) return;
+    setEntrada('');
+    pararFala(); // interrompe qualquer fala em andamento
+    await processarMensagem(texto);
+  }, [entrada, pensando, processarMensagem, pararFala]);
 
   // Único botão da tela: pede câmera + microfone e já entra conversando
   // (a saudação comenta o que a câmera está vendo).
@@ -568,6 +602,15 @@ export default function RostoSexta({ onVoltar }) {
         <ChevronLeft className="w-6 h-6" />
       </button>
 
+      {/* Abrir chat por texto */}
+      <button
+        onClick={() => setChatAberto(true)}
+        aria-label="Abrir chat"
+        className="absolute top-6 right-5 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-black/[0.06] backdrop-blur-sm text-black/50 hover:text-black/80 active:scale-90 transition"
+      >
+        <MessageCircle className="w-6 h-6" />
+      </button>
+
       {/* Único botão da tela: falar com ela */}
       <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-3" style={{ top: '66%' }}>
         {status && (
@@ -584,9 +627,90 @@ export default function RostoSexta({ onVoltar }) {
         )}
       </div>
 
+      {/* CHAT POR TEXTO */}
+      {chatAberto && (
+        <div className="absolute inset-0 z-20 flex flex-col justify-end">
+          <div className="absolute inset-0 bg-black/20" onClick={() => setChatAberto(false)} />
+          <div className="relative flex flex-col w-full h-[80%] bg-[#f6f2ec] rounded-t-3xl border-t border-black/10 shadow-[0_-10px_40px_rgba(0,0,0,0.18)]">
+            {/* Cabeçalho: seletor de modo de resposta + fechar */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-black/10">
+              <div className="flex items-center gap-1 bg-black/[0.05] rounded-full p-1">
+                <button
+                  onClick={() => setModoResposta('voz')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium transition ${modoResposta === 'voz' ? 'bg-white text-black/80 shadow-sm' : 'text-black/45'}`}
+                >
+                  <Volume2 className="w-3.5 h-3.5" /> Voz
+                </button>
+                <button
+                  onClick={() => setModoResposta('texto')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium transition ${modoResposta === 'texto' ? 'bg-white text-black/80 shadow-sm' : 'text-black/45'}`}
+                >
+                  <MessageSquare className="w-3.5 h-3.5" /> Texto
+                </button>
+              </div>
+              <button
+                onClick={() => setChatAberto(false)}
+                aria-label="Fechar chat"
+                className="w-9 h-9 flex items-center justify-center rounded-full text-black/40 hover:text-black/70 hover:bg-black/[0.05] transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Mensagens */}
+            <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
+              {mensagens.length === 0 && !pensando && (
+                <p className="text-black/35 text-sm text-center mt-6">Manda uma mensagem pra Sexta-feira 👋</p>
+              )}
+              {mensagens.map((m, i) => (
+                <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-[14px] leading-snug whitespace-pre-wrap break-words ${m.role === 'user' ? 'bg-[#e6b64c] text-black/85 rounded-br-md' : 'bg-white text-black/80 border border-black/[0.06] rounded-bl-md'}`}>
+                    {m.content}
+                  </div>
+                </div>
+              ))}
+              {pensando && (
+                <div className="flex justify-start">
+                  <div className="px-4 py-3 rounded-2xl rounded-bl-md bg-white border border-black/[0.06] flex items-center gap-1">
+                    <span className="chat-dot" /><span className="chat-dot" /><span className="chat-dot" />
+                  </div>
+                </div>
+              )}
+              <div ref={chatFimRef} />
+            </div>
+
+            {/* Caixa de texto */}
+            <div
+              className="flex items-center gap-2 px-3 py-3 border-t border-black/10 bg-[#f6f2ec]"
+              style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+            >
+              <input
+                value={entrada}
+                onChange={(e) => setEntrada(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') enviarTexto(); }}
+                placeholder="Escreva uma mensagem..."
+                className="flex-1 h-11 px-4 rounded-full bg-white border border-black/10 text-[14px] text-black/80 placeholder:text-black/35 outline-none focus:border-[#e6b64c]/60"
+              />
+              <button
+                onClick={enviarTexto}
+                disabled={!entrada.trim() || pensando}
+                aria-label="Enviar"
+                className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-full bg-[#e6b64c] text-black/80 shadow-sm active:scale-95 transition disabled:opacity-40"
+              >
+                <Send className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes rosto-pulsar { 0%,100% { transform: scale(1); } 50% { transform: scale(1.02); } }
         .rosto-ouvindo { animation: rosto-pulsar 1.4s ease-in-out infinite; }
+        .chat-dot { width: 6px; height: 6px; border-radius: 9999px; background: rgba(0,0,0,0.3); display: inline-block; animation: chat-bounce 1s infinite; }
+        .chat-dot:nth-child(2) { animation-delay: 0.15s; }
+        .chat-dot:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes chat-bounce { 0%,60%,100% { transform: translateY(0); opacity: 0.35; } 30% { transform: translateY(-4px); opacity: 0.9; } }
       `}</style>
     </div>
   );
